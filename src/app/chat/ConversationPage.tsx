@@ -50,6 +50,7 @@ export default function ConversationPage() {
   }, [conversationId]);
 
   useGSAP(() => {
+    if(!title) return;
     const modelTitle = new SplitText("#sidebar-header h1", {
       type: "chars",
     });
@@ -65,7 +66,7 @@ export default function ConversationPage() {
 
   return (
     <>
-      <div className="overflow-auto h-full">
+      <div className="overflow-auto h-full" >
         {!!title &&
           createPortal(
             <h1>Conversation {conversationId}</h1>,

@@ -23,7 +23,7 @@ export default function ChatLayout() {
     >
       <ChatSidebar />
       <main className=" w-full h-full mx-2">
-        <div className="safe-area-top min-h-10 flex items-center sticky top-0 w-full">
+        <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full bg-sidebar">
           <SidebarExpandTrigger />
           <div id="sidebar-header" />
         </div>
