@@ -35,6 +35,10 @@ export default function ChatLayout() {
 
 function SidebarExpandTrigger() {
   const { state } = useSidebar();
-  const isMobile = useIsMobile()
-  return (state === "collapsed" || isMobile) && <SidebarTrigger iconClassName="size-6" />;
+  const isMobile = useIsMobile();
+  return (
+    (state === "collapsed" || isMobile) && (
+      <SidebarTrigger iconClassName="size-6" />
+    )
+  );
 }

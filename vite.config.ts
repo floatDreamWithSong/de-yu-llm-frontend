@@ -3,7 +3,85 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 import { resolve } from 'node:path'
+const vendorMap = new Map<string, string>([
+  /* ---------- React ---------- */
+  ['react', 'react-vendor'],
+  ['react-dom', 'react-vendor'],
 
+  /* ---------- TanStack ---------- */
+  ['@tanstack/react-router', 'tanstack-router'],
+  ['@tanstack/react-router-devtools', 'tanstack-router'],
+  ['@tanstack/react-query', 'tanstack-query'],
+  ['@tanstack/react-query-devtools', 'tanstack-query'],
+  ['@tanstack/react-form', 'tanstack-form'],
+  ['@tanstack/react-store', 'tanstack-store'],
+  ['@tanstack/store', 'tanstack-store'],
+
+  /* ---------- Radix UI ---------- */
+  ['@radix-ui/react-accordion', 'radix-ui'],
+  ['@radix-ui/react-alert-dialog', 'radix-ui'],
+  ['@radix-ui/react-aspect-ratio', 'radix-ui'],
+  ['@radix-ui/react-avatar', 'radix-ui'],
+  ['@radix-ui/react-checkbox', 'radix-ui'],
+  ['@radix-ui/react-collapsible', 'radix-ui'],
+  ['@radix-ui/react-context-menu', 'radix-ui'],
+  ['@radix-ui/react-dialog', 'radix-ui'],
+  ['@radix-ui/react-dropdown-menu', 'radix-ui'],
+  ['@radix-ui/react-hover-card', 'radix-ui'],
+  ['@radix-ui/react-label', 'radix-ui'],
+  ['@radix-ui/react-menubar', 'radix-ui'],
+  ['@radix-ui/react-navigation-menu', 'radix-ui'],
+  ['@radix-ui/react-popover', 'radix-ui'],
+  ['@radix-ui/react-progress', 'radix-ui'],
+  ['@radix-ui/react-radio-group', 'radix-ui'],
+  ['@radix-ui/react-scroll-area', 'radix-ui'],
+  ['@radix-ui/react-select', 'radix-ui'],
+  ['@radix-ui/react-separator', 'radix-ui'],
+  ['@radix-ui/react-slider', 'radix-ui'],
+  ['@radix-ui/react-slot', 'radix-ui'],
+  ['@radix-ui/react-switch', 'radix-ui'],
+  ['@radix-ui/react-tabs', 'radix-ui'],
+  ['@radix-ui/react-toggle', 'radix-ui'],
+  ['@radix-ui/react-toggle-group', 'radix-ui'],
+  ['@radix-ui/react-tooltip', 'radix-ui'],
+  ['@radix-ui/react-use-controllable-state', 'radix-ui'],
+
+  /* ---------- utils ---------- */
+  ['clsx', 'utils'],
+  ['tailwind-merge', 'utils'],
+  ['class-variance-authority', 'utils'],
+  ['date-fns', 'utils'],
+  ['zod', 'utils'],
+  ['axios', 'utils'],
+
+  /* ---------- UI components ---------- */
+  ['cmdk', 'ui-components'],
+  ['embla-carousel-react', 'ui-components'],
+  ['input-otp', 'ui-components'],
+  ['lucide-react', 'ui-components'],
+  ['react-day-picker', 'ui-components'],
+  ['react-resizable-panels', 'ui-components'],
+  ['react-syntax-highlighter', 'ui-components'],
+  ['sonner', 'ui-components'],
+  ['vaul', 'ui-components'],
+  ['use-stick-to-bottom', 'ui-components'],
+
+  /* ---------- animation & charts ---------- */
+  ['gsap', 'animation-charts'],
+  ['@gsap/react', 'animation-charts'],
+  ['recharts', 'animation-charts'],
+
+  /* ---------- theming ---------- */
+  ['next-themes', 'theming'],
+
+  /* ---------- forms ---------- */
+  ['react-hook-form', 'forms'],
+  ['@hookform/resolvers', 'forms'],
+
+  /* ---------- AI ---------- */
+  ['ai', 'ai'],
+  ['streamdown', 'ai'],
+]);
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [viteReact(), tailwindcss()],
@@ -20,95 +98,16 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React 相关
-          'react-vendor': ['react', 'react-dom'],
-          
-          // TanStack 相关
-          'tanstack-router': ['@tanstack/react-router', '@tanstack/react-router-devtools'],
-          'tanstack-query': ['@tanstack/react-query', '@tanstack/react-query-devtools'],
-          'tanstack-form': ['@tanstack/react-form'],
-          'tanstack-store': ['@tanstack/react-store', '@tanstack/store'],
-          
-          // Radix UI 组件库
-          'radix-ui': [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog',
-            '@radix-ui/react-aspect-ratio',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-collapsible',
-            '@radix-ui/react-context-menu',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-hover-card',
-            '@radix-ui/react-label',
-            '@radix-ui/react-menubar',
-            '@radix-ui/react-navigation-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-radio-group',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-select',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-switch',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toggle',
-            '@radix-ui/react-toggle-group',
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-use-controllable-state'
-          ],
-          
-          // 工具库
-          'utils': [
-            'clsx',
-            'tailwind-merge',
-            'class-variance-authority',
-            'date-fns',
-            'zod',
-            'axios'
-          ],
-          
-          // UI 组件
-          'ui-components': [
-            'cmdk',
-            'embla-carousel-react',
-            'input-otp',
-            'lucide-react',
-            'react-day-picker',
-            'react-resizable-panels',
-            'react-syntax-highlighter',
-            'sonner',
-            'vaul',
-            'use-stick-to-bottom'
-          ],
-          
-          // 动画和图表
-          'animation-charts': [
-            'gsap',
-            '@gsap/react',
-            'recharts'
-          ],
-          
-          // 主题和样式
-          'theming': [
-            'next-themes'
-          ],
-          
-          // 表单处理
-          'forms': [
-            'react-hook-form',
-            '@hookform/resolvers'
-          ],
-          
-          // AI 相关
-          'ai': [
-            'ai',
-            'streamdown'
-          ]
-        }
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return null;   // 只拆 npm 包
+          const parts = id.split('node_modules/');
+          const path = parts[parts.length - 1];            // eg  "@tanstack/react-query/dist/...
+          const pkgName = path.startsWith('@')
+            ? path.slice(0, path.indexOf('/', path.indexOf('/') + 1)) // scoped
+            : path.slice(0, path.indexOf('/'));                      // normal
+
+          return vendorMap.get(pkgName) ?? null;
+        },
       }
     },
     // 增加 chunk 大小警告限制
