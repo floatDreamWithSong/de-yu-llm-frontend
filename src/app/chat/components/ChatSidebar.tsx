@@ -113,13 +113,13 @@ export default function ChatSidebar() {
               <Settings className="size-6" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="ml-2" >
+          <DropdownMenuContent className="ml-2">
             {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
             <DropdownMenuItem>
               <LogOut className="size-4" />
               退出登录
-              </DropdownMenuItem>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <img

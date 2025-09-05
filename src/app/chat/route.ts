@@ -5,26 +5,26 @@ import ConversationPage from "./ConversationPage";
 import ChatLayout from "./layouts/ChatLayout";
 
 const chatRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/chat",
-	component: ChatLayout,
+  getParentRoute: () => rootRoute,
+  path: "/chat",
+  component: ChatLayout,
 });
 
 const chatIndexRoute = createRoute({
-	getParentRoute: () => chatRoute,
-	path: "/",
-	component: ChatPage,
+  getParentRoute: () => chatRoute,
+  path: "/",
+  component: ChatPage,
 });
 
 const conversationRoute = createRoute({
-	getParentRoute: () => chatRoute,
-	path: "/$conversationId",
-	component: ConversationPage,
+  getParentRoute: () => chatRoute,
+  path: "/$conversationId",
+  component: ConversationPage,
 });
 
 const chatRouteTree = chatRoute.addChildren([
-	chatIndexRoute,
-	conversationRoute,
+  chatIndexRoute,
+  conversationRoute,
 ]);
 
 export default chatRouteTree;

@@ -8,7 +8,9 @@ import { PencilLine } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type React from "react";
 
-export default function UserPromptTextarea({ className }: React.ComponentProps<"div">) {
+export default function UserPromptTextarea({
+  className,
+}: React.ComponentProps<"div">) {
   const [value, setValue] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
 
@@ -39,10 +41,13 @@ export default function UserPromptTextarea({ className }: React.ComponentProps<"
         e.preventDefault();
         console.log(value);
       }}
-      className={cn("max-w-[800px] relative divide-none p-2 border-3 mb-4 border-[#d4d5ff] shadow-lg shadow-secondary", className)}
+      className={cn(
+        "max-w-[800px] relative divide-none p-2 border-3 mb-4 border-[#d4d5ff] shadow-lg shadow-secondary",
+        className,
+      )}
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-<div
+      <div
         className="h-[120px] overflow-y-auto p-2"
         style={{
           scrollbarColor: "transparent transparent",

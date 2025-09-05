@@ -1,13 +1,13 @@
-import { toast } from "sonner" 
+import { toast } from "sonner";
 const message = {
   success: (message: string) => {
-    toast.success(message)
+    toast.success(message);
   },
   error: (message: string) => {
-    toast.error(message)
+    toast.error(message);
   },
   info: (message: string) => {
-    toast.info(message)
+    toast.info(message);
   },
-}
-export default message
+};
+export default message;

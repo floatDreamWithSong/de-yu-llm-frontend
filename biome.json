@@ -7,7 +7,11 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["src/routeTree.gen.ts"],
+    "ignore": [
+      "src/routeTree.gen.ts",
+      "src/components/ai-elements",
+      "src/components/ui"
+    ],
     "include": ["src/*", ".vscode/*", "index.html", "vite.config.js"]
   },
   "formatter": {
@@ -21,8 +25,7 @@
     "enabled": true,
     "rules": {
       "recommended": true
-    },
-    "ignore": ["src/components/ai-elements","src/components/ui"]
+    }
   },
   "javascript": {
     "formatter": {

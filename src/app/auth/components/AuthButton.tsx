@@ -10,7 +10,18 @@ export default function AuthButton({
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
+    asChild?: boolean;
   }) {
-  return <Button className={cn('bg-primary w-full rounded-full p-6 text-lg [:disabled]:bg-[#d4d5ff]',className)} variant={variant} size={size} asChild={asChild} {...props} />;
+  return (
+    <Button
+      className={cn(
+        "bg-primary w-full rounded-full p-6 text-lg [:disabled]:bg-[#d4d5ff]",
+        className,
+      )}
+      variant={variant}
+      size={size}
+      asChild={asChild}
+      {...props}
+    />
+  );
 }

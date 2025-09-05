@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import AgentCard from "@/app/chat/components/AgentCard";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
@@ -63,14 +63,14 @@ export default function ChatPage() {
       delay: 0.2,
     });
   }, []);
-  
+
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center @container">
       <h1 className="model-title text-4xl font-bold text-primary py-10 whitespace-pre">
         张江高科·高科芯 德育大模型
       </h1>
       <UserPromptTextarea />
-      <div className="grid grid-cols-3 gap-6 w-full mt-10 items-stretch px-6 max-w-[1200px]">
+      <div className="grid @4xl:grid-cols-3 @xl:grid-cols-2 @md:grid-cols-1 gap-6 w-full mt-10 items-stretch px-6 max-w-[1200px]">
         {cardList.map((card) => (
           <AgentCard className="agent-card" key={card.name} {...card} />
         ))}

@@ -1,4 +1,4 @@
-import { Outlet } from '@tanstack/react-router';
+import { Outlet } from "@tanstack/react-router";
 
 export default function AuthLayout() {
   return (
@@ -8,14 +8,14 @@ export default function AuthLayout() {
     >
       {/* 左侧品牌名 */}
       <div className="flex items-center justify-center">
-          <div className="space-y-4 transform -translate-y-10">
-            <h1 className="text-[#1677ff] text-shadow-2xs text-shadow-white text-6xl">
+        <div className="space-y-4 transform -translate-y-10">
+          <h1 className="text-[#1677ff] text-shadow-2xs text-shadow-white text-6xl">
             张江高科·高科芯
-            </h1>
-            <h2 className="text-[#5a5c72] text-4xl">
+          </h1>
+          <h2 className="text-[#5a5c72] text-4xl">
             以智育慧，"芯" 航程点亮孩子未来
-            </h2>
-          </div>
+          </h2>
+        </div>
       </div>
       {/* 右侧内容区域 */}
       <div className="flex items-center">

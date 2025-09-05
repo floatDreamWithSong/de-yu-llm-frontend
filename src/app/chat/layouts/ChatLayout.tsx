@@ -6,7 +6,8 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Outlet } from '@tanstack/react-router';
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Outlet } from "@tanstack/react-router";
 
 const sidebarWidth = "300px";
 
@@ -34,5 +35,6 @@ export default function ChatLayout() {
 
 function SidebarExpandTrigger() {
   const { state } = useSidebar();
-  return state === "collapsed" && <SidebarTrigger iconClassName="size-6" />;
+  const isMobile = useIsMobile()
+  return (state === "collapsed" || isMobile) && <SidebarTrigger iconClassName="size-6" />;
 }

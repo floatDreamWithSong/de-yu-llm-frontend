@@ -18,9 +18,9 @@ export default function AgentCard({
     <Card
       {...props}
       className={cn(
-        "border-0 shadow-none outline-3 outline-secondary rounded-md aspect-video overflow-hidden cursor-pointer flex flex-col",
+        "@container border-0 shadow-none outline-3 outline-secondary rounded-md aspect-video overflow-hidden cursor-pointer flex flex-col",
         "hover:outline-primary/50 hover:shadow-xs shadow-secondary transition-colors duration-300",
-        className
+        className,
       )}
     >
       <CardHeader className="flex items-center gap-2">
@@ -30,7 +30,7 @@ export default function AgentCard({
         <CardTitle>{name}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1">
-        <p className="xl:line-clamp-4 lg:line-clamp-3 md:line-clamp-2 line-clamp-1 text-sm text-muted-foreground leading-relaxed break-words">
+        <p className="@xs:line-clamp-4 @2xs:line-clamp-3 @[12rem]:line-clamp-2 line-clamp-1 text-sm text-muted-foreground leading-relaxed break-words">
           {description}
         </p>
       </CardContent>

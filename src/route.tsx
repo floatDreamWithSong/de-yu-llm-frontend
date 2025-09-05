@@ -7,23 +7,23 @@ export const rootRoute = createRootRoute({
   component: () => (
     <>
       <Outlet />
-      <TanStackRouterDevtools />
+      {import.meta.env.DEV && <TanStackRouterDevtools />}
     </>
   ),
-})
+});
 
 // Root redirect
 const indexRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/",
-	component: () => {
-		window.location.href = "/chat";
-		return null;
-	},
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: () => {
+    window.location.href = "/chat";
+    return null;
+  },
 });
 
 export const routeTree = rootRoute.addChildren([
-	indexRoute,
-	authRouteTree,
-	chatRouteTree,
+  indexRoute,
+  authRouteTree,
+  chatRouteTree,
 ]);

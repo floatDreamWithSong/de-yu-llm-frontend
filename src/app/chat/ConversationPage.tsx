@@ -42,13 +42,13 @@ nihao \`123\`
 `;
 
 export default function ConversationPage() {
-  const { conversationId } = useParams({ strict: false });  
+  const { conversationId } = useParams({ strict: false });
   const [title, setTitle] = useState("");
 
   useEffect(() => {
     setTitle(conversationId as string);
   }, [conversationId]);
-  
+
   useGSAP(() => {
     const modelTitle = new SplitText("#sidebar-header h1", {
       type: "chars",
@@ -59,17 +59,18 @@ export default function ConversationPage() {
       y: 10,
       stagger: 0.02,
       ease: "elastic.out(1,0.6)",
-      delay: 0.2
+      delay: 0.2,
     });
   }, [title]);
-  
+
   return (
     <>
       <div className="overflow-auto h-full">
-        {!!title && createPortal(
-          <h1>Conversation {conversationId}</h1>,
-          document.getElementById("sidebar-header") || document.body
-        )}
+        {!!title &&
+          createPortal(
+            <h1>Conversation {conversationId}</h1>,
+            document.getElementById("sidebar-header") || document.body,
+          )}
         <div className="max-w-[1000px] mx-auto">
           <Message from="user">
             <div className="flex flex-col items-end">

@@ -24,7 +24,7 @@ function AuthInput({
         className={cn(
           "h-12 rounded-full border-gray-200 bg-[#f6f6f6] pr-4 placeholder:text-gray-400 focus:bg-white focus:border-gray-300 focus:ring-0",
           phone ? "pl-24 md:text-lg border-0" : "pl-4",
-          className
+          className,
         )}
         {...props}
       />
