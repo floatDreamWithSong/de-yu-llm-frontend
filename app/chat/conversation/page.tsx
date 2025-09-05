@@ -14,10 +14,10 @@ import {
   ThumbsDownIcon,
   ThumbsUpIcon,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import UserPromptTextarea from "../components/user-prompt-textarea";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { SplitText } from "gsap/all";
@@ -41,13 +41,15 @@ nihao \`123\`
 \`\`\`
 `;
 
-export default function ConversationPage() {
-  const { ["conversation-id"]: conversationId } = useParams();  
+function ConversationContent() {
+  const searchParams = useSearchParams();
+  const conversationId = searchParams.get('id') || '1';
   const [title, setTitle] = useState("");
 
   useEffect(() => {
-    setTitle(conversationId as string);
+    setTitle(conversationId);
   }, [conversationId]);
+  
   useGSAP(() => {
     const modelTitle = new SplitText("#sidebar-header h1", {
       type: "chars",
@@ -61,6 +63,7 @@ export default function ConversationPage() {
       delay: 0.2
     });
   }, [title]);
+  
   return (
     <>
       <div className="overflow-auto h-full">
@@ -155,5 +158,13 @@ export default function ConversationPage() {
       </div>
       <UserPromptTextarea className="mx-auto sticky bottom-4" />
     </>
+  );
+}
+
+export default function ConversationPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ConversationContent />
+    </Suspense>
   );
 }

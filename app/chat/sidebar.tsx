@@ -1,13 +1,11 @@
 import {
-  Calendar,
-  Home,
-  Inbox,
   ListCollapseIcon,
+  LogOut,
   MessageCircleMoreIcon,
-  Search,
   SearchIcon,
   Settings,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import {
   Sidebar,
@@ -27,6 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Menu items.
 const items = [
@@ -53,7 +57,8 @@ const items = [
 ];
 
 export default function ChatSidebar() {
-  const { state } = useSidebar()
+  const { state } = useSidebar();
+  const router = useRouter();
   return (
     <Sidebar className="px-5 pb-0 pt-10 ease-out duration-400" variant="inset">
       <SidebarHeader className="space-y-4">
@@ -61,12 +66,17 @@ export default function ChatSidebar() {
           <h2 className="text-primary font-semibold text-[1.45rem]">
             张江高科·高科芯
           </h2>
-          {state === "expanded" && <SidebarTrigger icon={<ListCollapseIcon className="size-6" />} />}
+          {state === "expanded" && (
+            <SidebarTrigger icon={<ListCollapseIcon className="size-6" />} />
+          )}
         </div>
         <Button
           className="rounded-full text-lg "
           size={"lg"}
           variant={"secondary"}
+          onClick={() => {
+            router.push("/chat");
+          }}
         >
           <MessageCircleMoreIcon className="stroke-2 size-5" />
           开始对话
@@ -98,10 +108,28 @@ export default function ChatSidebar() {
       </SidebarContent>
       <Separator />
       <SidebarFooter className="flex flex-row justify-between items-center p-6">
-          <Button variant="ghost" size="icon">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
               <Settings className="size-6" />
-          </Button>
-          <Image className="rounded-full" src="/default-user.png" alt="avatar" width={40} height={40} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="ml-2" >
+            {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
+            <DropdownMenuSeparator /> */}
+            <DropdownMenuItem>
+              <LogOut className="size-4" />
+              退出登录
+              </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Image
+          className="rounded-full"
+          src="/default-user.png"
+          alt="avatar"
+          width={40}
+          height={40}
+        />
       </SidebarFooter>
     </Sidebar>
   );

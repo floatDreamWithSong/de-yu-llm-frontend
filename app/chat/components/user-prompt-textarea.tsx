@@ -35,13 +35,14 @@ export default function UserPromptTextarea({ className, ...props }: React.Compon
           console.log(value);
         }
       }}
-      onSubmit={() => {
+      onSubmit={(e) => {
+        e.preventDefault();
         console.log(value);
       }}
-      className={cn("max-w-[800px] relative divide-none p-2 outline-3 outline-[#d4d5ff] shadow-lg shadow-secondary", className)}
+      className={cn("max-w-[800px] relative divide-none p-2 border-3 mb-4 border-[#d4d5ff] shadow-lg shadow-secondary", className)}
     >
       <div
-        className="min-h-[100px] max-h-[150px] h-full overflow-y-auto p-2"
+        className="h-[120px] overflow-y-auto p-2"
         style={{
           scrollbarColor: "transparent transparent",
         }}

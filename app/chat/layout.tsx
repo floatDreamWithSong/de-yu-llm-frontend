@@ -24,9 +24,10 @@ export default function ChatLayout({
       }
     >
       <ChatSidebar />
-      <main className="p-4 w-full h-screen">
-        <div className="safe-area-top min-h-10 flex items-center">
+      <main className=" w-full h-full mx-2">
+        <div className="safe-area-top min-h-10 flex items-center sticky top-0 w-full">
           <SidebarExpandTrigger />
+          <div id="sidebar-header" />
         </div>
         {children}
       </main>
