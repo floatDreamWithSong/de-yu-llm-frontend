@@ -55,7 +55,7 @@ const items = [
 export default function ChatSidebar() {
   const { state } = useSidebar()
   return (
-    <Sidebar className="px-5 pb-0 pt-16" variant="inset">
+    <Sidebar className="px-5 pb-0 pt-10 ease-out duration-400" variant="inset">
       <SidebarHeader className="space-y-4">
         <div className="flex items-center justify-center gap-2">
           <h2 className="text-primary font-semibold text-[1.45rem]">
