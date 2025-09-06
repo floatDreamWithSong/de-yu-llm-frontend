@@ -19,7 +19,7 @@ import {
   ThumbsDownIcon,
   ThumbsUpIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 gsap.registerPlugin(SplitText);
 
@@ -45,7 +45,7 @@ export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
   const [title, setTitle] = useState("");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setTitle(conversationId as string);
   }, [conversationId]);
 
