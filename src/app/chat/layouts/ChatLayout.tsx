@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGSAP } from "@gsap/react";
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useRouter } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ChevronsRightIcon } from "lucide-react";
 import { useRef } from "react";
@@ -16,6 +16,7 @@ import { useRef } from "react";
 const sidebarWidth = "380px";
 
 export default function ChatLayout() {
+  const router = useRouter();
   return (
     <div
       style={{ backgroundImage: "url(/chat/bg.png)" }}
@@ -30,12 +31,14 @@ export default function ChatLayout() {
           } as React.CSSProperties
         }
       >
-        <ChatSidebar />
-        <main className=" w-full h-full">
+        <ChatSidebar className="px-10 py-20 ease-out duration-400" />
+        <main className="w-full flex-1 flex flex-col py-20 ml-6">
           <SidebarExpandTrigger />
-          <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full">
-            <div id="sidebar-header" />
-          </div>
+          {router.state.location.pathname !== "/chat" && (
+            <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full">
+              <div id="sidebar-header" />
+            </div>
+          )}
           <Outlet />
         </main>
       </SidebarProvider>
@@ -71,7 +74,7 @@ function SidebarExpandTrigger() {
       <SidebarTrigger
         icon={<ChevronsRightIcon className="size-6 stroke-primary" />}
         ref={triggerRef}
-        className="bg-white rounded-r-full size-8 absolute top-1/2 -translate-y-1/2 opacity-0"
+        className="bg-white rounded-r-full size-8 absolute top-1/2 -translate-y-1/2 opacity-0 -ml-6"
       />
     )
   );

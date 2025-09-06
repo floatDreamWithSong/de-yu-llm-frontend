@@ -2,21 +2,11 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   BookOpen,
   ListCollapseIcon,
-  LogOut,
   MessageCircleMoreIcon,
-  SearchIcon,
-  Settings,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -51,19 +41,82 @@ const items = [
     url: "#",
   },
   {
-    title: "Settings",
+    title: "Settingasdasdadss",
+    url: "#",
+  },
+  {
+    title: "你能做什么",
+    url: "#",
+  },
+  {
+    title: "孩子说两嘴顶嘴，一发凶就哭怎么办",
+    url: "#",
+  },
+  {
+    title: "随便问点",
+    url: "#",
+  },
+  {
+    title: "孩子说两嘴顶嘴，一发凶就哭怎么办 孩子说两嘴顶嘴，一发凶就哭怎么办",
+    url: "#",
+  },
+  {
+    title: "Settingasdasdadss",
+    url: "#",
+  },
+  {
+    title: "你能做什么",
+    url: "#",
+  },
+  {
+    title: "孩子说两嘴顶嘴，一发凶就哭怎么办",
+    url: "#",
+  },
+  {
+    title: "随便问点",
+    url: "#",
+  },
+  {
+    title: "孩子说两嘴顶嘴，一发凶就哭怎么办 孩子说两嘴顶嘴，一发凶就哭怎么办",
+    url: "#",
+  },
+  {
+    title: "Settingasdasdadss",
+    url: "#",
+  },
+  {
+    title: "你能做什么",
+    url: "#",
+  },
+  {
+    title: "孩子说两嘴顶嘴，一发凶就哭怎么办",
+    url: "#",
+  },
+  {
+    title: "随便问点",
+    url: "#",
+  },
+  {
+    title: "孩子说两嘴顶嘴，一发凶就哭怎么办 孩子说两嘴顶嘴，一发凶就哭怎么办",
+    url: "#",
+  },
+  {
+    title: "Settingasdasdadss",
     url: "#",
   },
 ];
 
-export default function ChatSidebar() {
+export default function ChatSidebar({ className }: { className?: string }) {
   const { state } = useSidebar();
   const navigate = useNavigate();
   return (
-    <Sidebar className="px-10 py-20 ease-out duration-400" variant="inset">
+    <Sidebar variant="inset" className={className}>
       <SidebarHeader className="space-y-4 px-8 pt-10 relative">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-primary text-xl font-bold" style={{letterSpacing: "0.06em"}}>
+          <h2
+            className="text-primary text-xl font-bold"
+            style={{ letterSpacing: "0.06em" }}
+          >
             张江高科&nbsp;·&nbsp;高科芯
           </h2>
           {state === "expanded" && (
@@ -93,17 +146,22 @@ export default function ChatSidebar() {
           <BookOpen className="stroke-2 size-5 text-primary" />
           知识宝库
         </Button>
-        <img src="/chat/bot.png" alt="bot" className="absolute left-2 h-[5.6rem] top-0 -translate-y-7/12" />
+        <img
+          src="/chat/bot.png"
+          alt="bot"
+          className="absolute left-2 h-[5.6rem] top-0 -translate-y-7/12"
+        />
       </SidebarHeader>
-      <SidebarContent className="pt-10 px-3 justify-end">
+      <SidebarContent className="mt-10 px-3 ">
         <SidebarGroup>
           <SidebarGroupLabel className="text-md font-bold text-[#9d9da9]">
             昨天
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {items.map((item, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                <SidebarMenuItem key={item.title + index}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
                       <span>{item.title}</span>
@@ -117,8 +175,16 @@ export default function ChatSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-4">
         <div className="relative">
-          <Input placeholder="搜索......" className=" p-5 pr-13 mr-10 rounded-full rounded-r-none border-2 border-primary" />
-          <img loading="eager" src="/chat/search.png" alt="search" className="size-12 absolute right-0 top-1/2 -translate-y-1/2" />
+          <Input
+            placeholder="搜索......"
+            className=" p-5 pr-13 mr-10 rounded-full rounded-r-none border-2 border-primary"
+          />
+          <img
+            loading="eager"
+            src="/chat/search.png"
+            alt="search"
+            className="size-12 absolute right-0 top-1/2 -translate-y-1/2"
+          />
         </div>
       </SidebarFooter>
       {/* <Separator />

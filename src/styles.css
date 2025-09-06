@@ -126,6 +126,10 @@
   }
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
   @apply m-0;
   background-color: white;
