@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import {
+  BookOpen,
   ListCollapseIcon,
   LogOut,
   MessageCircleMoreIcon,
@@ -59,20 +60,21 @@ export default function ChatSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
   return (
-    <Sidebar className="px-5 pb-0 pt-10 ease-out duration-400" variant="inset">
-      <SidebarHeader className="space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <h2 className="text-primary font-semibold text-[1.45rem]">
-            张江高科·高科芯
+    <Sidebar className="px-10 py-20 ease-out duration-400" variant="inset">
+      <SidebarHeader className="space-y-4 px-8 pt-10 relative">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-primary text-xl font-bold" style={{letterSpacing: "0.06em"}}>
+            张江高科&nbsp;·&nbsp;高科芯
           </h2>
           {state === "expanded" && (
-            <SidebarTrigger icon={<ListCollapseIcon className="size-6" />} />
+            <SidebarTrigger
+              icon={<ListCollapseIcon className="size-6 stroke-primary" />}
+            />
           )}
         </div>
         <Button
-          className="rounded-full text-lg "
+          className="rounded-full text-lg font-bold"
           size={"lg"}
-          variant={"secondary"}
           onClick={() => {
             navigate({ to: "/chat" });
           }}
@@ -80,12 +82,20 @@ export default function ChatSidebar() {
           <MessageCircleMoreIcon className="stroke-2 size-5" />
           开始对话
         </Button>
-        <div className="relative">
-          <Input placeholder="搜索..." className="p-5 mr-10 rounded-full" />
-          <SearchIcon className="size-4 absolute right-4 top-1/2 -translate-y-1/2" />
-        </div>
+        <Button
+          className="rounded-full text-lg text-primary border-2 border-primary font-bold outline-0 hover:text-primary"
+          size={"lg"}
+          variant={"outline"}
+          onClick={() => {
+            navigate({ to: "/chat" });
+          }}
+        >
+          <BookOpen className="stroke-2 size-5 text-primary" />
+          知识宝库
+        </Button>
+        <img src="/chat/bot.png" alt="bot" className="absolute left-2 h-[5.6rem] top-0 -translate-y-7/12" />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="pt-10 px-3 justify-end">
         <SidebarGroup>
           <SidebarGroupLabel className="text-md font-bold text-[#9d9da9]">
             昨天
@@ -105,7 +115,13 @@ export default function ChatSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <Separator />
+      <SidebarFooter className="p-4">
+        <div className="relative">
+          <Input placeholder="搜索......" className=" p-5 pr-13 mr-10 rounded-full rounded-r-none border-2 border-primary" />
+          <img loading="eager" src="/chat/search.png" alt="search" className="size-12 absolute right-0 top-1/2 -translate-y-1/2" />
+        </div>
+      </SidebarFooter>
+      {/* <Separator />
       <SidebarFooter className="flex flex-row justify-between items-center p-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -114,8 +130,8 @@ export default function ChatSidebar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="ml-2">
-            {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
-            <DropdownMenuSeparator /> */}
+            <DropdownMenuLabel>系统设置</DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut className="size-4" />
               退出登录
@@ -129,7 +145,7 @@ export default function ChatSidebar() {
           width={40}
           height={40}
         />
-      </SidebarFooter>
+      </SidebarFooter> */}
     </Sidebar>
   );
 }
