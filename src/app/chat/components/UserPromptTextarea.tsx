@@ -12,20 +12,24 @@ import type React from "react";
 export default function UserPromptTextarea({
   className,
   onSubmit,
-}: React.ComponentProps<"div"> & {
+  disabled = false,
+}: Omit<React.ComponentProps<"div">, 'onSubmit'> & {
   onSubmit: (value: string) => void;
+  disabled?: boolean;
 }) {
   const [value, setValue] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
 
   const handleInput = useCallback((e: React.FormEvent<HTMLSpanElement>) => {
+    if (disabled) return;
     e.preventDefault();
     const target = e.target as HTMLSpanElement;
     const newValue = target.innerHTML;
     console.log(newValue);
     setValue(newValue);
-  }, []);
+  }, [disabled]);
   const handlePaste = (e: React.ClipboardEvent<HTMLSpanElement>) => {
+    if (disabled) return;
     e.preventDefault(); // 1. 阻止默认粘贴
     const text = e.clipboardData.getData("text/plain"); // 2. 只拿纯文本
     document.execCommand("insertText", false, text); // 3. 当成文本插入
@@ -43,14 +47,27 @@ export default function UserPromptTextarea({
   return (
     <PromptInput
       onKeyDown={(e) => {
-        if (e.key === "Enter" && e.ctrlKey) {
-          console.log(value);
-          onSubmit?.(value);
+        if (e.key === "Enter" && e.ctrlKey && !disabled) {
+          const textContent = spanRef.current?.textContent || '';
+          console.log('提交消息:', textContent);
+          onSubmit?.(textContent);
+          setValue('');
+          if (spanRef.current) {
+            spanRef.current.innerHTML = '';
+          }
         }
       }}
       onSubmit={(e) => {
         e.preventDefault();
-        console.log(value);
+        if (!disabled) {
+          const textContent = spanRef.current?.textContent || '';
+          console.log('提交消息:', textContent);
+          onSubmit?.(textContent);
+          setValue('');
+          if (spanRef.current) {
+            spanRef.current.innerHTML = '';
+          }
+        }
       }}
       className={cn(
         "relative flex flex-col divide-none p-2 border-3 mb-4 border-none shadow-lg shadow-primary",
@@ -72,10 +89,10 @@ export default function UserPromptTextarea({
         </div>
         <span
           ref={spanRef}
-          contentEditable
+          contentEditable={!disabled}
           onInput={handleInput}
           onPaste={handlePaste}
-          className="outline-none border-none"
+          className={cn("outline-none border-none", disabled && "opacity-50 cursor-not-allowed")}
           suppressContentEditableWarning
         />
         {!value && <span className="text-gray-500">继续提问</span>}
@@ -100,8 +117,8 @@ export default function UserPromptTextarea({
           </PromptInputButton>
           <PromptInputSubmit
             className="rounded-full"
-            disabled={false}
-            status={"ready"}
+            disabled={disabled || !value.trim()}
+            status={disabled ? "streaming" : undefined}
           />
         </div>
       </div>

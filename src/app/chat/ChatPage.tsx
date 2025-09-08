@@ -2,6 +2,7 @@
 
 import AgentCard from "@/app/chat/components/AgentCard";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
+import { useStreamCompletion } from "@/hooks/use-stream-completion";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
@@ -42,6 +43,8 @@ const cardList = [
 ];
 
 export default function ChatPage() {
+  const { isStreaming, currentMessage, sendMessage } = useStreamCompletion();
+
   useGSAP(() => {
     const modelTitle = new SplitText(".model-title", {
       type: "chars",
@@ -63,13 +66,33 @@ export default function ChatPage() {
     });
   }, []);
 
+  const handleSubmit = (message: string) => {
+    if (message.trim()) {
+      console.log('发送消息:', message);
+      sendMessage(message);
+    }
+  };
+
   return (
     <div className="flex flex-col items-start @container px-6 flex-1">
       <h1 className="model-title text-4xl font-bold text-primary pb-6 whitespace-pre">
         {/* 张江高科 · 高科芯 德育大模型 */}
         <img src="/chat/fake-title.png" alt="张江高科 · 高科芯 德育大模型" className="max-h-16" />
       </h1>
-      <UserPromptTextarea className="min-h-[300px] max-h-[400px]" onSubmit={() => {}} />
+      <UserPromptTextarea 
+        className="min-h-[300px] max-h-[400px]" 
+        onSubmit={handleSubmit}
+        disabled={isStreaming}
+      />
+      
+      {/* 显示流式响应 */}
+      {currentMessage && (
+        <div className="w-full mt-4 p-4 bg-gray-50 rounded-lg border">
+          <div className="text-sm text-gray-600 mb-2">AI回复:</div>
+          <div className="text-gray-800 whitespace-pre-wrap">{currentMessage}</div>
+          {isStreaming && <div className="text-blue-500 text-sm mt-2">正在输入...</div>}
+        </div>
+      )}
       <div className="grid gap-6 w-full mt-6 items-stretch max-w-[1200px]" 
            style={{gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))'}}>
         {cardList.map((card) => (
