@@ -11,7 +11,10 @@ import type React from "react";
 
 export default function UserPromptTextarea({
   className,
-}: React.ComponentProps<"div">) {
+  onSubmit,
+}: React.ComponentProps<"div"> & {
+  onSubmit: (value: string) => void;
+}) {
   const [value, setValue] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
 
@@ -42,6 +45,7 @@ export default function UserPromptTextarea({
       onKeyDown={(e) => {
         if (e.key === "Enter" && e.ctrlKey) {
           console.log(value);
+          onSubmit?.(value);
         }
       }}
       onSubmit={(e) => {

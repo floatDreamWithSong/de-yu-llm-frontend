@@ -69,7 +69,7 @@ export default function ChatPage() {
         {/* 张江高科 · 高科芯 德育大模型 */}
         <img src="/chat/fake-title.png" alt="张江高科 · 高科芯 德育大模型" className="max-h-16" />
       </h1>
-      <UserPromptTextarea className="min-h-[300px] max-h-[400px]" />
+      <UserPromptTextarea className="min-h-[300px] max-h-[400px]" onSubmit={() => {}} />
       <div className="grid gap-6 w-full mt-6 items-stretch max-w-[1200px]" 
            style={{gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))'}}>
         {cardList.map((card) => (
