@@ -1,13 +1,19 @@
 // Mock completion API 实现 SSE 流式响应
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 模拟的回复内容，用于流式输出
-const mockResponse = "你好！我是德育大模型，很高兴为您服务。我可以帮助您解答各种问题，包括学习、生活、德育教育等方面。请告诉我您需要什么帮助？";
+// 模拟响应文件列表
+const mockFiles = [
+  'mock1.txt',
+  'mock2.txt', 
+  'mock3.txt'
+];
 
 // 模拟的智能体信息
 const mockBotInfo = {
@@ -21,9 +27,38 @@ function generateId() {
   return Math.random().toString(36).substr(2, 9);
 }
 
+// 随机选择模拟文件
+function getRandomMockFile() {
+  const randomIndex = Math.floor(Math.random() * mockFiles.length);
+  return mockFiles[randomIndex];
+}
+
+// 读取并解析模拟文件
+function readMockFile(filename) {
+  try {
+    const filePath = path.join(__dirname, filename);
+    const content = fs.readFileSync(filePath, 'utf8');
+    return content.split('\n');
+  } catch (error) {
+    console.error('读取模拟文件失败:', error);
+    return [];
+  }
+}
+
 // 模拟流式响应
 app.post('/v1/completions', (req, res) => {
   console.log('收到completion请求:', JSON.stringify(req.body, null, 2));
+  
+  // 随机选择模拟文件
+  const selectedFile = getRandomMockFile();
+  console.log('选择模拟文件:', selectedFile);
+  
+  // 读取模拟文件内容
+  const mockLines = readMockFile(selectedFile);
+  if (mockLines.length === 0) {
+    res.status(500).json({ error: '无法读取模拟文件' });
+    return;
+  }
   
   // 设置SSE响应头
   res.writeHead(200, {
@@ -34,77 +69,35 @@ app.post('/v1/completions', (req, res) => {
     'Access-Control-Allow-Headers': 'Cache-Control'
   });
 
-  const conversationId = req.body.conversation_id || generateId();
-  const messageId = generateId();
-  const sectionId = generateId();
-  const replyId = generateId();
-  let id = 0;
+  const conversationId = req.body.conversationId || generateId();
+  let lineIndex = 0;
 
-  // 发送meta信息
-  const metaData = {
-    messageId: messageId,
-    conversationId: conversationId,
-    sectionId: sectionId,
-    messageIndex: 0,
-    conversationType: 0
-  };
-  
-  res.write(`id: ${id++}\n`);
-  res.write(`type: meta\n`);
-  res.write(`data: ${JSON.stringify(metaData)}\n\n`);
-
-  // 发送model信息
-  res.write(`id: ${id++}\n`);
-  res.write(`type: model\n`);
-  res.write(`data: ${JSON.stringify(mockBotInfo)}\n\n`);
-
-  // 模拟流式输出文本内容
-  let currentText = "";
-  const words = mockResponse.split('');
-  let wordIndex = 0;
-
-  const sendChunk = () => {
-    if (wordIndex < words.length) {
-      currentText += words[wordIndex];
+  const sendNextLine = () => {
+    if (lineIndex < mockLines.length) {
+      const line = mockLines[lineIndex].trim();
       
-      const chatData = {
-        message: {
-          content: JSON.stringify({
-            text: currentText,
-            think: "",
-            suggest: ""
-          }),
-          contentType: 0
-        },
-        messageId: messageId,
-        conversationId: conversationId,
-        sectionId: sectionId,
-        replyId: replyId,
-        isDelta: true,
-        status: 0,
-        inputContentType: 0,
-        messageIndex: 0,
-        botId: mockBotInfo.botId
-      };
-
-      res.write(`id: ${id++}\n`);
-      res.write(`type: chat\n`);
-      res.write(`data: ${JSON.stringify(chatData)}\n\n`);
+      if (line) {
+        // 直接发送原始行数据
+        res.write(line + '\n');
+        console.log('发送行:', line);
+      }
       
-      wordIndex++;
+      lineIndex++;
+      
       // 随机延迟，模拟真实的流式输出
-      setTimeout(sendChunk, Math.random() * 100 + 50);
+      setTimeout(sendNextLine, Math.random() * 50 + 20);
     } else {
       // 发送结束信号
-      res.write(`id: ${id++}\n`);
+      res.write(`id: ${Date.now()}\n`);
       res.write(`type: end\n`);
       res.write(`data: {}\n\n`);
       res.end();
+      console.log('模拟响应完成');
     }
   };
 
   // 开始发送流式数据
-  setTimeout(sendChunk, 100);
+  setTimeout(sendNextLine, 100);
 });
 
 // 创建对话接口
@@ -113,8 +106,12 @@ app.post('/v1/conversation/create', (req, res) => {
   console.log('创建新对话:', conversationId);
   
   res.json({
-    conversationId: conversationId,
-    success: true
+    code: 200,
+    msg: "success",
+    data: {
+      conversationId: conversationId,
+      success: true
+    }
   });
 });
 

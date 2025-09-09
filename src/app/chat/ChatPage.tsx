@@ -2,10 +2,12 @@
 
 import AgentCard from "@/app/chat/components/AgentCard";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
-import { useStreamCompletion } from "@/hooks/use-stream-completion";
+import { createConversation } from "@/apis/requests/create-conversation";
 import { useGSAP } from "@gsap/react";
+import { useNavigate } from "@tanstack/react-router";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
+import { useState } from "react";
 gsap.registerPlugin(SplitText);
 
 const cardList = [
@@ -43,19 +45,20 @@ const cardList = [
 ];
 
 export default function ChatPage() {
-  const { isStreaming, currentMessage, sendMessage } = useStreamCompletion();
+  const navigate = useNavigate();
+  const [isCreating, setIsCreating] = useState(false);
 
   useGSAP(() => {
-    const modelTitle = new SplitText(".model-title", {
-      type: "chars",
-    });
-    gsap.from(modelTitle.chars, {
-      duration: 1,
-      opacity: 0,
-      y: 40,
-      ease: "power3.out",
-      stagger: 0.01,
-    });
+    // const modelTitle = new SplitText(".model-title", {
+    //   type: "chars",
+    // });
+    // gsap.from(modelTitle.chars, {
+    //   duration: 1,
+    //   opacity: 0,
+    //   y: 40,
+    //   ease: "power3.out",
+    //   stagger: 0.01,
+    // });
     gsap.from(".agent-card", {
       duration: 1,
       opacity: 0,
@@ -66,10 +69,24 @@ export default function ChatPage() {
     });
   }, []);
 
-  const handleSubmit = (message: string) => {
-    if (message.trim()) {
-      console.log('发送消息:', message);
-      sendMessage(message);
+  const handleSubmit = async (message: string) => {
+    if (message.trim() && !isCreating) {
+      setIsCreating(true);
+      try {
+        console.log('创建对话并发送消息:', message);
+        const conversation = await createConversation();
+        console.log('对话创建成功:', conversation);
+        
+        // 跳转到对话页面，并传递初始消息
+        navigate({
+          to: '/chat/$conversationId',
+          params: { conversationId: conversation.conversationId },
+          search: { initialMessage: message }
+        });
+      } catch (error) {
+        console.error('创建对话失败:', error);
+        setIsCreating(false);
+      }
     }
   };
 
@@ -82,15 +99,12 @@ export default function ChatPage() {
       <UserPromptTextarea 
         className="min-h-[300px] max-h-[400px]" 
         onSubmit={handleSubmit}
-        disabled={isStreaming}
+        disabled={isCreating}
       />
       
-      {/* 显示流式响应 */}
-      {currentMessage && (
-        <div className="w-full mt-4 p-4 bg-gray-50 rounded-lg border">
-          <div className="text-sm text-gray-600 mb-2">AI回复:</div>
-          <div className="text-gray-800 whitespace-pre-wrap">{currentMessage}</div>
-          {isStreaming && <div className="text-blue-500 text-sm mt-2">正在输入...</div>}
+      {isCreating && (
+        <div className="w-full mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="text-blue-600 text-sm">正在创建对话...</div>
         </div>
       )}
       <div className="grid gap-6 w-full mt-6 items-stretch max-w-[1200px]" 

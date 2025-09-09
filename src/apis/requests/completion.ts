@@ -1,4 +1,3 @@
-import { request } from "@/lib/request";
 import z from "zod";
 
 /**
@@ -47,19 +46,11 @@ export const CompletionsOptionSchema = z.object({
 export type CompletionsOption = z.infer<typeof CompletionsOptionSchema>;
 
 export const RequestSchema = z.object({
-    "bot_id": z.string(),
+    "botId": z.string(),
     "completionsOption": CompletionsOptionSchema,
-    "conversation_id": z.string(),
+    "conversationId": z.string(),
     "messages": z.array(MessageSchema),
     "model": z.string(),
-    "reply_id": z.union([z.null(), z.string()]).optional(),
+    "replyId": z.union([z.null(), z.string()]).optional(),
 });
 export type Request = z.infer<typeof RequestSchema>;
-
-export const completionRequest = (data: Request) => {
-    return request({
-        url: "/v1/completions",
-        method: "POST",
-        data,
-    });
-};

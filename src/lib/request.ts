@@ -8,9 +8,10 @@ import axios from "axios";
 import z from "zod";
 import message from "@/lib/message";
 import process from "node:process";
+import { env } from "@/env";
 
 // 基础配置
-const BASE_URL = process.env.VITE_API_BASE_URL;
+const BASE_URL = env.VITE_API_BASE_URL;
 const DEFAULT_TIMEOUT = 120000;
 const TOKEN_KEY = "token";
 export const tokenStore = {
@@ -50,7 +51,7 @@ function createAxiosInstance(): AxiosInstance {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      if (process.env.NODE_ENV === "development") {
+      if (import.meta.env.DEV) {
         await sleep(1);
       }
       return config;
@@ -133,6 +134,7 @@ function createAxiosInstance(): AxiosInstance {
         errorMessage += `: ${error.response.data.msg}`;
       }
       message.error(errorMessage);
+      console.error(error);
       return Promise.reject(new Error(errorMessage));
     },
   );

@@ -1,9 +1,11 @@
 # 德育大模型前端 Demo
 
-这是一个基于设计文档实现的德育大模型前端demo，展示了流式消息处理功能。
+这是一个基于设计文档实现的德育大模型前端demo，展示了完整的对话流程和流式消息处理功能。
 
 ## 功能特性
 
+- ✅ 完整的对话创建和跳转流程
+- ✅ 消息列表管理和显示
 - ✅ 完整的SSE流式响应处理
 - ✅ 符合设计文档的API结构
 - ✅ 实时控制台日志输出
@@ -39,9 +41,11 @@ pnpm run dev
 ## 使用方法
 
 1. 打开浏览器访问 `http://localhost:3000`
-2. 在输入框中输入消息（支持Ctrl+Enter或点击提交按钮）
-3. 观察控制台输出，查看流式消息处理过程
-4. 在页面上查看AI的实时回复
+2. 在首页输入框中输入消息（支持Ctrl+Enter或点击提交按钮）
+3. 系统会自动创建对话并跳转到对话页面
+4. 在对话页面可以看到消息列表和流式AI回复
+5. 可以继续在对话页面发送新消息
+6. 观察控制台输出，查看流式消息处理过程
 
 ## API设计
 
@@ -94,6 +98,7 @@ data: {}
 ## 技术实现
 
 - **前端**: React + TypeScript + Vite
+- **路由**: TanStack Router
 - **Mock服务器**: Express.js + CORS
 - **流式处理**: Server-Sent Events (SSE)
 - **状态管理**: React Hooks
@@ -106,15 +111,26 @@ src/
 ├── hooks/
 │   └── use-stream-completion.ts    # 流式消息处理Hook
 ├── app/chat/
-│   ├── ChatPage.tsx                # 主聊天页面
+│   ├── ChatPage.tsx                # 首页聊天页面
+│   ├── ConversationPage.tsx        # 对话页面
+│   ├── route.ts                    # 路由配置
 │   └── components/
 │       └── UserPromptTextarea.tsx  # 用户输入组件
-└── apis/requests/
-    └── completion.ts               # API类型定义
-
-mock/
-└── compeletion.js                  # Mock服务器实现
+├── apis/requests/
+│   ├── completion.ts               # API类型定义
+│   └── create-conversation.ts      # 创建对话API
+└── mock/
+    └── compeletion.cjs             # Mock服务器实现
 ```
+
+## 对话流程
+
+1. **首页输入**: 用户在ChatPage输入消息
+2. **创建对话**: 调用API创建新的对话ID
+3. **页面跳转**: 跳转到ConversationPage，传递初始消息
+4. **消息处理**: 在ConversationPage中处理流式响应
+5. **消息列表**: 显示完整的对话历史
+6. **继续对话**: 用户可以继续发送新消息
 
 ## 控制台输出
 

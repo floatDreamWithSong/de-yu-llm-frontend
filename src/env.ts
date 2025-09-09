@@ -9,7 +9,7 @@ export const env = createEnv({
   clientPrefix: "VITE_",
 
   client: {
-    VITE_API_BASE_URL: z.string().url().optional(),
+    VITE_API_BASE_URL: z.string().url(),
   },
 
   /**
@@ -31,5 +31,5 @@ export const env = createEnv({
    * In order to solve these issues, we recommend that all new projects
    * explicitly specify this option as true.
    */
-  emptyStringAsUndefined: true,
+  // emptyStringAsUndefined: ,
 });
