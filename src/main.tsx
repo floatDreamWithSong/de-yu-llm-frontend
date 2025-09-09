@@ -8,6 +8,7 @@ import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 import { routeTree } from "./route.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 const router = createRouter({
@@ -35,6 +36,7 @@ if (rootElement && !rootElement.innerHTML) {
       <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
         <RouterProvider router={router} />
         <Toaster />
+        <ReactQueryDevtools />
       </TanStackQueryProvider.Provider>
     </StrictMode>,
   );

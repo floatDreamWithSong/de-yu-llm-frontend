@@ -14,7 +14,7 @@ const BASE_URL = env.VITE_API_BASE_URL;
 const DEFAULT_TIMEOUT = 120000;
 const TOKEN_KEY = "token";
 export const tokenStore = {
-  get: () => localStorage.getItem(TOKEN_KEY),
+  get: () => localStorage.getItem(TOKEN_KEY) ?? import.meta.env.MODE === 'test' ? "xh-polaris" : undefined,
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
   remove: () => localStorage.removeItem(TOKEN_KEY),
 };

@@ -1,6 +1,7 @@
 import type { Request as CompletionRequest } from "@/apis/requests/conversation/completion";
+import { getConversationDetail } from "@/apis/requests/conversation/detail";
 import type { ChatStatus, DeepPartial } from "ai";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 export interface StreamChunk {
   id: number;
@@ -37,14 +38,29 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
-export function useStreamCompletion(conversationId: string, _option?:{
-  getMessageUseConversationId?: boolean
-}) {
+export function useStreamCompletion(conversationId: string) {
   const status = useRef<ChatStatus>("ready");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const lastUserMessageId = useRef<string | null>(null);
   const lastAssistantMessageId = useRef<string | null>(null);
+  useEffect(() => {
+    getConversationDetail({
+      conversationId,
+      page: {
+        page: 1,
+        size: 10,
+      },
+    }).then((data) => {
+      setMessages(data.messageList.map((message) => ({
+        id: message.messageId,
+        content: message.content,
+        think: message.ext.think ?? undefined,
+        role: message.userType === 0 ? "user" : "assistant",
+        timestamp: new Date(message.createTime),
+      })));
+    });
+  }, [conversationId]);
   const addMessage = useCallback(
     (content: string, role: "user" | "assistant", isStreaming = false) => {
       const newMessage: ChatMessage = {

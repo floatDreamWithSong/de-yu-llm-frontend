@@ -13,5 +13,6 @@ export function renameConversation(data: Request){
     url: "/conversation/rename",
     method: "POST",
     dataValidator: RequestSchema,
+    data
   });
 }

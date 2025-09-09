@@ -188,9 +188,11 @@ export default function ConversationPage() {
                         {!!message.content && (
                           <Response>{message.content}</Response>
                         )}
-                        {message.isStreaming && (!message.think && !message.content) && (
-                          <LoaderCircle className="size-4 animate-spin" />
-                        )}
+                        {message.isStreaming &&
+                          !message.think &&
+                          !message.content && (
+                            <LoaderCircle className="size-4 animate-spin" />
+                          )}
                         {!message.isStreaming &&
                           lastAssistantMessageId.current === message.id && (
                             <Actions className="mt-2">

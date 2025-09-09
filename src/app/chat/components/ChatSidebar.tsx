@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BotIcon,
   LogOut,
@@ -30,34 +30,23 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-
-// Menu items.
-const items = [
-  {
-    title: "你能做什么",
-    url: "#",
-  },
-  {
-    title: "孩子说两嘴顶嘴，一发凶就哭怎么办",
-    url: "#",
-  },
-  {
-    title: "随便问点",
-    url: "#",
-  },
-  {
-    title: "孩子说两嘴顶嘴，一发凶就哭怎么办 孩子说两嘴顶嘴，一发凶就哭怎么办",
-    url: "#",
-  },
-  {
-    title: "Settings",
-    url: "#",
-  },
-];
+import { getConversationHistoryList } from "@/apis/requests/conversation/history";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import groupConversationsByDate from "@/utils/date-group";
 
 export default function ChatSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
+  const { data: conversationHistory } = useInfiniteQuery({
+    queryKey: ["conversationHistory"],
+    queryFn: ({ pageParam = 1 }) =>
+      getConversationHistoryList({ page: pageParam, pageSize: 10 }),
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.list.length > 0 ? pages.length + 1 : undefined,
+    initialPageParam: 1,
+    select: (data) => data.pages.flatMap((page) => page.list),
+  });
+
   return (
     <Sidebar
       className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow"
@@ -115,24 +104,25 @@ export default function ChatSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent className="px-3">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-md font-bold text-[#9d9da9]">
-            昨天
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groupConversationsByDate(conversationHistory ?? []).map((item) => (
+          <SidebarGroup key={item.label}>
+            <SidebarGroupLabel>{item.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {item.list.map((item) => (
+                  <SidebarMenuItem key={item.conversationId}>
+                    <SidebarMenuButton asChild>
+                      {/* @ts-expect-error tanstack-router */}
+                      <Link to={`/chat/${item.conversationId}`}>
+                        <span>{item.brief}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <div className="relative mx-3 my-6">
         <Input placeholder="搜索..." className="p-5 pr-10 rounded-full" />
