@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-const message = {
+const messageToaster = {
   success: (message: string) => {
     toast.success(message);
   },
@@ -10,4 +10,4 @@ const message = {
     toast.info(message);
   },
 };
-export default message;
+export default messageToaster;

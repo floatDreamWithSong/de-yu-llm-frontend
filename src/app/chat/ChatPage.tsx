@@ -1,80 +1,102 @@
 "use client";
 
-import AgentCard from "@/app/chat/components/AgentCard";
+import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
 import { useGSAP } from "@gsap/react";
+import { useNavigate } from "@tanstack/react-router";
+import type { ChatStatus } from "ai";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
-import { UserIcon } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 gsap.registerPlugin(SplitText);
 
-const cardList = [
-  {
-    name: "Agent 1",
-    description: "Agent 1 description",
-    icon: UserIcon,
-  },
-  {
-    name: "Agent 2",
-    description: "Agent 2 description",
-    icon: UserIcon,
-  },
-  {
-    name: "Agent 3",
-    description: "Agent 3 description",
-    icon: UserIcon,
-  },
-  {
-    name: "Agent 4",
-    description: "Agent 4 description",
-    icon: UserIcon,
-  },
-  {
-    name: "Agent 5",
-    description: "Agent 5 description",
-    icon: UserIcon,
-  },
-  {
-    name: "Agent 6",
-    description:
-      "Agent 6 description 阿萨的表空间方便的吗使得按时间八十九海边酒店房卡氨甲环酸的金山词霸叫阿三的放假啊士大夫就喀什地方尽快SHD发哈士大夫v就卡还是v",
-    icon: UserIcon,
-  },
-];
-
 export default function ChatPage() {
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<ChatStatus>("ready");
+  const signal = useRef<AbortController | null>(null);
+  const abortRequest = useCallback(() => {
+    if (signal.current) {
+      setStatus("ready");
+      signal.current.abort();
+      signal.current = null;
+    }
+  }, []);
+
   useGSAP(() => {
     const modelTitle = new SplitText(".model-title", {
       type: "chars",
     });
     gsap.from(modelTitle.chars, {
-      duration: 1,
+      duration: 0.8,
       opacity: 0,
-      y: 40,
+      x: 40,
       ease: "power3.out",
       stagger: 0.01,
-    });
-    gsap.from(".agent-card", {
-      duration: 1,
-      opacity: 0,
-      y: 40,
-      ease: "power3.out",
-      stagger: 0.05,
       delay: 0.2,
+    });
+    const modelSubtitle = new SplitText(".model-subtitle", {
+      type: "chars",
+    });
+    gsap.from(modelSubtitle.chars, {
+      duration: 0.3,
+      opacity: 0,
+      y: 10,
+      ease: "power3.out",
+      stagger: 0.01,
+      delay: 0.6,
     });
   }, []);
 
+  const handleSubmit = async (message: string, onSuccess?: () => void) => {
+    if (message.trim() && status === "ready") {
+      setStatus("submitted");
+      try {
+        signal.current = new AbortController();
+        console.log("创建对话并发送消息:", message);
+        const conversation = await createConversation(signal.current);
+        console.log("对话创建成功:", conversation);
+
+        // 跳转到对话页面，并传递初始消息
+        navigate({
+          to: "/chat/$conversationId",
+          params: { conversationId: conversation.conversationId },
+          search: { initialMessage: message },
+        });
+        onSuccess?.();
+      } catch (error) {
+        console.error("创建对话失败:", error);
+      } finally {
+        setStatus("ready");
+        signal.current = null;
+      }
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center @container">
-      <h1 className="model-title text-4xl font-bold text-primary py-10 whitespace-pre">
-        张江高科·高科芯 德育大模型
-      </h1>
-      <UserPromptTextarea />
-      <div className="grid @4xl:grid-cols-3 @xl:grid-cols-2 @md:grid-cols-1 gap-6 w-full mt-10 items-stretch px-6 max-w-[1200px]">
-        {cardList.map((card) => (
-          <AgentCard className="agent-card" key={card.name} {...card} />
-        ))}
+    <div className="grid grid-rows-3 h-full">
+      <div className="absolute right-0 top-0 w-1/2">
+        <img src="/chat-bg.png" alt="" />
       </div>
+      <div className="my-6 row-span-1 mx-auto self-end space-y-6 text-center">
+        <h1
+          className="model-title text-4xl font-bold text-primary whitespace-pre"
+          style={{
+            letterSpacing: "0.1em",
+          }}
+        >
+          启创·InnoSpark, 做有温度的教育大模型
+        </h1>
+        <h2 className="model-subtitle">
+          我可以帮助你【设计实验】、【搜索文献】、【分析文档】、【分析数据】，你也可以直接开始和我对话
+        </h2>
+      </div>
+      <UserPromptTextarea
+        className="row-span-1 mx-auto align-middle"
+        onSubmit={handleSubmit}
+        onAbort={abortRequest}
+        status={status}
+      />
+      <div />
     </div>
   );
 }

@@ -6,11 +6,11 @@ import type {
 } from "axios";
 import axios from "axios";
 import z from "zod";
-import message from "@/lib/message";
-import process from "node:process";
+import messageToaster from "@/lib/message";
+import { env } from "@/env";
 
 // 基础配置
-const BASE_URL = process.env.VITE_API_BASE_URL;
+const BASE_URL = env.VITE_API_BASE_URL;
 const DEFAULT_TIMEOUT = 120000;
 const TOKEN_KEY = "token";
 export const tokenStore = {
@@ -50,7 +50,7 @@ function createAxiosInstance(): AxiosInstance {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      if (process.env.NODE_ENV === "development") {
+      if (import.meta.env.DEV) {
         await sleep(1);
       }
       return config;
@@ -89,7 +89,7 @@ function createAxiosInstance(): AxiosInstance {
           window.location.href = "/auth";
         }
         const errmsg = payload.msg || "请求失败";
-        message.error(errmsg);
+        messageToaster.error(errmsg);
         throw new Error(errmsg);
       }
 
@@ -132,7 +132,8 @@ function createAxiosInstance(): AxiosInstance {
       ) {
         errorMessage += `: ${error.response.data.msg}`;
       }
-      message.error(errorMessage);
+      messageToaster.error(errorMessage);
+      console.error(error);
       return Promise.reject(new Error(errorMessage));
     },
   );
@@ -181,7 +182,7 @@ export async function request<T extends z.ZodSchema>(
     return result.data;
   } catch (error) {
     console.error(error);
-    message.error(error instanceof Error ? error.message : "未知错误");
+    messageToaster.error(error instanceof Error ? error.message : "未知错误");
     throw error instanceof Error ? error : new Error("未知错误");
   }
 }

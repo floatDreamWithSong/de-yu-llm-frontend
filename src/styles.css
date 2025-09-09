@@ -41,9 +41,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-chat: var(--chat);
 }
 
 :root {
+  --chat: #fafcff;
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -128,7 +130,7 @@
 
 body {
   @apply m-0;
-  background-color: white;
+  background: var(--chat);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
@@ -143,4 +145,8 @@ code {
 
 ::-webkit-scrollbar {
   width: 0;
+}
+
+.style__shallow-shadow {
+  box-shadow: 3px 3px 12px 0px #e9f1fc;
 }

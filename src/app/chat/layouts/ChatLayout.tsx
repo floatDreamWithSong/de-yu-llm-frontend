@@ -7,7 +7,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useGSAP } from "@gsap/react";
 import { Outlet } from "@tanstack/react-router";
+import gsap from "gsap";
+import { ChevronRight } from "lucide-react";
+import { useRef } from "react";
 
 const sidebarWidth = "300px";
 
@@ -22,11 +26,11 @@ export default function ChatLayout() {
       }
     >
       <ChatSidebar />
-      <main className=" w-full h-full mx-2">
-        <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full bg-sidebar">
-          <SidebarExpandTrigger />
-          <div id="sidebar-header" />
-        </div>
+      <main className=" w-full h-full bg-chat">
+        {/* <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full"> */}
+        <SidebarExpandTrigger />
+        {/* <div id="sidebar-header" /> */}
+        {/* </div> */}
         <Outlet />
       </main>
     </SidebarProvider>
@@ -36,9 +40,29 @@ export default function ChatLayout() {
 function SidebarExpandTrigger() {
   const { state } = useSidebar();
   const isMobile = useIsMobile();
+  const ref = useRef<HTMLButtonElement>(null);
+  useGSAP(() => {
+    if (state === "expanded") {
+      gsap.set(ref.current, {
+        opacity: 0,
+      });
+    } else {
+      gsap.from(ref.current, {
+        duration: 0.6,
+        opacity: 0,
+        x: -200,
+      });
+    }
+  }, [state]);
   return (
     (state === "collapsed" || isMobile) && (
-      <SidebarTrigger iconClassName="size-6" />
+      <SidebarTrigger
+        variant={"outline"}
+        icon={<ChevronRight className="size-5" />}
+        className="absolute size-10 left-0 top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2"
+        ref={ref}
+        iconClassName="size-6"
+      />
     )
   );
 }

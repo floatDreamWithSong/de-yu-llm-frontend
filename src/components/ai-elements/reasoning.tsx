@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { BrainIcon, ChevronDownIcon } from 'lucide-react';
+import { Atom, ChevronDownIcon } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { createContext, memo, useContext, useEffect, useState } from 'react';
 import { Response } from './response';
@@ -119,19 +119,19 @@ export const ReasoningTrigger = memo(
     return (
       <CollapsibleTrigger
         className={cn(
-          'flex items-center gap-2 text-muted-foreground text-sm',
+          'flex items-center gap-2 text-muted-foreground text-sm bg-[#edeeff] rounded-xl p-3',
           className
         )}
         {...props}
       >
         {children ?? (
           <>
-            <BrainIcon className="size-4" />
+            <Atom className="size-4 stroke-[#555aff]" />
             {isStreaming || duration === 0 ? (
-              <p>Thinking...</p>
+              <p>正在思考</p>
             ) : (
               <p>
-                Thought for {duration} {duration === 1 ? 'second' : 'seconds'}
+                已深度思考{duration}秒
               </p>
             )}
             <ChevronDownIcon
@@ -157,7 +157,7 @@ export const ReasoningContent = memo(
   ({ className, children, ...props }: ReasoningContentProps) => (
     <CollapsibleContent
       className={cn(
-        'mt-4 text-sm',
+        'mt-4 text-sm border-l-secondary border-l-4 pl-4',
         'data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in',
         className
       )}

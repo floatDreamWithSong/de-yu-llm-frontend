@@ -4,7 +4,7 @@ dist
 dist-ssr
 *.local
 count.txt
-.env
+*.local
 .nitro
 .tanstack
 .vscode
@@ -12,3 +12,5 @@ count.txt
 docs
 CLAUDE.md
 .claude
+*.txt
+.mock
