@@ -4,6 +4,7 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/store/chat";
 import type { ChatStatus } from "ai";
 import {
   Atom,
@@ -30,6 +31,9 @@ export default function UserPromptTextarea({
 }) {
   const [value, setValue] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
+
+  // 使用 Zustand store 管理深度思考状态
+  const { isDeepThink, toggleDeepThink } = useChatStore();
 
   const handleInput = useCallback(
     (e: React.FormEvent<HTMLSpanElement>) => {
@@ -119,7 +123,11 @@ export default function UserPromptTextarea({
       </div>
       <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
         <div>
-          <PromptInputButton variant={"outline"} className="rounded-full">
+          <PromptInputButton
+            onClick={toggleDeepThink}
+            variant={isDeepThink ? "default" : "outline"}
+            className="rounded-full"
+          >
             <Atom size={16} />
             <span>深度思考</span>
           </PromptInputButton>

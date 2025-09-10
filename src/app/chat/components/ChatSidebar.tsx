@@ -40,11 +40,13 @@ export default function ChatSidebar() {
   const { data: conversationHistory } = useInfiniteQuery({
     queryKey: ["conversationHistory"],
     queryFn: ({ pageParam = 1 }) =>
-      getConversationHistoryList({ page: pageParam, pageSize: 10 }),
+      getConversationHistoryList({
+        page: { page: pageParam, size: 20 },
+      }),
     getNextPageParam: (lastPage, pages) =>
-      lastPage.list.length > 0 ? pages.length + 1 : undefined,
+      lastPage.conversations.length > 0 ? pages.length + 1 : undefined,
     initialPageParam: 1,
-    select: (data) => data.pages.flatMap((page) => page.list),
+    select: (data) => data.pages.flatMap((page) => page.conversations),
   });
 
   return (
@@ -110,10 +112,15 @@ export default function ChatSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.list.map((item) => (
-                  <SidebarMenuItem key={item.conversationId}>
-                    <SidebarMenuButton asChild>
-                      {/* @ts-expect-error tanstack-router */}
-                      <Link to={`/chat/${item.conversationId}`}>
+                  <SidebarMenuItem
+                    key={item.conversationId}
+                    className="flex justify-between"
+                  >
+                    <SidebarMenuButton>
+                      <Link
+                        to={`/chat/$conversationId`}
+                        params={{ conversationId: item.conversationId }}
+                      >
                         <span>{item.brief}</span>
                       </Link>
                     </SidebarMenuButton>

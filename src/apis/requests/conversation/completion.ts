@@ -46,11 +46,15 @@ export const CompletionsOptionSchema = z.object({
 export type CompletionsOption = z.infer<typeof CompletionsOptionSchema>;
 
 export const RequestSchema = z.object({
-  botId: z.string(),
+  botId: z.literal("default"),
   completionsOption: CompletionsOptionSchema,
   conversationId: z.string(),
   messages: z.array(MessageSchema),
-  model: z.string(),
+  model: z.union([
+    z.literal("InnoSpark-R"),
+    z.literal("deyu-default"),
+    z.literal("InnoSpark"),
+  ]),
   replyId: z.union([z.null(), z.string()]).optional(),
 });
 export type Request = z.infer<typeof RequestSchema>;

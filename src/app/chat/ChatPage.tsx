@@ -14,6 +14,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<ChatStatus>("ready");
   const signal = useRef<AbortController | null>(null);
+
   const abortRequest = useCallback(() => {
     if (signal.current) {
       setStatus("ready");

@@ -108,6 +108,7 @@ export default function ConversationPage() {
           message,
           {
             completionsOption: {
+              useDeepThink: true,
               isReplace: isReplace,
             },
           },
@@ -179,7 +180,9 @@ export default function ConversationPage() {
                             className=""
                             isStreaming={status === "streaming"}
                           >
-                            <ReasoningTrigger />
+                            <ReasoningTrigger
+                              isCompleted={message.isCompleteThink}
+                            />
                             <ReasoningContent className="text-[#80808f]">
                               {message.think}
                             </ReasoningContent>

@@ -14,11 +14,25 @@ const BASE_URL = env.VITE_API_BASE_URL;
 const DEFAULT_TIMEOUT = 120000;
 const TOKEN_KEY = "token";
 export const tokenStore = {
-  get: () => localStorage.getItem(TOKEN_KEY) ?? import.meta.env.MODE === 'test' ? "xh-polaris" : undefined,
+  get: () => {
+    if (import.meta.env.MODE === "test") {
+      return "xh-polaris";
+    }
+    const token = localStorage.getItem(TOKEN_KEY);
+    return token ? `Bearer ${token}` : void 0;
+  },
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
   remove: () => localStorage.removeItem(TOKEN_KEY),
 };
-
+export const GlobalHeader = {
+  get: () => {
+    const headers = {
+      "Content-Type": "application/json",
+      [env.VITE_BACKEND_ENV_HEAD]: env.VITE_BACKEND_ENV_VALUE,
+    };
+    return headers;
+  },
+};
 // 通用响应数据格式
 interface ApiResponse<T = unknown> {
   code: number | string;
@@ -38,9 +52,7 @@ function createAxiosInstance(): AxiosInstance {
   const instance = axios.create({
     baseURL: BASE_URL,
     timeout: DEFAULT_TIMEOUT,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: GlobalHeader.get(),
   });
 
   // 请求拦截器 - 自动token装配
@@ -48,7 +60,7 @@ function createAxiosInstance(): AxiosInstance {
     async (config) => {
       const token = tokenStore.get();
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = token;
       }
       if (import.meta.env.DEV) {
         await sleep(1);

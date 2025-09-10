@@ -1,5 +1,8 @@
 import type { Request as CompletionRequest } from "@/apis/requests/conversation/completion";
 import { getConversationDetail } from "@/apis/requests/conversation/detail";
+import { env } from "@/env";
+import { GlobalHeader, tokenStore } from "@/lib/request";
+import { useChatStore } from "@/store/chat";
 import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect } from "react";
 
@@ -36,6 +39,7 @@ export interface ChatMessage {
   role: "user" | "assistant";
   timestamp: Date;
   isStreaming?: boolean;
+  isCompleteThink?: boolean;
 }
 
 export function useStreamCompletion(conversationId: string) {
@@ -44,6 +48,10 @@ export function useStreamCompletion(conversationId: string) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const lastUserMessageId = useRef<string | null>(null);
   const lastAssistantMessageId = useRef<string | null>(null);
+
+  // 使用 Zustand store 获取完成配置
+  const completionConfig = useChatStore((state) => state.completionConfig);
+
   useEffect(() => {
     getConversationDetail({
       conversationId,
@@ -52,13 +60,18 @@ export function useStreamCompletion(conversationId: string) {
         size: 10,
       },
     }).then((data) => {
-      setMessages(data.messageList.map((message) => ({
-        id: message.messageId,
-        content: message.content,
-        think: message.ext.think ?? undefined,
-        role: message.userType === 0 ? "user" : "assistant",
-        timestamp: new Date(message.createTime),
-      })));
+      setMessages(
+        data.messageList
+          .filter((message) => !!message.content)
+          .map((message) => ({
+            id: message.messageId,
+            content: message.content,
+            think: message.ext.think,
+            role: message.userType,
+            timestamp: new Date(message.createTime),
+            isCompleteThink: message.ext.think !== "" && message.content !== "",
+          })),
+      );
     });
   }, [conversationId]);
   const addMessage = useCallback(
@@ -146,10 +159,14 @@ export function useStreamCompletion(conversationId: string) {
         addMessage(content, "user");
 
         const requestData: CompletionRequest = {
-          model: "deyu-default",
+          model: completionConfig.model,
+          botId: completionConfig.botId,
           conversationId,
-          botId: "default",
           ...options,
+          completionsOption: {
+            ...completionConfig.completionsOption,
+            ...options?.completionsOption,
+          },
           messages: [
             {
               content,
@@ -159,25 +176,21 @@ export function useStreamCompletion(conversationId: string) {
               role: "user",
             },
           ],
-          completionsOption: {
-            isRegen: false,
-            withSuggest: false,
-            isReplace: false,
-            useDeepThink: false,
-            stream: true,
-            ...options?.completionsOption,
-          },
         };
 
-        console.log("发送请求:", requestData);
-        const response = await fetch("http://localhost:3001/v1/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const token = tokenStore.get();
+        const response = await fetch(
+          `${env.VITE_API_BASE_URL}/v1/completions`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: token || "",
+              ...GlobalHeader.get(),
+            },
+            body: JSON.stringify(requestData),
+            signal: newAbortController.signal,
           },
-          body: JSON.stringify(requestData),
-          signal: newAbortController.signal,
-        });
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -271,7 +284,13 @@ export function useStreamCompletion(conversationId: string) {
         modifyMessage(aiMessageId, { isStreaming: false });
       }
     },
-    [conversationId, addMessage, modifyMessage, accumulativeMessage],
+    [
+      conversationId,
+      addMessage,
+      modifyMessage,
+      accumulativeMessage,
+      completionConfig,
+    ],
   );
 
   return {

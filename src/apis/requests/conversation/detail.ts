@@ -33,7 +33,9 @@ export const MessageListSchema = z.object({
   replyId: z.union([z.null(), z.string()]),
   sectionId: z.string(),
   status: z.number(),
-  userType: z.number(),
+  userType: z.number().transform((value) => {
+    return value === 2 ? "user" : "assistant";
+  }),
 });
 export type MessageList = z.infer<typeof MessageListSchema>;
 
