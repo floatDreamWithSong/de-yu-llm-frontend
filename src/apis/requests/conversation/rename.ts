@@ -2,8 +2,8 @@ import { request } from "@/lib/request";
 import z from "zod";
 
 const RequestSchema = z.object({
-  conversationID: z.string(),
-  newName: z.string(),
+  conversationId: z.string(),
+  brief: z.string(),
 });
 type Request = z.infer<typeof RequestSchema>;
 

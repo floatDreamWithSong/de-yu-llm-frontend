@@ -47,10 +47,12 @@ function SidebarExpandTrigger() {
         opacity: 0,
       });
     } else {
-      gsap.from(ref.current, {
+      gsap.to(ref.current, {
         duration: 0.6,
-        opacity: 0,
-        x: -200,
+        opacity: 1,
+        x: 0,
+        ease: "circ",
+        delay: 0.2,
       });
     }
   }, [state]);
@@ -59,7 +61,7 @@ function SidebarExpandTrigger() {
       <SidebarTrigger
         variant={"outline"}
         icon={<ChevronRight className="size-5" />}
-        className="absolute z-50 size-10 left-0 top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2"
+        className="transition-none opacity-0 absolute z-50 size-10 left-0 -translate-x-full top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2"
         ref={ref}
         iconClassName="size-6"
       />

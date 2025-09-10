@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BotIcon,
+  Edit,
   LogOut,
   MessageCircleMoreIcon,
+  MoreHorizontal,
   SearchIcon,
   Settings,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,18 +28,32 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getConversationHistoryList } from "@/apis/requests/conversation/history";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  getConversationHistoryList,
+  type Conversation,
+} from "@/apis/requests/conversation/history";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import groupConversationsByDate from "@/utils/date-group";
+import { renameConversation } from "@/apis/requests/conversation/rename";
+import { useState } from "react";
 
 export default function ChatSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [renamingItemId, setRenamingItemId] = useState("");
+  const [tempTitle, setTempTitle] = useState("");
   const { data: conversationHistory } = useInfiniteQuery({
     queryKey: ["conversationHistory"],
     queryFn: ({ pageParam = 1 }) =>
@@ -48,7 +65,73 @@ export default function ChatSidebar() {
     initialPageParam: 1,
     select: (data) => data.pages.flatMap((page) => page.conversations),
   });
+  const renameMutation = useMutation({
+    mutationFn: renameConversation,
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ["conversationHistory"] });
+      type Page = { conversations: Conversation[] };
+      type Data = InfiniteData<Page, number>;
+      const previousData = queryClient.getQueryData<Data>([
+        "conversationHistory",
+      ]);
+      // 更新底层无限列表的 pages 结构
+      queryClient.setQueryData<Data>(["conversationHistory"], (oldData) => {
+        if (!oldData) return oldData as Data | undefined;
+        if (Array.isArray(oldData.pages)) {
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              conversations: page.conversations.map((c) =>
+                c.conversationId === variables.conversationId
+                  ? { ...c, brief: variables.brief }
+                  : c,
+              ),
+            })),
+          };
+        }
+        return oldData;
+      });
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(["conversationHistory"], context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversationHistory"] });
+    },
+  });
 
+  function startRename(conversationId: string, currentTitle: string) {
+    setRenamingItemId(conversationId);
+    setTempTitle(currentTitle);
+  }
+
+  function cancelRename() {
+    setRenamingItemId("");
+    setTempTitle("");
+  }
+
+  function commitRename(conversationId: string) {
+    const nextTitle = tempTitle.trim();
+    if (!nextTitle) {
+      cancelRename();
+      return;
+    }
+    // 如果没有变化则直接退出编辑态
+    const original = (conversationHistory ?? []).find(
+      (c) => c.conversationId === conversationId,
+    );
+    if (original && original.brief === nextTitle) {
+      cancelRename();
+      return;
+    }
+
+    renameMutation.mutate({ conversationId: conversationId, brief: nextTitle });
+    cancelRename();
+  }
   return (
     <Sidebar
       className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow"
@@ -116,14 +199,57 @@ export default function ChatSidebar() {
                     key={item.conversationId}
                     className="flex justify-between"
                   >
-                    <SidebarMenuButton>
-                      <Link
-                        to={`/chat/$conversationId`}
-                        params={{ conversationId: item.conversationId }}
-                      >
-                        <span>{item.brief}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    {renamingItemId === item.conversationId ? (
+                      <Input
+                        autoFocus
+                        value={tempTitle}
+                        onChange={(e) => setTempTitle(e.target.value)}
+                        onBlur={() => commitRename(item.conversationId)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            commitRename(item.conversationId);
+                          }
+                          if (e.key === "Escape") {
+                            e.preventDefault();
+                            cancelRename();
+                          }
+                        }}
+                        className="h-8 px-2"
+                      />
+                    ) : (
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={`/chat/$conversationId`}
+                          params={{ conversationId: item.conversationId }}
+                        >
+                          <span>{item.brief}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    )}
+                    {renamingItemId !== item.conversationId && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <SidebarMenuAction>
+                            <MoreHorizontal />
+                          </SidebarMenuAction>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="right" align="start">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              startRename(item.conversationId, item.brief)
+                            }
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            <span>编辑标题</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem variant="destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>删除对话</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>

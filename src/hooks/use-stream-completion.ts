@@ -3,6 +3,7 @@ import { getConversationDetail } from "@/apis/requests/conversation/detail";
 import { env } from "@/env";
 import { GlobalHeader, tokenStore } from "@/lib/request";
 import { useChatStore } from "@/store/chat";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect } from "react";
 
@@ -51,8 +52,9 @@ export function useStreamCompletion(conversationId: string) {
 
   // 使用 Zustand store 获取完成配置
   const completionConfig = useChatStore((state) => state.completionConfig);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
+    let isUninstalled = false;
     getConversationDetail({
       conversationId,
       page: {
@@ -60,7 +62,7 @@ export function useStreamCompletion(conversationId: string) {
         size: 10,
       },
     }).then((data) => {
-      if (!data.messageList) return;
+      if (isUninstalled || !data.messageList) return;
       setMessages(
         data.messageList
           .filter((message) => !!message.content)
@@ -74,8 +76,10 @@ export function useStreamCompletion(conversationId: string) {
           }))
           .reverse(),
       );
-      
     });
+    return () => {
+      isUninstalled = true;
+    };
   }, [conversationId]);
   const addMessage = useCallback(
     (content: string, role: "user" | "assistant", isStreaming = false) => {
@@ -285,6 +289,7 @@ export function useStreamCompletion(conversationId: string) {
         abortControllerRef.current = null;
         // 完成流式输出
         modifyMessage(aiMessageId, { isStreaming: false });
+        queryClient.invalidateQueries({ queryKey: ["conversationHistory"] });
       }
     },
     [
@@ -293,6 +298,7 @@ export function useStreamCompletion(conversationId: string) {
       modifyMessage,
       accumulativeMessage,
       completionConfig,
+      queryClient,
     ],
   );
 

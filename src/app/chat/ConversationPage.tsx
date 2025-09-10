@@ -36,7 +36,6 @@ import { useEffect, useRef, useState } from "react";
 import MessageEditor, {
   type MessageEditorRef,
 } from "./components/MessageEditor";
-import { useQueryClient } from "@tanstack/react-query";
 gsap.registerPlugin(SplitText);
 
 export default function ConversationPage() {
@@ -45,7 +44,6 @@ export default function ConversationPage() {
     useInitMessageStore();
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
-  const queryClient = useQueryClient()
   const {
     status,
     messages,
@@ -122,12 +120,7 @@ export default function ConversationPage() {
               isReplace: isReplace,
             },
           },
-          () => {
-            queryClient.invalidateQueries({
-              queryKey: ["conversationHistory"],
-            });
-            onSuccess?.();
-          },
+          onSuccess,
         );
       }, 0);
     }
