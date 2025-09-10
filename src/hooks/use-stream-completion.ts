@@ -74,6 +74,7 @@ export function useStreamCompletion(conversationId: string) {
           }))
           .reverse(),
       );
+      
     });
   }, [conversationId]);
   const addMessage = useCallback(

@@ -45,7 +45,7 @@ export default function ConversationPage() {
     useInitMessageStore();
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
-
+  const queryClient = useQueryClient()
   const {
     status,
     messages,
@@ -123,7 +123,7 @@ export default function ConversationPage() {
             },
           },
           () => {
-            useQueryClient().invalidateQueries({
+            queryClient.invalidateQueries({
               queryKey: ["conversationHistory"],
             });
             onSuccess?.();
