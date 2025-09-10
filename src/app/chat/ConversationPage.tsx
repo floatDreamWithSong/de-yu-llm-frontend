@@ -20,7 +20,8 @@ import {
 import { Response } from "@/components/ai-elements/response";
 import { useStreamCompletion } from "@/hooks/use-stream-completion";
 import messageToaster from "@/lib/message";
-import { useParams, useSearch } from "@tanstack/react-router";
+import { useInitMessageStore } from "@/store/initMessage";
+import { useParams } from "@tanstack/react-router";
 import gsap from "gsap";
 import { SplitText } from "gsap/all";
 import {
@@ -35,12 +36,13 @@ import { useEffect, useRef, useState } from "react";
 import MessageEditor, {
   type MessageEditorRef,
 } from "./components/MessageEditor";
+import { useQueryClient } from "@tanstack/react-query";
 gsap.registerPlugin(SplitText);
 
 export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
-  const search = useSearch({ strict: false }) as { initialMessage?: string };
-  const hasProcessedInitialMessage = useRef(false);
+  const { initMessage, hasProcessed, markAsProcessed, clearInitMessage } =
+    useInitMessageStore();
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
 
@@ -55,11 +57,19 @@ export default function ConversationPage() {
   } = useStreamCompletion(conversationId as string);
 
   useEffect(() => {
-    if (search.initialMessage && !hasProcessedInitialMessage.current) {
-      hasProcessedInitialMessage.current = true;
-      sendMessage(search.initialMessage);
+    if (initMessage && !hasProcessed) {
+      markAsProcessed();
+      sendMessage(initMessage);
+      // 发送消息后清除初始消息
+      clearInitMessage();
     }
-  }, [search.initialMessage, sendMessage]);
+  }, [
+    initMessage,
+    hasProcessed,
+    markAsProcessed,
+    clearInitMessage,
+    sendMessage,
+  ]);
 
   const handleRegenerate = () => {
     const messageId = messages.find(
@@ -112,7 +122,12 @@ export default function ConversationPage() {
               isReplace: isReplace,
             },
           },
-          onSuccess,
+          () => {
+            useQueryClient().invalidateQueries({
+              queryKey: ["conversationHistory"],
+            });
+            onSuccess?.();
+          },
         );
       }, 0);
     }

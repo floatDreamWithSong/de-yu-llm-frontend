@@ -60,6 +60,7 @@ export function useStreamCompletion(conversationId: string) {
         size: 10,
       },
     }).then((data) => {
+      if (!data.messageList) return;
       setMessages(
         data.messageList
           .filter((message) => !!message.content)
@@ -70,7 +71,8 @@ export function useStreamCompletion(conversationId: string) {
             role: message.userType,
             timestamp: new Date(message.createTime),
             isCompleteThink: message.ext.think !== "" && message.content !== "",
-          })),
+          }))
+          .reverse(),
       );
     });
   }, [conversationId]);

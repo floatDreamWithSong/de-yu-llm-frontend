@@ -7,7 +7,6 @@ export const createConversation = (abort: AbortController) => {
     method: "POST",
     responseValidator: z.object({
       conversationId: z.string(),
-      success: z.boolean().optional(),
     }),
     signal: abort.signal,
   });

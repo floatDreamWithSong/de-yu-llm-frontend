@@ -2,6 +2,7 @@
 
 import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
+import { useInitMessageStore } from "@/store/initMessage";
 import { useGSAP } from "@gsap/react";
 import { useNavigate } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
@@ -14,6 +15,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<ChatStatus>("ready");
   const signal = useRef<AbortController | null>(null);
+  const { setInitMessage } = useInitMessageStore();
 
   const abortRequest = useCallback(() => {
     if (signal.current) {
@@ -57,13 +59,15 @@ export default function ChatPage() {
         const conversation = await createConversation(signal.current);
         console.log("对话创建成功:", conversation);
 
-        // 跳转到对话页面，并传递初始消息
+        // 将初始消息存储到状态库中
+        setInitMessage(message);
+
+        // 跳转到对话页面
+        onSuccess?.();
         navigate({
           to: "/chat/$conversationId",
           params: { conversationId: conversation.conversationId },
-          search: { initialMessage: message },
         });
-        onSuccess?.();
       } catch (error) {
         console.error("创建对话失败:", error);
       } finally {

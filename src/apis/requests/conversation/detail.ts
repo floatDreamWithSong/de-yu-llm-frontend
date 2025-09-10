@@ -41,7 +41,7 @@ export type MessageList = z.infer<typeof MessageListSchema>;
 
 export const DataSchema = z.object({
   hasMore: z.boolean(),
-  messageList: z.array(MessageListSchema),
+  messageList: z.array(MessageListSchema).nullable(),
   regenList: z.null(),
 });
 
