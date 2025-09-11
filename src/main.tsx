@@ -1,7 +1,7 @@
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-
+import { scan } from "react-scan";
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 
 import "./styles.css";
@@ -9,6 +9,10 @@ import reportWebVitals from "./reportWebVitals.ts";
 import { routeTree } from "./route.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+scan({
+  enabled: true,
+});
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 const router = createRouter({
