@@ -1,8 +1,9 @@
 import { rootRoute } from "@/route";
 import { createRoute } from "@tanstack/react-router";
-import ChatPage from "./ChatPage";
-import ConversationPage from "./ConversationPage";
-import ChatLayout from "./layouts/ChatLayout";
+import { lazy } from "react";
+const ChatPage = lazy(()=>import("./ChatPage"))
+const ChatLayout = lazy(()=>import("./layouts/ChatLayout"))
+const ConversationPage = lazy(()=>import("./ConversationPage"));
 
 const chatRoute = createRoute({
   getParentRoute: () => rootRoute,
