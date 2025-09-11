@@ -15,6 +15,7 @@ const ConversationSchema = z.object({
 });
 const ResponseSchema = z.object({
   conversations: z.array(ConversationSchema),
+  hasMore: z.boolean()
 });
 
 export type Conversation = z.infer<typeof ConversationSchema>;

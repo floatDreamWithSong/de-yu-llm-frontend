@@ -61,7 +61,7 @@ export default function ChatSidebar() {
         page: { page: pageParam, size: 20 },
       }),
     getNextPageParam: (lastPage, pages) =>
-      lastPage.conversations.length > 0 ? pages.length + 1 : undefined,
+      lastPage.hasMore ? pages.length + 1 : undefined,
     initialPageParam: 1,
     select: (data) => data.pages.flatMap((page) => page.conversations),
   });
