@@ -11,7 +11,7 @@ import { Toaster } from "./components/ui/sonner.tsx";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 scan({
-  enabled: true,
+  enabled: false,
 });
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();

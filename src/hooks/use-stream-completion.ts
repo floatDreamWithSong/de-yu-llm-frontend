@@ -63,19 +63,22 @@ export function useStreamCompletion(conversationId: string) {
       },
     }).then((data) => {
       if (isUninstalled || !data.messageList) return;
-      setMessages(
-        data.messageList
-          .filter((message) => !!message.content)
-          .map((message) => ({
-            id: message.messageId,
-            content: message.content,
-            think: message.ext.think,
-            role: message.userType,
-            timestamp: new Date(message.createTime),
-            isCompleteThink: message.ext.think !== "" && message.content !== "",
-          }))
-          .reverse(),
-      );
+      const messages = data.messageList
+        .filter((message) => !!message.content)
+        .map((message) => ({
+          id: message.messageId,
+          content: message.content,
+          think: message.ext.think,
+          role: message.userType,
+          timestamp: new Date(message.createTime),
+          isCompleteThink: message.ext.think !== "" && message.content !== "",
+        }))
+        ;
+      lastUserMessageId.current =
+        messages.find((i) => i.role === "user")?.id ?? null;
+      lastAssistantMessageId.current =
+        messages.find((i) => i.role === "assistant")?.id ?? null;
+      setMessages(messages.reverse());
     });
     return () => {
       isUninstalled = true;
@@ -98,7 +101,7 @@ export function useStreamCompletion(conversationId: string) {
       }
       return newMessage.id;
     },
-    [],
+    []
   );
   const rollbackMessagesTo = useCallback(
     (id: string) => {
@@ -107,15 +110,15 @@ export function useStreamCompletion(conversationId: string) {
         setMessages((prev) => prev.slice(0, index));
       }
     },
-    [messages],
+    [messages]
   );
   const modifyMessage = useCallback(
     (id: string, message: Partial<ChatMessage>) => {
       setMessages((prev) =>
-        prev.map((msg) => (msg.id === id ? { ...msg, ...message } : msg)),
+        prev.map((msg) => (msg.id === id ? { ...msg, ...message } : msg))
       );
     },
-    [],
+    []
   );
 
   const accumulativeMessage = useCallback((id: string, opt: TextContent) => {
@@ -127,8 +130,8 @@ export function useStreamCompletion(conversationId: string) {
               content: (msg.content ?? "") + (opt.text ?? ""),
               think: (msg.think ?? "") + (opt.think ?? ""),
             }
-          : msg,
-      ),
+          : msg
+      )
     );
   }, []);
 
@@ -144,7 +147,7 @@ export function useStreamCompletion(conversationId: string) {
     async (
       content: string,
       options?: DeepPartial<Omit<CompletionRequest, "messages">>,
-      onSuccess?: () => void,
+      onSuccess?: () => void
     ) => {
       if (status.current !== "ready" || !conversationId) return;
 
@@ -196,7 +199,7 @@ export function useStreamCompletion(conversationId: string) {
             },
             body: JSON.stringify(requestData),
             signal: newAbortController.signal,
-          },
+          }
         );
 
         if (!response.ok) {
@@ -247,14 +250,14 @@ export function useStreamCompletion(conversationId: string) {
                 });
                 if (currentType === "chat" && data.message) {
                   const content = JSON.parse(
-                    data.message.content,
+                    data.message.content
                   ) as TextContent;
                   console.log("content", content);
                   if (content.text) {
                     console.log(
                       "accumulativeMessage",
                       aiMessageId,
-                      content.text,
+                      content.text
                     );
                     accumulativeMessage(aiMessageId, { text: content.text });
                   }
@@ -262,7 +265,7 @@ export function useStreamCompletion(conversationId: string) {
                     console.log(
                       "accumulativeMessage",
                       aiMessageId,
-                      content.think,
+                      content.think
                     );
                     accumulativeMessage(aiMessageId, { think: content.think });
                   }
@@ -299,7 +302,7 @@ export function useStreamCompletion(conversationId: string) {
       accumulativeMessage,
       completionConfig,
       queryClient,
-    ],
+    ]
   );
 
   return {

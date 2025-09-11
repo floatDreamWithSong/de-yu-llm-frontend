@@ -1,3 +1,9 @@
+import AuthWrapper from "./components/AuthWrapper";
+
 export default function RegisterPage() {
-  return <div>2</div>;
+  return (
+    <AuthWrapper>
+      <div>2</div>
+    </AuthWrapper>
+  );
 }

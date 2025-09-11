@@ -185,6 +185,7 @@ export default function ConversationPage() {
                       <MessageContent>
                         {message.think && (
                           <Reasoning
+                            defaultOpen={!message.isCompleteThink}
                             className=""
                             isStreaming={status === "streaming"}
                           >
