@@ -194,7 +194,7 @@ export default function ConversationPage() {
   return (
     <div className="max-w-[1000px] mx-auto p-6 relative size-full rounded-lg">
       <div className="flex flex-col h-full">
-        <Conversation id="list-container">
+        <Conversation id="list-container" className="style__scoller-none">
           <ConversationContent className="relative">
             {!initMessage && !hasProcessed ? (
               isFetchingEarlier ? (

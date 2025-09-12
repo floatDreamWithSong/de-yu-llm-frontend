@@ -50,7 +50,7 @@ export interface ChatMessage {
   isCompleteThink?: boolean;
   feedback?: number;
 }
-const MESSAGE_BATCH_SIZE = 6
+const MESSAGE_BATCH_SIZE = 30;
 
 export function useStreamCompletion(conversationId: string) {
   const status = useRef<ChatStatus>("ready");
@@ -60,7 +60,7 @@ export function useStreamCompletion(conversationId: string) {
   const lastAssistantMessageId = useRef<string | null>(null);
   // 使用 Zustand store 获取完成配置
   const completionConfig = useChatStore((state) => state.completionConfig);
-  const {initMessage, hasProcessed} = useInitMessageStore()
+  const { initMessage, hasProcessed } = useInitMessageStore();
   const queryClient = useQueryClient();
 
   // 当 conversationId 变化时，重置所有状态
@@ -76,7 +76,10 @@ export function useStreamCompletion(conversationId: string) {
     }
     // 清除之前的查询缓存，确保新会话的数据是干净的
     queryClient.removeQueries({
-      queryKey: [ClientQueryKeys.consversation.conversationDetail, conversationId],
+      queryKey: [
+        ClientQueryKeys.consversation.conversationDetail,
+        conversationId,
+      ],
     });
   }, [conversationId, queryClient]);
 
@@ -109,9 +112,9 @@ export function useStreamCompletion(conversationId: string) {
     staleTime: -1,
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.cursor : null),
     initialPageParam: null,
-    enabled: !!conversationId && (!initMessage && !hasProcessed),
+    enabled: !!conversationId && !initMessage && !hasProcessed,
     select: (data) => {
-      console.log(conversationId, initMessage, hasProcessed)
+      console.log(conversationId, initMessage, hasProcessed);
       // 将更早的消息插入到现有消息的前面
       const earlierMessages = data.pages
         .flatMap((page) => page.messageList ?? [])
@@ -128,17 +131,32 @@ export function useStreamCompletion(conversationId: string) {
         .reverse();
       return earlierMessages;
     },
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
   // 当获取到更早的消息时，更新消息状态
   useEffect(() => {
     if (earlierMessagesData && earlierMessagesData.length > 0) {
-      setMessages(prevMessages => {
+      setMessages((prevMessages) => {
         // 检查是否已经包含这些消息，避免重复添加
-        const existingIds = new Set(prevMessages.map(msg => msg.id));
-        const newMessages = earlierMessagesData.filter(msg => !existingIds.has(msg.id));
+        const existingIds = new Set(prevMessages.map((msg) => msg.id));
+        const newMessages = earlierMessagesData.filter(
+          (msg) => !existingIds.has(msg.id)
+        );
         if (newMessages.length > 0) {
+          if (!prevMessages.length) {
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              const el = newMessages[i];
+              if (el.role === "user") {
+                lastUserMessageId.current = el.id;
+              } else if (el.role === "assistant") {
+                lastAssistantMessageId.current = el.id;
+              }
+              if (lastAssistantMessageId.current && lastUserMessageId.current) {
+                break;
+              }
+            }
+          }
           return [...newMessages, ...prevMessages];
         }
         return prevMessages;
@@ -228,7 +246,7 @@ export function useStreamCompletion(conversationId: string) {
 
       try {
         // 添加用户消息
-        addMessage(`${content}1`, "user");
+        addMessage(content, "user");
 
         const requestData: CompletionRequest = {
           model: completionConfig.model,

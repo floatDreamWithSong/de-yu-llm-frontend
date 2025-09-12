@@ -86,7 +86,7 @@ export default function ChatSidebar() {
       const cursor = pageParam ?? undefined;
       if (!seacherQueryKey) {
         return getConversationHistoryList({
-          page: { size: 5, cursor },
+          page: { size: 15, cursor },
         });
       }
       return queryHistory({
@@ -277,7 +277,7 @@ export default function ChatSidebar() {
     deleteMutation.mutate({ conversationId: id });
   }
   return (
-    <Sidebar className="px-10 py-20 ease-out duration-400" variant="floating">
+    <Sidebar className="px-10 py-20 ease-out duration-400 style__scoller" variant="floating">
       <SidebarHeader className="space-y-4 relative">
       <img
           src="/chat/bot.png"
