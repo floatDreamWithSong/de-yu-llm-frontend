@@ -2,11 +2,8 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   Edit,
   LoaderCircle,
-  LogOut,
   MessageCircleMoreIcon,
   MoreHorizontal,
-  SearchIcon,
-  Settings,
   AlignJustify,
   Trash2,
   BookOpenText,
@@ -20,11 +17,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -59,11 +54,11 @@ export default function ChatSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
-  const matchRouteId = location.pathname.startsWith("/chat/agent")
-    ? "agent"
-    : location.pathname.startsWith("/chat/database")
-      ? "database"
-      : "chat";
+  // const matchRouteId = location.pathname.startsWith("/chat/agent")
+  //   ? "agent"
+  //   : location.pathname.startsWith("/chat/database")
+  //     ? "database"
+  //     : "chat";
   const [renamingItemId, setRenamingItemId] = useState("");
   const [tempTitle, setTempTitle] = useState("");
   const [seacherQueryKey, setSearchQueryKey] = useState("");
@@ -325,7 +320,6 @@ export default function ChatSidebar() {
             size={"lg"}
             variant={"outline"}
             onClick={() => {
-              // @ts-expect-error tanstack-router
               navigate({ to: "/chat/database" });
             }}
           >
