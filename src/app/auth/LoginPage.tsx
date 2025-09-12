@@ -54,8 +54,8 @@ export default function LoginPage() {
       {!isVerificationStage ? (
         <AuthWrapper>
           <div className="grid grid-rows-3 h-full items-center gap-y-10">
-            <h3 className="text-2xl font-bold row-span-1 w-full text-center">
-              验证登录
+            <h3 className="text-3xl font-bold text-primary row-span-1 w-full text-center">
+              欢迎登录
             </h3>
             <Form {...form}>
               <form
@@ -91,7 +91,7 @@ export default function LoginPage() {
                     }
                   />
                   <Label className="gap-0.5">
-                    已阅读并同意 启创 的
+                    我已阅读并同意
                     <Link
                       to="."
                       className="text-black font-bold underline-offset-4 hover:underline"
