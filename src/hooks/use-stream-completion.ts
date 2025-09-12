@@ -176,9 +176,19 @@ export function useStreamCompletion(conversationId: string) {
   }, [earlierMessagesData]);
 
   const addMessage = useCallback(
-    (content: string, role: "user" | "assistant", isStreaming = false) => {
+    ({
+      role,
+      content = "",
+      isStreaming = true,
+      id = Math.random().toString(36).substring(2, 9),
+    }: {
+      role: "user" | "assistant";
+      content?: string;
+      isStreaming?: boolean;
+      id?: string;
+    }) => {
       const newMessage: ChatMessage = {
-        id: Math.random().toString(36).substring(2, 9),
+        id,
         content,
         role,
         timestamp: -1,
@@ -257,7 +267,7 @@ export function useStreamCompletion(conversationId: string) {
 
       try {
         // 添加用户消息
-        addMessage(content, "user");
+        addMessage({ content, role: "user" });
 
         const requestData: CompletionRequest = {
           model: completionConfig.model,
@@ -361,7 +371,10 @@ export function useStreamCompletion(conversationId: string) {
                 } else if (currentType === "meta") {
                   const data = _data as SSEMeta;
                   if (!aiMessageId) {
-                    aiMessageId = addMessage(data.messageId, "assistant", true);
+                    aiMessageId = addMessage({
+                      id: data.messageId,
+                      role: "assistant",
+                    });
                   }
                 } else if (currentType === "model") {
                   const data = _data as SSEModel;
