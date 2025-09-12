@@ -1,12 +1,7 @@
 import z from "zod";
 import { ConversationSchema } from "./history";
 import { request } from "@/lib/request";
-
-export const PageSchema = z.object({
-  cursor: z.number().optional(),
-  size: z.number(),
-});
-export type Page = z.infer<typeof PageSchema>;
+import { PageSchema } from "./schema";
 
 export const RequestSchema = z.object({
   key: z.string(),
@@ -16,7 +11,7 @@ export const RequestSchema = z.object({
 export const ResponseSchema = z.object({
   conversations: z.array(ConversationSchema),
   hasMore: z.boolean(),
-  cursor: z.number()
+  cursor: z.string()
 });
 
 export function queryHistory(data: z.infer<typeof RequestSchema>) {
