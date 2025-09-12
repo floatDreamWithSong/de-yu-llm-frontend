@@ -34,7 +34,18 @@ export interface SSEDataPayload {
   messageIndex: number;
   botId: string;
 }
-
+export interface SSEMeta {
+  messageId: string;
+  conversationId: string;
+  sectionId: string;
+  messageIndex: number;
+  conversationType: number;
+}
+export interface SSEModel {
+  model: string;
+  botId: string;
+  botName: string;
+}
 // 如果 content 里是 {text: string}，可再定义一个解析后的结构
 export interface TextContent {
   text?: string;
@@ -319,16 +330,14 @@ export function useStreamCompletion(conversationId: string) {
               if (dataStr.trim() === "{}") continue;
 
               try {
-                const data = JSON.parse(dataStr) as SSEDataPayload;
-                if (!aiMessageId) {
-                  aiMessageId = addMessage(data.replyId, "assistant", true);
-                }
+                const _data = JSON.parse(dataStr);
                 // console.log("收到流式数据:", {
                 //   id: currentId,
                 //   event: currentType,
                 //   data,
                 // });
-                if (currentType === "chat" && data.message) {
+                if (currentType === "chat") {
+                  const data = _data as SSEDataPayload;
                   const content = JSON.parse(
                     data.message.content
                   ) as TextContent;
@@ -349,6 +358,14 @@ export function useStreamCompletion(conversationId: string) {
                     // );
                     accumulativeMessage(aiMessageId, { think: content.think });
                   }
+                } else if (currentType === "meta") {
+                  const data = _data as SSEMeta;
+                  if (!aiMessageId) {
+                    aiMessageId = addMessage(data.messageId, "assistant", true);
+                  }
+                } else if (currentType === "model") {
+                  const data = _data as SSEModel;
+                  console.log(data);
                 }
               } catch (e) {
                 console.error("解析数据失败:", e, dataStr);
