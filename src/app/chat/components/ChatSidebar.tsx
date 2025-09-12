@@ -194,6 +194,61 @@ export default function ChatSidebar() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteConversation,
+    onMutate: async (variables: { conversationId: string }) => {
+      await queryClient.cancelQueries({
+        queryKey: [ClientQueryKeys.consversation.conversationHistory],
+      });
+
+      type Page = { conversations: Conversation[] };
+      type Data = InfiniteData<Page, number>;
+      const previousData = queryClient.getQueryData<Data>([
+        ClientQueryKeys.consversation.conversationHistory,
+      ]);
+
+      // 如果当前正处于被删除的会话，立即跳回 /chat
+      if (location.pathname.includes(variables.conversationId)) {
+        reset();
+        navigate({ to: "/chat" });
+      }
+
+      queryClient.setQueryData<Data>(
+        [ClientQueryKeys.consversation.conversationHistory],
+        (oldData) => {
+          if (!oldData) return oldData;
+          if (Array.isArray(oldData.pages)) {
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) => ({
+                ...page,
+                conversations: page.conversations.filter(
+                  (c) => c.conversationId !== variables.conversationId,
+                ),
+              })),
+            };
+          }
+          return oldData;
+        },
+      );
+
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          [ClientQueryKeys.consversation.conversationHistory],
+          context.previousData,
+        );
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: [ClientQueryKeys.consversation.conversationHistory],
+      });
+    },
+  });
+
   function startRename(conversationId: string, currentTitle: string) {
     setRenamingItemId(conversationId);
     setTempTitle(currentTitle);
@@ -223,11 +278,7 @@ export default function ChatSidebar() {
     cancelRename();
   }
   function handleDeleteConversation(id: string) {
-    deleteConversation({
-      conversationId: id,
-    }).then(() => {
-      conversationHistory;
-    });
+    deleteMutation.mutate({ conversationId: id });
   }
   return (
     <Sidebar
