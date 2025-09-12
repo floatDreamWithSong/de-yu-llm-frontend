@@ -86,11 +86,11 @@ export function useStreamCompletion(conversationId: string) {
     isFetchingNextPage: isFetchingEarlier,
     data: earlierMessagesData,
   } = useInfiniteQuery<
-    { cursor: number; hasMore: boolean; messageList: MessageList[] | null },
+    { cursor: string; hasMore: boolean; messageList: MessageList[] | null },
     Error,
     ChatMessage[],
     [string, string],
-    number | null
+    string | null
   >({
     queryKey: [
       ClientQueryKeys.consversation.conversationDetail,
@@ -275,7 +275,7 @@ export function useStreamCompletion(conversationId: string) {
 
         const decoder = new TextDecoder();
         let buffer = "";
-        let currentId = 0;
+        // let currentId = 0;
         let currentType: StreamChunk["event"] = "meta";
         status.current = "streaming";
         onSuccess?.();
@@ -289,7 +289,7 @@ export function useStreamCompletion(conversationId: string) {
 
           for (const line of lines) {
             if (line.startsWith("id: ")) {
-              currentId = Number.parseInt(line.substring(4), 10);
+              // currentId = Number.parseInt(line.substring(4), 10);
               continue;
             }
             if (line.startsWith("event: ")) {

@@ -76,11 +76,11 @@ export default function ChatSidebar() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<
-    { conversations: Conversation[]; cursor: number; hasMore: boolean },
+    { conversations: Conversation[]; cursor: string; hasMore: boolean },
     Error,
     Conversation[],
     [string, string],
-    number | null
+    string | null
   >({
     queryKey: [
       ClientQueryKeys.consversation.conversationHistory,
