@@ -6,7 +6,7 @@ import type {
 } from "axios";
 import axios from "axios";
 import z from "zod";
-import messageToaster from "@/lib/message";
+import {toast} from "sonner";
 import { env } from "@/env";
 
 // 基础配置
@@ -101,7 +101,7 @@ function createAxiosInstance(): AxiosInstance {
           window.location.href = "/auth";
         }
         const errmsg = payload.msg || "请求失败";
-        messageToaster.error(errmsg);
+        toast.error(errmsg);
         throw new Error(errmsg);
       }
 
@@ -144,7 +144,7 @@ function createAxiosInstance(): AxiosInstance {
       ) {
         errorMessage += `: ${error.response.data.msg}`;
       }
-      messageToaster.error(errorMessage);
+      toast.error(errorMessage);
       console.error(error);
       return Promise.reject(new Error(errorMessage));
     },
@@ -194,7 +194,7 @@ export async function request<T extends z.ZodSchema>(
     return result.data;
   } catch (error) {
     console.error(error);
-    messageToaster.error(error instanceof Error ? error.message : "未知错误");
+    toast.error(error instanceof Error ? error.message : "未知错误");
     throw error instanceof Error ? error : new Error("未知错误");
   }
 }

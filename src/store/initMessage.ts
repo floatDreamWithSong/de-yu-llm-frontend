@@ -27,7 +27,6 @@ export const useInitMessageStore = create<InitMessageState>((set) => ({
   clearInitMessage: () => {
     set({
       initMessage: null,
-      hasProcessed: false,
     });
   },
 

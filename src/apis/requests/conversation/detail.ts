@@ -2,8 +2,8 @@ import { request } from "@/lib/request";
 import z from "zod";
 
 export const PageSchema = z.object({
-  page: z.number(),
   size: z.number(),
+  cursor: z.number().optional()
 });
 export type Page = z.infer<typeof PageSchema>;
 
@@ -42,7 +42,8 @@ export type MessageList = z.infer<typeof MessageListSchema>;
 export const DataSchema = z.object({
   hasMore: z.boolean(),
   messageList: z.array(MessageListSchema).nullable(),
-  regenList: z.null(),
+  regenList: z.array(MessageListSchema).nullable(),
+  cursor: z.number()
 });
 
 export function getConversationDetail(data: z.infer<typeof RequestSchema>) {

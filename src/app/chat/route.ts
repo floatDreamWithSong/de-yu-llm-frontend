@@ -1,9 +1,9 @@
 import { rootRoute } from "@/route";
-import { createRoute } from "@tanstack/react-router";
+import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 import { lazy } from "react";
-const ChatPage = lazy(()=>import("./ChatPage"))
-const ChatLayout = lazy(()=>import("./layouts/ChatLayout"))
-const ConversationPage = lazy(()=>import("./ConversationPage"));
+const ChatPage = lazy(() => import("./ChatPage"));
+const ChatLayout = lazy(() => import("./layouts/ChatLayout"));
+const ConversationPage = lazy(() => import("./ConversationPage"));
 
 const chatRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -23,9 +23,23 @@ const conversationRoute = createRoute({
   component: ConversationPage,
 });
 
+const agenrRoute = createRoute({
+  path: "/agent",
+  getParentRoute: () => chatRoute,
+  component: lazyRouteComponent(() => import("./agent/AgentPage")),
+});
+
+const databaseRoute = createRoute({
+  path: "/database",
+  getParentRoute: () => chatRoute,
+  component: lazyRouteComponent(() => import("./database/DatabasePage")),
+});
+
 const chatRouteTree = chatRoute.addChildren([
   chatIndexRoute,
   conversationRoute,
+  agenrRoute,
+  databaseRoute
 ]);
 
 export default chatRouteTree;

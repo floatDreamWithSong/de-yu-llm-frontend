@@ -19,11 +19,9 @@ import {
 } from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
 import { useStreamCompletion } from "@/hooks/use-stream-completion";
-import messageToaster from "@/lib/message";
+import { toast } from "sonner";
 import { useInitMessageStore } from "@/store/initMessage";
 import { useParams } from "@tanstack/react-router";
-import gsap from "gsap";
-import { SplitText } from "gsap/all";
 import {
   Copy,
   LoaderCircle,
@@ -36,7 +34,7 @@ import { useEffect, useRef, useState } from "react";
 import MessageEditor, {
   type MessageEditorRef,
 } from "./components/MessageEditor";
-gsap.registerPlugin(SplitText);
+import { useDebounceEffect } from "ahooks";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
@@ -44,6 +42,8 @@ export default function ConversationPage() {
     useInitMessageStore();
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
+  const previousMessageIdRef = useRef<string | null>(null);
+
   const {
     status,
     messages,
@@ -51,15 +51,24 @@ export default function ConversationPage() {
     lastAssistantMessageId,
     lastUserMessageId,
     abortRequest,
+    handleFeedback,
     rollbackMessagesTo,
+    fetchEarlier,
+    hasMoreEarlier,
+    isFetchingEarlier,
   } = useStreamCompletion(conversationId as string);
 
   useEffect(() => {
     if (initMessage && !hasProcessed) {
       markAsProcessed();
-      sendMessage(initMessage);
-      // 发送消息后清除初始消息
+      console.log("发送消息", initMessage, hasProcessed);
+      const message = initMessage;
       clearInitMessage();
+      sendMessage(message);
+      setTimeout(() => {
+        console.log("post 发送消息", initMessage, hasProcessed);
+      });
+      // 发送消息后清除初始消息
     }
   }, [
     initMessage,
@@ -68,7 +77,6 @@ export default function ConversationPage() {
     clearInitMessage,
     sendMessage,
   ]);
-
   const handleRegenerate = () => {
     const messageId = messages.find(
       (message) => message.id === lastUserMessageId.current,
@@ -127,17 +135,82 @@ export default function ConversationPage() {
   };
 
   const handleCopy = (message: string) => {
-    messageToaster.success("复制成功");
+    toast.success("复制成功");
     navigator.clipboard.writeText(message);
   };
 
+  // 顶部哨兵：当最上方消息触达到视图顶端时，加载更早消息
+  const topSentinelRef = useRef<HTMLDivElement | null>(null);
+  useDebounceEffect(
+    () => {
+      const el = topSentinelRef.current;
+      if (!el) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const first = entries[0];
+          console.log(first.isIntersecting, hasMoreEarlier);
+          if (first.isIntersecting && hasMoreEarlier && !isFetchingEarlier) {
+            document
+              .querySelector("#list-container")
+              ?.children[0]?.scrollTo(0, 32);
+            fetchEarlier();
+          }
+        },
+        { root: null, threshold: 0 },
+      );
+      observer.observe(el);
+      return () => observer.disconnect();
+    },
+    [fetchEarlier, hasMoreEarlier, isFetchingEarlier],
+    {
+      wait: 800,
+    },
+  );
+  useEffect(() => {
+    const el = topSentinelRef.current;
+    if (!el) return;
+    if (messages.length) {
+      const currentId = `mid-${messages[0].id}`;
+      if (!previousMessageIdRef.current) {
+        previousMessageIdRef.current = currentId;
+      }
+      console.log("现在最新的消息", currentId);
+      const previousId = previousMessageIdRef.current;
+      if (previousId === currentId) {
+        return;
+      }
+      console.log("之前的消息", previousId);
+      const previousNode = document.getElementById(previousId);
+      console.log(previousNode);
+      if (!previousNode) {
+        return;
+      }
+      const scrooler = document.querySelector("#list-container")?.children[0];
+      console.log("移动到", previousNode?.offsetTop);
+      scrooler?.scrollTo(0, previousNode?.offsetTop);
+      previousMessageIdRef.current = currentId;
+    }
+  }, [messages]);
   return (
     <div className="max-w-[1000px] mx-auto p-6 relative size-full rounded-lg">
       <div className="flex flex-col h-full">
-        <Conversation>
-          <ConversationContent>
+        <Conversation id="list-container">
+          <ConversationContent className="relative">
+            {!initMessage && !hasProcessed ? (
+              isFetchingEarlier ? (
+                <div className="absolute w-full justify-center flex py-4">
+                  <LoaderCircle className="animate-spin duration-500 stroke-primary" />
+                </div>
+              ) : (
+                <div ref={topSentinelRef} className="w-full p-1" />
+              )
+            ) : null}
             {messages.map((message) => (
-              <Message key={message.id} from={message.role}>
+              <Message
+                id={`mid-${message.id}`}
+                key={message.id}
+                from={message.role}
+              >
                 {message.role === "user" ? (
                   message.id !== lastUserMessageId.current || !isReplace ? (
                     <div className="flex flex-col items-end">
@@ -176,9 +249,9 @@ export default function ConversationPage() {
                   <div className="flex gap-3">
                     <div>
                       <MessageAvatar
-                        src="/logo.png"
+                        src="/logo.svg"
                         className="order-1"
-                        name="德育班主任"
+                        name="启创"
                       />
                     </div>
                     <div className="flex flex-col bg-white style__shallow-shadow rounded-3xl">
@@ -220,12 +293,48 @@ export default function ConversationPage() {
                               >
                                 <RefreshCcw className="size-4" />
                               </Action>
-                              <Action label="Like">
-                                <ThumbsUpIcon className="size-4" />
-                              </Action>
-                              <Action label="Dislike">
-                                <ThumbsDownIcon className="size-4" />
-                              </Action>
+                              {message.feedback === 1 ? (
+                                <Action
+                                  onClick={handleFeedback.bind(null, {
+                                    action: 0,
+                                    messageId: message.id,
+                                  })}
+                                  label="Like"
+                                >
+                                  <ThumbsUpIcon className="size-4 fill-primary" />
+                                </Action>
+                              ) : message.feedback === 2 ? (
+                                <Action
+                                  onClick={handleFeedback.bind(null, {
+                                    action: 0,
+                                    messageId: message.id,
+                                  })}
+                                  label="DisLike"
+                                >
+                                  <ThumbsDownIcon className="size-4 fill-primary" />
+                                </Action>
+                              ) : (
+                                <>
+                                  <Action
+                                    onClick={handleFeedback.bind(null, {
+                                      action: 1,
+                                      messageId: message.id,
+                                    })}
+                                    label="Like"
+                                  >
+                                    <ThumbsUpIcon className="size-4" />
+                                  </Action>
+                                  <Action
+                                    onClick={handleFeedback.bind(null, {
+                                      action: 2,
+                                      messageId: message.id,
+                                    })}
+                                    label="Dislike"
+                                  >
+                                    <ThumbsDownIcon className="size-4" />
+                                  </Action>
+                                </>
+                              )}
                             </Actions>
                           )}
                       </MessageContent>

@@ -42,7 +42,7 @@ function SidebarExpandTrigger() {
   const isMobile = useIsMobile();
   const ref = useRef<HTMLButtonElement>(null);
   useGSAP(() => {
-    if (state === "expanded") {
+    if (state === "expanded" && !isMobile) {
       gsap.set(ref.current, {
         opacity: 0,
       });
@@ -55,7 +55,7 @@ function SidebarExpandTrigger() {
         delay: 0.2,
       });
     }
-  }, [state]);
+  }, [state,isMobile]);
   return (
     (state === "collapsed" || isMobile) && (
       <SidebarTrigger
