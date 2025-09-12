@@ -1,6 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  BotIcon,
   Edit,
   LoaderCircle,
   LogOut,
@@ -8,7 +7,9 @@ import {
   MoreHorizontal,
   SearchIcon,
   Settings,
+  AlignJustify,
   Trash2,
+  BookOpenText,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -128,7 +129,7 @@ export default function ChatSidebar() {
       {
         root: scrollContainerRef.current,
         threshold: 0.1,
-      },
+      }
     );
 
     observer.observe(sentinel);
@@ -143,7 +144,7 @@ export default function ChatSidebar() {
         queryKey: [ClientQueryKeys.consversation.conversationHistory],
       });
     },
-    [queryClient],
+    [queryClient]
   );
   const renameMutation = useMutation({
     mutationFn: renameConversation,
@@ -169,13 +170,13 @@ export default function ChatSidebar() {
                 conversations: page.conversations.map((c) =>
                   c.conversationId === variables.conversationId
                     ? { ...c, brief: variables.brief }
-                    : c,
+                    : c
                 ),
               })),
             };
           }
           return oldData;
-        },
+        }
       );
       return { previousData };
     },
@@ -183,7 +184,7 @@ export default function ChatSidebar() {
       if (context?.previousData) {
         queryClient.setQueryData(
           [ClientQueryKeys.consversation.conversationHistory],
-          context.previousData,
+          context.previousData
         );
       }
     },
@@ -223,13 +224,13 @@ export default function ChatSidebar() {
               pages: oldData.pages.map((page) => ({
                 ...page,
                 conversations: page.conversations.filter(
-                  (c) => c.conversationId !== variables.conversationId,
+                  (c) => c.conversationId !== variables.conversationId
                 ),
               })),
             };
           }
           return oldData;
-        },
+        }
       );
 
       return { previousData };
@@ -238,7 +239,7 @@ export default function ChatSidebar() {
       if (context?.previousData) {
         queryClient.setQueryData(
           [ClientQueryKeys.consversation.conversationHistory],
-          context.previousData,
+          context.previousData
         );
       }
     },
@@ -267,7 +268,7 @@ export default function ChatSidebar() {
     }
     // 如果没有变化则直接退出编辑态
     const original = (conversationHistory ?? []).find(
-      (c) => c.conversationId === conversationId,
+      (c) => c.conversationId === conversationId
     );
     if (original && original.brief === nextTitle) {
       cancelRename();
@@ -281,67 +282,55 @@ export default function ChatSidebar() {
     deleteMutation.mutate({ conversationId: id });
   }
   return (
-    <Sidebar
-      className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow"
-      variant="inset"
-    >
-      <SidebarHeader className="space-y-4">
-        <div className="flex items-center justify-around px-2 gap-2">
+    <Sidebar className="px-10 py-20 ease-out duration-400" variant="floating">
+      <SidebarHeader className="space-y-4 relative">
+      <img
+          src="/chat/bot.png"
+          alt="bot"
+          className="absolute left-2 h-[5.6rem] top-0 -translate-y-7/12"
+        />
+        <div className="flex items-center justify-around px-2 gap-2 pt-10">
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="logo" />
             <h2 className="text-primary font-semibold text-2xl">
-              启创·<span className="text-xl">InnoSpark</span>
+              张江高科 <strong>·</strong> 高科芯
             </h2>
           </div>
           {state === "expanded" && (
             <SidebarTrigger
               className="self-end"
-              icon={<img src="/collapse.svg" alt="collapse" />}
+              icon={<AlignJustify className="stroke-primary size-8" />}
             />
           )}
         </div>
         <div className="px-3 space-y-4 flex flex-col my-6">
           <Button
             className={cn([
-              "rounded-full text-lg ",
-              matchRouteId !== "chat" ? "bg-gray-100 text-[#545469]" : "",
+              "rounded-full text-lg",
+              // matchRouteId !== "chat" ? "bg-gray-100 text-[#545469]" : "",
             ])}
             size={"lg"}
-            variant={"secondary"}
+            variant={"default"}
             onClick={() => {
               navigate({ to: "/chat" });
             }}
           >
-            <MessageCircleMoreIcon className="stroke-2 size-5" />
+            <MessageCircleMoreIcon className="stroke-2 size-6" />
             开始对话
           </Button>
           <Button
             className={cn([
-              "rounded-full text-lg ",
-              matchRouteId !== "agent" ? "bg-gray-100 text-[#545469]" : "",
+              "rounded-full text-lg border-2 border-primary",
+              // matchRouteId !== "database" ? "bg-gray-100 text-[#545469]" : "",
             ])}
             size={"lg"}
-            variant={"secondary"}
+            variant={"outline"}
             onClick={() => {
-              navigate({ to: "/chat/agent" });
-            }}
-          >
-            <BotIcon className="stroke-2 size-5" />
-            智能助手
-          </Button>
-          <Button
-            className={cn([
-              "rounded-full text-lg ",
-              matchRouteId !== "database" ? "bg-gray-100 text-[#545469]" : "",
-            ])}
-            size={"lg"}
-            variant={"secondary"}
-            onClick={() => {
+              // @ts-expect-error tanstack-router
               navigate({ to: "/chat/database" });
             }}
           >
-            <MessageCircleMoreIcon className="stroke-2 size-5" />
-            <div className="mr-4">知识库</div>
+            <BookOpenText className="stroke-2 stroke-primary size-6" />
+            <div className="mr-4 text-primary">知识宝库</div>
           </Button>
         </div>
       </SidebarHeader>
@@ -410,7 +399,7 @@ export default function ChatSidebar() {
                               <DropdownMenuItem
                                 onClick={handleDeleteConversation.bind(
                                   null,
-                                  item.conversationId,
+                                  item.conversationId
                                 )}
                                 variant="destructive"
                               >
@@ -455,11 +444,16 @@ export default function ChatSidebar() {
           value={seacherQueryKey}
           onChange={handleChangeSearchKey}
           placeholder="搜索..."
-          className="p-5 pr-10 rounded-full"
+          className="p-5 pr-14 rounded-full border-2 border-primary"
         />
-        <SearchIcon className="size-4 absolute right-4 top-1/2 -translate-y-1/2" />
+        {/* <SearchIcon className="size-4 absolute right-4 top-1/2 -translate-y-1/2" /> */}
+        <img
+          className="size-13 absolute right-0 top-1/2 translate-x-1 -translate-y-1/2"
+          src="/chat/search.png"
+          alt="搜索"
+        />
       </div>
-      <Separator />
+      {/* <Separator />
       <SidebarFooter className="flex flex-row justify-between items-center p-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -470,7 +464,7 @@ export default function ChatSidebar() {
           <DropdownMenuContent className="ml-2">
             {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
-            <DropdownMenuItem>
+            {/* <DropdownMenuItem>
               <LogOut className="size-4" />
               退出登录
             </DropdownMenuItem>
@@ -483,7 +477,7 @@ export default function ChatSidebar() {
           width={40}
           height={40}
         />
-      </SidebarFooter>
+      </SidebarFooter> */}
     </Sidebar>
   );
 }

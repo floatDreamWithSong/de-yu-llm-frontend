@@ -3,13 +3,43 @@
 import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
 import { useInitMessageStore } from "@/store/initMessage";
-import { useGSAP } from "@gsap/react";
 import { useNavigate } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
-import gsap from "gsap";
-import SplitText from "gsap/SplitText";
 import { useCallback, useRef, useState } from "react";
-gsap.registerPlugin(SplitText);
+import AgentCard from "./components/AgentCard";
+const cardList = [
+  {
+    name: "润心桥",
+    description: "读懂班级里的每一个独特，让关怀如期而至。——您专注播种，我默默耕耘。班主任的专属智慧伙伴，贴心翻译成长的密语，让心与心的对话自然发生。",
+    imgUrl: "/chat/agent-1.png",
+  },
+  {
+    name: "引航号",
+    description: "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
+    imgUrl: "/chat/agent-2.png",
+  },
+  {
+    name: "解忧铺",
+    description: "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
+    imgUrl: "/chat/agent-3.png",
+  },
+  {
+    name: "慧育港",
+    description: "为德育工作者点亮前行的灯塔。这里有智能方案、资源推荐，让每一次德育活动都散发星光——让我们一起把教育做得更有温度。",
+    imgUrl: "/chat/agent-4.png",
+  },
+  {
+    name: "育智云",
+    description: "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
+    imgUrl: "/chat/agent-5.png",
+  },
+  {
+    name: "暖心阁",
+    description:
+      "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
+      imgUrl: "/chat/agent-6.png",
+  },
+];
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -23,31 +53,6 @@ export default function ChatPage() {
       signal.current.abort();
       signal.current = null;
     }
-  }, []);
-
-  useGSAP(() => {
-    const modelTitle = new SplitText(".model-title", {
-      type: "chars",
-    });
-    gsap.from(modelTitle.chars, {
-      duration: 0.8,
-      opacity: 0,
-      x: 40,
-      ease: "power3.out",
-      stagger: 0.01,
-      delay: 0.2,
-    });
-    const modelSubtitle = new SplitText(".model-subtitle", {
-      type: "chars",
-    });
-    gsap.from(modelSubtitle.chars, {
-      duration: 0.3,
-      opacity: 0,
-      y: 10,
-      ease: "power3.out",
-      stagger: 0.01,
-      delay: 0.6,
-    });
   }, []);
 
   const handleSubmit = async (message: string, onSuccess?: () => void) => {
@@ -78,30 +83,28 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="grid grid-rows-3 h-full">
-      <div className="absolute right-0 top-0 w-1/2">
-        <img src="/chat-bg.png" alt="" />
-      </div>
-      <div className="my-6 row-span-1 mx-auto self-end space-y-6 text-center">
+    <div className="mx-8 grid grid-rows-9 py-20 h-full">
+      <div className="row-span-1 self-center space-y-6 text-center">
         <h1
-          className="model-title text-4xl font-bold text-primary whitespace-pre"
+          className="model-title -translate-y-2 text-4xl font-bold text-primary whitespace-pre"
           style={{
             letterSpacing: "0.1em",
           }}
         >
-          启创·InnoSpark, 做有温度的教育大模型
+        <img src="/chat/fake-title.png" alt="张江高科 · 高科芯 德育大模型" className="max-h-16 select-none" />
         </h1>
-        <h2 className="model-subtitle">
-          我可以帮助你【设计实验】、【搜索文献】、【分析文档】、【分析数据】，你也可以直接开始和我对话
-        </h2>
       </div>
       <UserPromptTextarea
-        className="row-span-1 mx-auto align-middle"
+        className="row-span-4 max-w-full align-middle h-full cursor-text"
         onSubmit={handleSubmit}
         onAbort={abortRequest}
         status={status}
       />
-      <div />
+      <div className="row-span-4 grid grid-rows-2 grid-cols-3 gap-6 mt-6" >
+        {cardList.map((card) => (
+            <AgentCard className="" key={card.name} {...card} />
+        ))}
+      </div>
     </div>
   );
 }

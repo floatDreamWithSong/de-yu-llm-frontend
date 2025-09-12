@@ -91,7 +91,7 @@ export default function UserPromptTextarea({
       }}
       className={cn(
         "relative flex flex-col divide-none p-2 border-4 mb-4",
-        "shadow-none border-primary/30 style__shallow-shadow max-w-[1000px] aspect-[4/1]",
+        "shadow-none border-primary/30 max-w-[1000px] aspect-[4/1]",
         className,
       )}
     >

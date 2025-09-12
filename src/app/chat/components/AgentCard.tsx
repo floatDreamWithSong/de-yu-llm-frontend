@@ -1,39 +1,43 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import "./agent-card.css";
 
 export default function AgentCard({
   name,
   description,
-  icon,
+  imgUrl,
   className,
   ...props
 }: React.ComponentProps<"div"> & {
   name: string;
   description: string;
   className?: string;
-  icon: React.ComponentType<React.ComponentProps<"svg">>;
+  imgUrl: string;
 }) {
-  const Icon = icon;
   return (
-    <Card
+    <div
       {...props}
       className={cn(
-        "@container border-0 shadow-none outline-3 outline-secondary rounded-md aspect-video overflow-hidden cursor-pointer flex flex-col",
-        "hover:outline-primary/50 hover:shadow-xs shadow-secondary transition-colors duration-300",
+        "@container bg-primary-foreground border-0 shadow-none outline-none overflow-hidden cursor-pointer",
+        "transition-colors duration-300",
+        "px-2 items-center",
+        "agent-card rounded-2xl grid grid-cols-4",
         className,
       )}
     >
-      <CardHeader className="flex items-center gap-2">
-        <div className="rounded-md bg-secondary p-1">
-          {Icon && <Icon className="size-6" />}
-        </div>
-        <CardTitle>{name}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <p className="@xs:line-clamp-4 @2xs:line-clamp-3 @[12rem]:line-clamp-2 line-clamp-1 text-sm text-muted-foreground leading-relaxed break-words">
+      <div className="col-span-1 p-1">
+        {imgUrl && <img src={imgUrl} alt={name} />}
+      </div>
+      <div className="flex flex-col flex-1 col-span-3 self-start py-5 pl-2">
+        <h3 className="text-primary font-bold text-xl">{name}</h3>
+        <p 
+        style={{
+          lineHeight: '1.3',
+          fontSize: '14px',
+        }} className="@xs:line-clamp-4 whitespace-pre-wrap @3xs:line-clamp-3 @[12rem]:line-clamp-2 line-clamp-1 text-muted-foreground break-words"
+        >
           {description}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

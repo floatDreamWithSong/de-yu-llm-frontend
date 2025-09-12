@@ -13,27 +13,32 @@ import gsap from "gsap";
 import { ChevronRight } from "lucide-react";
 import { useRef } from "react";
 
-const sidebarWidth = "300px";
+const sidebarWidth = "380px";
 
 export default function ChatLayout() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": sidebarWidth,
-          "--sidebar-width-mobile": sidebarWidth,
-        } as React.CSSProperties
-      }
+    <div
+      style={{ backgroundImage: "url(/chat/bg.png)" }}
+      className="w-full h-full bg-cover bg-center bg-no-repeat"
     >
-      <ChatSidebar />
-      <main className=" w-full h-full bg-chat">
-        {/* <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full"> */}
-        <SidebarExpandTrigger />
-        {/* <div id="sidebar-header" /> */}
-        {/* </div> */}
-        <Outlet />
-      </main>
-    </SidebarProvider>
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": sidebarWidth,
+            "--sidebar-width-mobile": sidebarWidth,
+          } as React.CSSProperties
+        }
+      >
+        <ChatSidebar />
+        <main className=" w-full h-full bg-transparent">
+          {/* <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full"> */}
+          <SidebarExpandTrigger />
+          {/* <div id="sidebar-header" /> */}
+          {/* </div> */}
+          <Outlet />
+        </main>
+      </SidebarProvider>
+    </div>
   );
 }
 
@@ -55,7 +60,7 @@ function SidebarExpandTrigger() {
         delay: 0.2,
       });
     }
-  }, [state,isMobile]);
+  }, [state, isMobile]);
   return (
     (state === "collapsed" || isMobile) && (
       <SidebarTrigger
