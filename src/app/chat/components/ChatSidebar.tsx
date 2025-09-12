@@ -90,7 +90,7 @@ export default function ChatSidebar() {
       const cursor = pageParam ?? undefined;
       if (!seacherQueryKey) {
         return getConversationHistoryList({
-          page: { size: 5, cursor },
+          page: { size: 15, cursor },
         });
       }
       return queryHistory({
@@ -282,7 +282,7 @@ export default function ChatSidebar() {
   }
   return (
     <Sidebar
-      className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow"
+      className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow style__scoller"
       variant="inset"
     >
       <SidebarHeader className="space-y-4">

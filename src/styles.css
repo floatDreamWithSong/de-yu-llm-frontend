@@ -144,19 +144,27 @@ code {
 }
 
 /* WebKit 滚动条样式（Chrome、Edge、Safari 等） */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.style__scoller{
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-secondary); /* 黑色滑块 */
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
 }
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: var(--color-secondary); /* 黑色滑块 */
-  border-radius: 9999px;
-  background-clip: padding-box;
+.style__scoller-none {
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
 }
 
 .style__shallow-shadow {
