@@ -1,4 +1,4 @@
-import AuthWrapper from "./components/AuthWrapper";
+import AuthWrapper from "@/app/auth/components/AuthWrapper";
 
 export default function RegisterPage() {
   return (

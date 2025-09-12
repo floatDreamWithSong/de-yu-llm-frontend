@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useContext, useState } from "react";
-import { AuthContext } from "./layouts/AuthLayout";
+import { AuthContext } from "@/app/auth/layouts/AuthLayout";
 import z from "zod";
 import { mobileSchema } from "@/utils/schema";
 import { useForm } from "react-hook-form";
@@ -20,8 +20,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import VerificationCodeTab from "./components/VerificationCodeTab";
-import AuthWrapper from "./components/AuthWrapper";
+import VerificationCodeTab from "@/app/auth/components/VerificationCodeTab";
+import AuthWrapper from "@/app/auth/components/AuthWrapper";
 import { toast } from "sonner";
 const iconSize = 26;
 
