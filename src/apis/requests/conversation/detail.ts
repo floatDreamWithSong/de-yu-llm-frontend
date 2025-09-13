@@ -32,7 +32,7 @@ export const MessageListSchema = z.object({
     return value === 2 ? "user" : "assistant";
   }),
 });
-export type MessageList = z.infer<typeof MessageListSchema>;
+export type MessageItem = z.infer<typeof MessageListSchema>;
 
 export const DataSchema = z.object({
   hasMore: z.boolean(),

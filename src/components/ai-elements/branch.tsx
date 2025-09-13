@@ -34,14 +34,15 @@ export type BranchProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 export const Branch = ({
-  defaultBranch = 0,
   onBranchChange,
   className,
   ...props
 }: BranchProps) => {
-  const [currentBranch, setCurrentBranch] = useState(defaultBranch);
+  const [currentBranch, setCurrentBranch] = useState(0);
   const [branches, setBranches] = useState<ReactElement[]>([]);
-
+  useEffect(()=>{
+     setCurrentBranch(branches.length - 1)
+  },[branches])
   const handleBranchChange = (newBranch: number) => {
     setCurrentBranch(newBranch);
     onBranchChange?.(newBranch);
@@ -140,7 +141,7 @@ export const BranchPrevious = ({
   children,
   ...props
 }: BranchPreviousProps) => {
-  const { goToPrevious, totalBranches } = useBranch();
+  const { goToPrevious, totalBranches,currentBranch } = useBranch();
 
   return (
     <Button
@@ -151,7 +152,7 @@ export const BranchPrevious = ({
         'disabled:pointer-events-none disabled:opacity-50',
         className
       )}
-      disabled={totalBranches <= 1}
+      disabled={totalBranches <= 1|| currentBranch === 0}
       onClick={goToPrevious}
       size="icon"
       type="button"
@@ -170,8 +171,7 @@ export const BranchNext = ({
   children,
   ...props
 }: BranchNextProps) => {
-  const { goToNext, totalBranches } = useBranch();
-
+  const { goToNext, totalBranches, currentBranch } = useBranch();
   return (
     <Button
       aria-label="Next branch"
@@ -181,7 +181,7 @@ export const BranchNext = ({
         'disabled:pointer-events-none disabled:opacity-50',
         className
       )}
-      disabled={totalBranches <= 1}
+      disabled={totalBranches <= 1|| currentBranch + 1 === totalBranches}
       onClick={goToNext}
       size="icon"
       type="button"

@@ -1,7 +1,7 @@
 import type { Request as CompletionRequest } from "@/apis/requests/conversation/completion";
 import {
   getConversationDetail,
-  type MessageList,
+  type MessageItem,
 } from "@/apis/requests/conversation/detail";
 import { feedbackMessage } from "@/apis/requests/conversation/feedback";
 import ClientQueryKeys from "@/apis/queryKeys";
@@ -11,7 +11,7 @@ import { useChatStore } from "@/store/chat";
 import { useInitMessageStore } from "@/store/initMessage";
 import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import type { ChatStatus, DeepPartial } from "ai";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 export interface StreamChunk {
@@ -40,6 +40,7 @@ export interface SSEMeta {
   sectionId: string;
   messageIndex: number;
   conversationType: number;
+  replyId: string;
 }
 export interface SSEModel {
   model: string;
@@ -60,7 +61,13 @@ export interface ChatMessage {
   isStreaming?: boolean;
   isCompleteThink?: boolean;
   feedback?: number;
+  replyId?: string;
 }
+export type FeedbackProps = {
+  messageId: string;
+  action: 0 | 1 | 2;
+  forRegenList?: boolean;
+};
 const MESSAGE_BATCH_SIZE = 30;
 
 export function useStreamCompletion(conversationId: string) {
@@ -69,6 +76,10 @@ export function useStreamCompletion(conversationId: string) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const lastUserMessageId = useRef<string | null>(null);
   const lastAssistantMessageId = useRef<string | null>(null);
+  const [lastAssistantMessageBranch, setLastAssistantMessageBranch] = useState<
+    ChatMessage[]
+  >([]);
+  const selectBranchIdRef = useRef<string | null>(null);
   // 使用 Zustand store 获取完成配置
   const completionConfig = useChatStore((state) => state.completionConfig);
   const initMessage = useInitMessageStore((state) => state.initMessage);
@@ -102,9 +113,17 @@ export function useStreamCompletion(conversationId: string) {
     isFetchingNextPage: isFetchingEarlier,
     data: earlierMessagesData,
   } = useInfiniteQuery<
-    { cursor: string; hasMore: boolean; messageList: MessageList[] | null },
+    {
+      cursor: string;
+      hasMore: boolean;
+      messageList: MessageItem[] | null;
+      regenList: MessageItem[] | null;
+    },
     Error,
-    ChatMessage[],
+    {
+      earlierMessages: ChatMessage[];
+      regenList: ChatMessage[];
+    },
     [string, string],
     string | null
   >({
@@ -127,12 +146,11 @@ export function useStreamCompletion(conversationId: string) {
     initialPageParam: null,
     enabled: !!conversationId && !initMessage && !hasProcessed,
     select: (data) => {
-      console.log(conversationId, initMessage, hasProcessed);
       // 将更早的消息插入到现有消息的前面
       const earlierMessages = data.pages
         .flatMap((page) => page.messageList ?? [])
         .filter((message) => !!message.content)
-        .map<ChatMessage>((message: MessageList) => ({
+        .map<ChatMessage>((message: MessageItem) => ({
           id: message.messageId,
           content: message.content,
           think: message.ext.think,
@@ -140,20 +158,48 @@ export function useStreamCompletion(conversationId: string) {
           timestamp: message.createTime,
           isCompleteThink: message.ext.think !== "" && message.content !== "",
           feedback: message.feedback,
+          replyId: message.replyId ?? undefined,
         }))
         .reverse();
-      return earlierMessages;
+
+      // 返回包含 regenList 信息的对象，而不是直接调用 setState
+      return {
+        earlierMessages,
+        regenList:
+          data.pages[0].regenList
+            ?.map<ChatMessage>((message: MessageItem) => ({
+              id: message.messageId,
+              content: message.ext.brief,
+              think: message.ext.think,
+              role: message.userType,
+              timestamp: message.createTime,
+              isCompleteThink:
+                message.ext.think !== "" && message.content !== "",
+              feedback: message.feedback,
+              replyId: message.replyId ?? undefined,
+            }))
+            .reverse() ?? [],
+      };
     },
     refetchOnWindowFocus: false,
   });
 
+  // 使用 useMemo 来稳定 earlierMessages 和 regenList 的引用
+  const stableEarlierMessages = useMemo(() => {
+    if (!earlierMessagesData) return { earlierMessages: [], regenList: [] };
+    return {
+      earlierMessages: earlierMessagesData.earlierMessages || [],
+      regenList: earlierMessagesData.regenList || [],
+    };
+  }, [earlierMessagesData]);
+
   // 当获取到更早的消息时，更新消息状态
   useEffect(() => {
-    if (earlierMessagesData && earlierMessagesData.length > 0) {
+    if (stableEarlierMessages.earlierMessages.length > 0) {
       setMessages((prevMessages) => {
         // 检查是否已经包含这些消息，避免重复添加
         const existingIds = new Set(prevMessages.map((msg) => msg.id));
-        const newMessages = earlierMessagesData.filter(
+        const newMessages = stableEarlierMessages.earlierMessages.filter(
           (msg) => !existingIds.has(msg.id)
         );
         if (newMessages.length > 0) {
@@ -169,13 +215,17 @@ export function useStreamCompletion(conversationId: string) {
                 break;
               }
             }
+            // 只在第一次加载时设置 regenList
+            if (stableEarlierMessages.regenList.length > 0) {
+              setLastAssistantMessageBranch(stableEarlierMessages.regenList);
+            }
           }
           return [...newMessages, ...prevMessages];
         }
         return prevMessages;
       });
     }
-  }, [earlierMessagesData]);
+  }, [stableEarlierMessages]);
 
   const addMessage = useCallback(
     ({
@@ -207,18 +257,44 @@ export function useStreamCompletion(conversationId: string) {
     []
   );
   const rollbackMessagesTo = useCallback(
-    (id: string) => {
-      const index = messages.findIndex((msg) => msg.id === id);
-      if (index !== -1) {
-        setMessages((prev) => prev.slice(0, index));
-      }
+    (id: string, saveLastAssistantMessage?: boolean) => {
+      setMessages((prevMessages) => {
+        const index = prevMessages.findIndex((msg) => msg.id === id);
+        if (saveLastAssistantMessage) {
+          const lastAssistantMessage = prevMessages.find(
+            (i) => i.id === lastAssistantMessageId.current
+          );
+          if (lastAssistantMessage) {
+            setLastAssistantMessageBranch((pre) =>
+              pre.some((i) => i.id === lastAssistantMessage.id)
+                ? pre
+                : [...pre, lastAssistantMessage]
+            );
+          }
+        }
+        if (index !== -1) {
+          return prevMessages.slice(0, index);
+        }
+        return prevMessages;
+      });
     },
-    [messages]
+    [] // 移除 messages 依赖，使用函数式更新
   );
   const modifyMessage = useCallback(
-    (id: string, message: Partial<ChatMessage>) => {
+    (
+      id: string,
+      message: Partial<ChatMessage>,
+      callback?: (msg: ChatMessage) => void
+    ) => {
       setMessages((prev) =>
-        prev.map((msg) => (msg.id === id ? { ...msg, ...message } : msg))
+        prev.map((msg) => {
+          if (msg.id === id) {
+            const newMsg = { ...msg, ...message };
+            callback?.(newMsg);
+            return newMsg;
+          }
+          return msg;
+        })
       );
     },
     []
@@ -269,7 +345,7 @@ export function useStreamCompletion(conversationId: string) {
 
       try {
         // 添加用户消息
-        addMessage({ content, role: "user" });
+        let tempUserMessageId = addMessage({ content, role: "user" });
 
         const requestData: CompletionRequest = {
           model,
@@ -320,6 +396,24 @@ export function useStreamCompletion(conversationId: string) {
         let currentType: StreamChunk["event"] = "meta";
         status.current = "streaming";
         onSuccess?.();
+        if (options?.completionsOption?.isReplace) {
+          setLastAssistantMessageBranch([]);
+        }
+        if (options?.completionsOption?.selectedRegenId) {
+          if (lastAssistantMessageId.current) {
+            // 使用函数式更新获取最新的 lastAssistantMessageBranch
+            setLastAssistantMessageBranch((currentBranch) => {
+              const message = currentBranch.find(
+                (i) => i.id === options?.completionsOption?.selectedRegenId
+              );
+              if (message && lastAssistantMessageId.current) {
+                modifyMessage(lastAssistantMessageId.current, message);
+              }
+              return [];
+            });
+          }
+          selectBranchIdRef.current = null;
+        }
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -343,44 +437,35 @@ export function useStreamCompletion(conversationId: string) {
 
               try {
                 const _data = JSON.parse(dataStr);
-                // console.log("收到流式数据:", {
-                //   id: currentId,
-                //   event: currentType,
-                //   data,
-                // });
                 if (currentType === "chat") {
                   const data = _data as SSEDataPayload;
                   const content = JSON.parse(
                     data.message.content
                   ) as TextContent;
-                  // console.log("content", content);
                   if (content.text) {
-                    // console.log(
-                    //   "accumulativeMessage",
-                    //   aiMessageId,
-                    //   content.text
-                    // );
                     accumulativeMessage(aiMessageId, { text: content.text });
                   }
                   if (content.think) {
-                    // console.log(
-                    //   "accumulativeMessage",
-                    //   aiMessageId,
-                    //   content.think
-                    // );
                     accumulativeMessage(aiMessageId, { think: content.think });
                   }
                 } else if (currentType === "meta") {
                   const data = _data as SSEMeta;
+                  console.log("meta:", data);
                   if (!aiMessageId) {
                     aiMessageId = addMessage({
                       id: data.messageId,
                       role: "assistant",
                     });
                   }
+                  if (data?.replyId !== tempUserMessageId) {
+                    tempUserMessageId = data.replyId;
+                    modifyMessage(tempUserMessageId, {
+                      id: tempUserMessageId,
+                    });
+                  }
                 } else if (currentType === "model") {
                   const data = _data as SSEModel;
-                  console.log(data);
+                  console.log("model:", data);
                 }
               } catch (e) {
                 console.error("解析数据失败:", e, dataStr);
@@ -403,7 +488,16 @@ export function useStreamCompletion(conversationId: string) {
         status.current = "ready";
         abortControllerRef.current = null;
         // 完成流式输出
-        modifyMessage(aiMessageId, { isStreaming: false });
+        modifyMessage(aiMessageId, { isStreaming: false }, (msg) => {
+          if (options?.completionsOption?.isRegen) {
+            setLastAssistantMessageBranch((pre) => {
+              if (!pre.some((i) => i.id === aiMessageId)) {
+                return [...pre, msg];
+              }
+              return pre;
+            });
+          }
+        });
         queryClient.invalidateQueries({
           queryKey: [ClientQueryKeys.consversation.conversationHistory],
         });
@@ -419,35 +513,42 @@ export function useStreamCompletion(conversationId: string) {
       model
     ]
   );
-  const handleFeedback = useCallback(
-    (props: { messageId: string; action: 0 | 1 | 2 }) => {
-      const { messageId, action } = props;
-      feedbackMessage(props)
-        .then(() => {
+  const handleFeedback = useCallback((props: FeedbackProps) => {
+    const { messageId, action } = props;
+    feedbackMessage(props)
+      .then(() => {
+        if (!props.forRegenList)
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === messageId ? { ...msg, feedback: action } : msg
             )
           );
-          toast("反馈成功！");
-        })
-        .catch(() => {
-          toast.error("反馈失败!");
-        });
-    },
-    []
-  );
+        else {
+          setLastAssistantMessageBranch((pre) =>
+            pre.map((msg) =>
+              msg.id === messageId ? { ...msg, feedback: action } : msg
+            )
+          );
+        }
+        toast("反馈成功！");
+      })
+      .catch(() => {
+        toast.error("反馈失败!");
+      });
+  }, []);
   return {
     status: status.current,
     messages,
     rollbackMessagesTo,
     lastAssistantMessageId,
     lastUserMessageId,
+    lastAssistantMessageBranch,
     sendMessage,
     abortRequest,
     handleFeedback,
     fetchEarlier,
     hasMoreEarlier,
     isFetchingEarlier,
+    selectBranchIdRef,
   };
 }

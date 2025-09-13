@@ -50,7 +50,6 @@ function sleep(time: number) {
 
 // 创建axios实例
 function createAxiosInstance(): AxiosInstance {
-  console.log(BASE_URL);
   const instance = axios.create({
     baseURL: BASE_URL,
     timeout: DEFAULT_TIMEOUT,
