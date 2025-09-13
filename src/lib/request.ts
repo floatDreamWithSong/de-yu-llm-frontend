@@ -12,17 +12,19 @@ import { env } from "@/env";
 // 基础配置
 const BASE_URL = env.VITE_API_BASE_URL;
 const DEFAULT_TIMEOUT = 120000;
-const TOKEN_KEY = "token";
+export const TOKEN_KEY = "token";
 export const tokenStore = {
   get: () => {
+    const token = localStorage.getItem(TOKEN_KEY);
     if (import.meta.env.MODE === "test") {
       return "xh-polaris";
     }
-    const token = localStorage.getItem(TOKEN_KEY);
     return token ? `Bearer ${token}` : void 0;
   },
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
-  remove: () => localStorage.removeItem(TOKEN_KEY),
+  remove: () => {
+    localStorage.removeItem(TOKEN_KEY)
+  },
 };
 export const GlobalHeader = {
   get: () => {
@@ -120,7 +122,7 @@ function createAxiosInstance(): AxiosInstance {
           case 401:
             errorMessage = "未授权，请重新登录";
             tokenStore.remove();
-            window.location.href = "/auth";
+            window.location.href = "/auth/login";
             break;
           case 403:
             errorMessage = "拒绝访问";

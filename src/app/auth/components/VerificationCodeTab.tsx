@@ -20,6 +20,11 @@ import { ChevronLeft } from "lucide-react";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../layouts/AuthLayout";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { loginByPhoneVerify } from "@/apis/requests/user/verifiy";
+import { useNavigate } from "@tanstack/react-router";
+import { sendVerificationCode } from "@/apis/requests/user/code";
+import { userInfoStore } from "@/store/user";
 
 const FormSchema = z.object({
   pin: z
@@ -30,9 +35,13 @@ const FormSchema = z.object({
     }),
 });
 
-export default function VerificationCodeTab({onBack}:{onBack:()=>void}) {
+export default function VerificationCodeTab({
+  onBack,
+}: { onBack: () => void }) {
   const { phone } = useContext(AuthContext);
-  const [countDown, setCountDown] = useState<number>(0);
+  const navigate = useNavigate();
+  const [countDown, setCountDown] = useState<number>(60);
+  const userInfo = userInfoStore()
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -46,25 +55,65 @@ export default function VerificationCodeTab({onBack}:{onBack:()=>void}) {
     }, 1000);
     return () => clearTimeout(timeout);
   }, [countDown]);
-  const handleSendCode = useCallback(()=>{
-    setCountDown(60)
-    toast('验证码已发送')
-  },[])
-  function onSubmit(_data: z.infer<typeof FormSchema>) {
-    // toast("You submitted the following values", {
-    //   description: (
-    //     <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-    //     </pre>
-    //   ),
-    // });
+  const loginMutation = useMutation({
+    mutationFn: loginByPhoneVerify,
+  });
+  const sendCodeMutation = useMutation({
+    mutationFn: sendVerificationCode,
+  });
+  const handleSendCode = useCallback(() => {
+    sendCodeMutation.mutate(
+      {
+        authId: phone,
+        authType: "phone",
+      },
+      {
+        onError() {
+          form.setError("pin", {
+            message: "验证码发送失败",
+          });
+        },
+        onSuccess() {
+          setCountDown(60);
+          toast("验证码已重新发送");
+        },
+      },
+    );
+  }, [sendCodeMutation.mutate, phone, form.setError]);
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    loginMutation.mutate(
+      {
+        verify: data.pin,
+        authId: phone,
+        authType: "phone",
+      },
+      {
+        onError() {
+          form.setError("pin", {
+            message: "验证码错误",
+          });
+        },
+        onSuccess(data) {
+          toast.success('登录成功')
+          userInfo.setCredentials(data)
+          navigate({
+            to: "/chat",
+          });
+        },
+      },
+    );
   }
 
   return (
     <AuthWrapper className="aspect-[25/23] grid grid-rows-4">
       <div className="row-span-2 items-center justify-center flex flex-col gap-3">
         <h3 className="text-2xl font-semibold relative w-full text-center">
-          <Button onClick={onBack} className="absolute left-0" variant={"ghost"} size={"icon"}>
+          <Button
+            onClick={onBack}
+            className="absolute left-0"
+            variant={"ghost"}
+            size={"icon"}
+          >
             <ChevronLeft className="size-6" />
           </Button>
           输入6位验证码
@@ -109,8 +158,13 @@ export default function VerificationCodeTab({onBack}:{onBack:()=>void}) {
           />
         </form>
       </Form>
-      <Button disabled={countDown>0} onClick={handleSendCode} className="self-end" variant={"link"}>
-        重新发送{countDown>0?`${countDown}s`:''}
+      <Button
+        disabled={countDown > 0}
+        onClick={handleSendCode}
+        className="self-end"
+        variant={"link"}
+      >
+        重新发送{countDown > 0 ? `${countDown}s` : ""}
       </Button>
     </AuthWrapper>
   );
