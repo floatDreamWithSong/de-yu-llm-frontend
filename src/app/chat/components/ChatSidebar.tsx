@@ -44,7 +44,7 @@ import {
 import groupConversationsByDate from "@/utils/date-group";
 import { renameConversation } from "@/apis/requests/conversation/rename";
 import { useCallback, useEffect, useRef, useState } from "react";
-import ClientQueryKeys from "@/apis/requests/queryKeys";
+import ClientQueryKeys from "@/apis/queryKeys";
 import { queryHistory } from "@/apis/requests/conversation/query";
 import { deleteConversation } from "@/apis/requests/conversation/delete";
 import { cn } from "@/lib/utils";

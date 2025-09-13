@@ -4,7 +4,7 @@ import {
   type MessageList,
 } from "@/apis/requests/conversation/detail";
 import { feedbackMessage } from "@/apis/requests/conversation/feedback";
-import ClientQueryKeys from "@/apis/requests/queryKeys";
+import ClientQueryKeys from "@/apis/queryKeys";
 import { env } from "@/env";
 import { GlobalHeader, tokenStore } from "@/lib/request";
 import { useChatStore } from "@/store/chat";
@@ -71,7 +71,9 @@ export function useStreamCompletion(conversationId: string) {
   const lastAssistantMessageId = useRef<string | null>(null);
   // 使用 Zustand store 获取完成配置
   const completionConfig = useChatStore((state) => state.completionConfig);
-  const { initMessage, hasProcessed, model } = useInitMessageStore();
+  const initMessage = useInitMessageStore((state) => state.initMessage);
+  const hasProcessed = useInitMessageStore((state) => state.hasProcessed);
+  const model = useInitMessageStore(state=>state.model)
   const queryClient = useQueryClient();
 
   // 当 conversationId 变化时，重置所有状态

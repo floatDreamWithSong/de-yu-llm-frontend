@@ -23,6 +23,8 @@ import {
 import VerificationCodeTab from "@/app/auth/components/VerificationCodeTab";
 import AuthWrapper from "@/app/auth/components/AuthWrapper";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { sendVerificationCode } from "@/apis/requests/user/code";
 const iconSize = 26;
 
 const formSchema = z.object({
@@ -36,18 +38,35 @@ export default function LoginPage() {
     },
   });
   const [isChecked, setIsChecked] = useState(false);
-  const [isVerificationStage, setVerificationStage] = useState(true);
+  const [isVerificationStage, setVerificationStage] = useState(false);
   const handleSwitchBack = useCallback(() => {
     setVerificationStage(false);
   }, []);
   const authContext = useContext(AuthContext);
+  const sendCodeMutation = useMutation({
+    mutationFn: sendVerificationCode,
+  });
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    if(!isChecked){
-      toast('请勾选使用协议与隐私协议')
-      return
+    if (!isChecked) {
+      toast("请勾选使用协议与隐私协议");
+      return;
     }
     authContext.setPhone(data.phone);
-    setVerificationStage(true)
+    sendCodeMutation.mutate(
+      {
+        authId: data.phone,
+        authType: "phone",
+      },
+      {
+        onError() {
+          toast.error("验证码发送失败");
+        },
+        onSuccess() {
+          setVerificationStage(true);
+          toast("验证码已发送");
+        },
+      },
+    );
   };
   return (
     <>
@@ -74,7 +93,9 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <AuthButton type="submit">下一步</AuthButton>
+                <AuthButton disabled={sendCodeMutation.isPending} type="submit">
+                  下一步
+                </AuthButton>
                 <div
                   className="justify-center flex items-center gap-2"
                   style={{
