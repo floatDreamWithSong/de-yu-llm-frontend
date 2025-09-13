@@ -273,13 +273,13 @@ export default function ConversationPage() {
                           <BranchMessages>
                             {(message.id === lastAssistantMessageId.current
                               ? lastAssistantMessageBranch.length
-                                ? message.isStreaming 
+                                ? message.isStreaming
                                   ? [message]
                                   : lastAssistantMessageBranch
                                 : [message]
                               : [message]
                             ).map((_message, _, messageArray) => {
-                              const forRegenList = messageArray.length > 1
+                              const forRegenList = messageArray.length > 1;
                               const regenerateable =
                                 _message.id ===
                                   lastAssistantMessageId.current ||

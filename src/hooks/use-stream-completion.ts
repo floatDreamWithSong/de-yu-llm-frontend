@@ -85,7 +85,6 @@ export function useStreamCompletion(conversationId: string) {
   const initMessage = useInitMessageStore((state) => state.initMessage);
   const hasProcessed = useInitMessageStore((state) => state.hasProcessed);
   const queryClient = useQueryClient();
-
   // 当 conversationId 变化时，重置所有状态
   useEffect(() => {
     setMessages([]);
@@ -457,10 +456,11 @@ export function useStreamCompletion(conversationId: string) {
                     });
                   }
                   if (data?.replyId !== tempUserMessageId) {
-                    tempUserMessageId = data.replyId;
                     modifyMessage(tempUserMessageId, {
-                      id: tempUserMessageId,
+                      id: data.replyId,
                     });
+                    tempUserMessageId = data.replyId;
+                    lastUserMessageId.current = tempUserMessageId;
                   }
                 } else if (currentType === "model") {
                   const data = _data as SSEModel;
