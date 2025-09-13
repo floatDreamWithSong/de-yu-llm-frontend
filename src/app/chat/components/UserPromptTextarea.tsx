@@ -65,7 +65,6 @@ export default function UserPromptTextarea({
       onKeyDown={(e) => {
         if (e.key === "Enter" && e.ctrlKey && status === "ready" && !disabled) {
           const textContent = spanRef.current?.textContent || "";
-          console.log("提交消息:", textContent);
           onSubmit?.(textContent, () => {
             setValue("");
             if (spanRef.current) {
@@ -78,7 +77,6 @@ export default function UserPromptTextarea({
         e.preventDefault();
         if (status === "ready" && !disabled) {
           const textContent = spanRef.current?.textContent || "";
-          console.log("提交消息:", textContent);
           onSubmit?.(textContent, () => {
             setValue("");
             if (spanRef.current) {
