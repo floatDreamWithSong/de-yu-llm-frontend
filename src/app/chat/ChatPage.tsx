@@ -2,42 +2,60 @@
 
 import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
-import { useInitMessageStore } from "@/store/initMessage";
+import {
+  useInitMessageStore,
+  type AvaliableModelName,
+} from "@/store/initMessage";
 import { useNavigate } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import { useCallback, useRef, useState } from "react";
 import AgentCard from "./components/AgentCard";
-const cardList = [
+import { cn } from "@/lib/utils";
+const cardList: {
+  name: string;
+  description: string;
+  imgUrl: string;
+  model: AvaliableModelName;
+}[] = [
   {
-    name: "润心桥",
-    description: "读懂班级里的每一个独特，让关怀如期而至。——您专注播种，我默默耕耘。班主任的专属智慧伙伴，贴心翻译成长的密语，让心与心的对话自然发生。",
-    imgUrl: "/chat/agent-1.png",
+    name: "德育班主任",
+    description: "模仿一位经丰富的德育导师，帮助教师设计班级活动和班会安排。",
+    imgUrl: "/chat/deyu-bzr.png",
+    model: "deyu-bzr",
   },
   {
-    name: "引航号",
-    description: "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
-    imgUrl: "/chat/agent-2.png",
-  },
-  {
-    name: "解忧铺",
-    description: "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
-    imgUrl: "/chat/agent-3.png",
-  },
-  {
-    name: "慧育港",
-    description: "为德育工作者点亮前行的灯塔。这里有智能方案、资源推荐，让每一次德育活动都散发星光——让我们一起把教育做得更有温度。",
-    imgUrl: "/chat/agent-4.png",
-  },
-  {
-    name: "育智云",
-    description: "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
-    imgUrl: "/chat/agent-5.png",
-  },
-  {
-    name: "暖心阁",
+    name: "学科教师",
     description:
-      "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
-      imgUrl: "/chat/agent-6.png",
+      "帮助学科教师在教案中自然融入社会情感教育，实现“教书”与“育人”的有机融合",
+    imgUrl: "/chat/deyu-xkjs.png",
+    model: "deyu-xkjs",
+  },
+  {
+    name: "全员导师",
+    description: "解决字生的社会情感问題，帮助导师设计干预方案和沟通话术。",
+    imgUrl: "/chat/deyu-qyds.png",
+    model: "deyu-qyds",
+  },
+  {
+    name: "德育干部",
+    description:
+      "紧扣“校家社协同培乔学生社会情感能力”的核心目标，帮助教师设计德育活动方案。",
+    imgUrl: "/chat/deyu-dygb.png",
+    model: "deyu-dygb",
+  },
+  {
+    name: "心芽",
+    description:
+      "构建一个能与学生自然对话、持续互动、情感引导的智能体，帮助他们在日常学习与生活中发展社会情感能力。",
+    imgUrl: "/chat/deyu-xy.png",
+    model: "deyu-xy",
+  },
+  {
+    name: "家育良方",
+    description:
+      "面向家长的社会情感教育智鋤理，帮助家长识别、理解并改善孩子在成长过程中面临的社会情感问题。",
+    imgUrl: "/chat/deyu-jylf.png",
+    model: "deyu-jylf",
   },
 ];
 
@@ -45,7 +63,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<ChatStatus>("ready");
   const signal = useRef<AbortController | null>(null);
-  const { setInitMessage } = useInitMessageStore();
+  const { setInitMessage, model, setModel } = useInitMessageStore();
 
   const abortRequest = useCallback(() => {
     if (signal.current) {
@@ -91,7 +109,11 @@ export default function ChatPage() {
             letterSpacing: "0.1em",
           }}
         >
-        <img src="/chat/fake-title.png" alt="张江高科 · 高科芯 德育大模型" className="max-h-16 select-none" />
+          <img
+            src="/chat/fake-title.png"
+            alt="张江高科 · 高科芯 德育大模型"
+            className="max-h-16 select-none"
+          />
         </h1>
       </div>
       <UserPromptTextarea
@@ -100,9 +122,25 @@ export default function ChatPage() {
         onAbort={abortRequest}
         status={status}
       />
-      <div className="row-span-4 grid grid-rows-2 grid-cols-3 gap-6 mt-6" >
+      <div className="row-span-4 grid grid-rows-2 grid-cols-3 gap-6 mt-6">
         {cardList.map((card) => (
-            <AgentCard className="" key={card.name} {...card} />
+          <AgentCard
+            className={cn([
+              "transition-all",
+              model === card.model
+                ? "scale-105"
+                : model !== "deyu-default"
+                  ? "brightness-75"
+                  : "",
+            ])}
+            onClick={() => {
+              model === card.model
+                ? setModel("deyu-default")
+                : setModel(card.model);
+            }}
+            key={card.name}
+            {...card}
+          />
         ))}
       </div>
     </div>

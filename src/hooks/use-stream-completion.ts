@@ -71,7 +71,7 @@ export function useStreamCompletion(conversationId: string) {
   const lastAssistantMessageId = useRef<string | null>(null);
   // 使用 Zustand store 获取完成配置
   const completionConfig = useChatStore((state) => state.completionConfig);
-  const { initMessage, hasProcessed } = useInitMessageStore();
+  const { initMessage, hasProcessed, model } = useInitMessageStore();
   const queryClient = useQueryClient();
 
   // 当 conversationId 变化时，重置所有状态
@@ -270,7 +270,7 @@ export function useStreamCompletion(conversationId: string) {
         addMessage({ content, role: "user" });
 
         const requestData: CompletionRequest = {
-          model: completionConfig.model,
+          model,
           botId: completionConfig.botId,
           conversationId,
           ...options,
@@ -414,6 +414,7 @@ export function useStreamCompletion(conversationId: string) {
       accumulativeMessage,
       completionConfig,
       queryClient,
+      model
     ]
   );
   const handleFeedback = useCallback(

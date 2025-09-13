@@ -27,7 +27,7 @@ export default function AgentCard({
       <div className="col-span-1 p-1">
         {imgUrl && <img src={imgUrl} alt={name} />}
       </div>
-      <div className="flex flex-col flex-1 col-span-3 self-start py-5 pl-2">
+      <div className="flex flex-col flex-1 col-span-3 self-center px-2">
         <h3 className="text-primary font-bold text-xl">{name}</h3>
         <p 
         style={{
