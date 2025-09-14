@@ -15,6 +15,9 @@ const authRoute = createRoute({
 const loginRoute = createRoute({
   getParentRoute: () => authRoute,
   path: "/login",
+  validateSearch: (search) => ({
+    redirect: (search.redirect as string) || "/chat",
+  }),
   component: LoginPage,
 });
 
