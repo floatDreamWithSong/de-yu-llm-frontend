@@ -9,7 +9,6 @@ import reportWebVitals from "./reportWebVitals.ts";
 import { routeTree } from "./route.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { userInfoStore } from "./store/user";
 
 scan({
   enabled: false,
@@ -17,24 +16,15 @@ scan({
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 
-// 创建认证上下文
-const createAuthContext = () => {
-  const user = userInfoStore.getState();
-  const isAuthenticated = Boolean(user.token && user.expire > 0 && user.expire * 1000 > Date.now());
-  
-  return {
-    auth: {
-      isAuthenticated,
-      user: isAuthenticated ? user : null,
-    },
-  };
-};
-
 const router = createRouter({
   routeTree,
   context: {
     ...TanStackQueryProviderContext,
-    ...createAuthContext(),
+    // 认证状态现在在 beforeLoad 中实时检查，这里提供一个基础结构
+    auth: {
+      isAuthenticated: false,
+      user: null,
+    },
   },
   defaultPreload: "intent",
   scrollRestoration: true,

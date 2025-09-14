@@ -13,6 +13,7 @@ import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import {throttledStream} from '@/utils/throttledStream'
 
 export interface StreamChunk {
   id: number;
@@ -384,7 +385,10 @@ export function useStreamCompletion(conversationId: string) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const reader = response.body?.getReader();
+        if(!response.body){
+          throw new Error('Empty Body!')
+        }
+        const reader = throttledStream(response.body, 100)?.getReader();
         if (!reader) {
           throw new Error("无法读取响应流");
         }
