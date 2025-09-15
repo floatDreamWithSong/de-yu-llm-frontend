@@ -14,6 +14,7 @@ import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import {throttledStream} from '@/utils/throttledStream'
+import { genConversationTitle } from "@/apis/requests/conversation/gen-title";
 
 export interface StreamChunk {
   id: number;
@@ -342,31 +343,28 @@ export function useStreamCompletion(conversationId: string) {
 
       status.current = "submitted";
       let aiMessageId = "";
+      const requestData: CompletionRequest = {
+        model,
+        botId: completionConfig.botId,
+        conversationId,
+        ...options,
+        completionsOption: {
+          ...completionConfig.completionsOption,
+          ...options?.completionsOption,
+        },
+        messages: [
+          {
+            content,
+            contentType: 0,
+            attaches: [],
+            references: [],
+            role: "user",
+          },
+        ],
+      };
 
       try {
-        // 添加用户消息
         let tempUserMessageId = addMessage({ content, role: "user" });
-
-        const requestData: CompletionRequest = {
-          model,
-          botId: completionConfig.botId,
-          conversationId,
-          ...options,
-          completionsOption: {
-            ...completionConfig.completionsOption,
-            ...options?.completionsOption,
-          },
-          messages: [
-            {
-              content,
-              contentType: 0,
-              attaches: [],
-              references: [],
-              role: "user",
-            },
-          ],
-        };
-
         const token = tokenStore.get();
         const response = await fetch(
           `${env.VITE_API_BASE_URL}/v1/completions`,
@@ -502,9 +500,17 @@ export function useStreamCompletion(conversationId: string) {
             });
           }
         });
-        queryClient.invalidateQueries({
-          queryKey: [ClientQueryKeys.consversation.conversationHistory],
-        });
+        const { initMessage: currentInitMessage, hasProcessed: currentHasProcessed } = useInitMessageStore.getState();
+        console.log(!currentInitMessage && currentHasProcessed)
+        if(!currentInitMessage && currentHasProcessed){
+          await genConversationTitle({
+            conversationId,
+            messages: requestData.messages
+          })
+          queryClient.invalidateQueries({
+            queryKey: [ClientQueryKeys.consversation.conversationHistory],
+          });
+        }
       }
     },
     [
