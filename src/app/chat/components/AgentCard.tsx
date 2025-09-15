@@ -33,7 +33,7 @@ export default function AgentCard({
         style={{
           lineHeight: '1.3',
           fontSize: '14px',
-        }} className="@xs:line-clamp-4 whitespace-pre-wrap @3xs:line-clamp-3 @[12rem]:line-clamp-2 line-clamp-1 text-muted-foreground break-words"
+        }} className="@xs:line-clamp-4 whitespace-pre-wrap @3xs:line-clamp-3 @[12rem]:line-clamp-2 line-clamp-1 text-muted-foreground break-words indent-8"
         >
           {description}
         </p>

@@ -18,43 +18,43 @@ const cardList: {
   model: AvaliableModelName;
 }[] = [
   {
-    name: "德育班主任",
-    description: "模仿一位经丰富的德育导师，帮助教师设计班级活动和班会安排。",
-    imgUrl: "/chat/deyu-bzr.png",
+    name: "润心桥",
+    description: "读懂班级里的每一个独特，让关怀如期而至。——您专注播种，我默默耕耘。班主任的专属智慧伙伴，贴心翻译成长的密语，让心与心的对话自然发生。",
+    imgUrl: "/chat/agent-1.png",
     model: "deyu-bzr",
   },
   {
-    name: "学科教师",
+    name: "慧育港",
     description:
-      "帮助学科教师在教案中自然融入社会情感教育，实现“教书”与“育人”的有机融合",
-    imgUrl: "/chat/deyu-xkjs.png",
+      "为德育工作者点亮前行的灯塔。这里有智能方案、资源推荐，让每一次德育活动都散发星光——让我们一起把教育做得更有温度。",
+    imgUrl: "/chat/agent-2.png",
     model: "deyu-xkjs",
   },
   {
-    name: "全员导师",
-    description: "解决字生的社会情感问題，帮助导师设计干预方案和沟通话术。",
-    imgUrl: "/chat/deyu-qyds.png",
+    name: "引航号",
+    description: "陪伴导师走进学生的成长旅程。提供个性化成长档案和沟通建议，让每位导师都能成为学生愿意信赖的引路人——因为最好的教育，源于真诚的陪伴。",
+    imgUrl: "/chat/agent-3.png",
     model: "deyu-qyds",
   },
   {
-    name: "德育干部",
+    name: "育智云",
     description:
-      "紧扣“校家社协同培乔学生社会情感能力”的核心目标，帮助教师设计德育活动方案。",
-    imgUrl: "/chat/deyu-dygb.png",
+      "助力教师打造知识与温暖交融的课堂。基于学情智能设计教学，让备课更轻松，课堂更生动——因为教育不仅是传授知识，更是点亮心灵。",
+    imgUrl: "/chat/agent-4.png",
     model: "deyu-dygb",
   },
   {
-    name: "心芽",
+    name: "解忧铺",
     description:
-      "构建一个能与学生自然对话、持续互动、情感引导的智能体，帮助他们在日常学习与生活中发展社会情感能力。",
-    imgUrl: "/chat/deyu-xy.png",
+      "24小时在线的成长树洞。你的心事，永远有地方倾诉；你的烦恼，总会得到温柔回应——愿孩子们在这里找回前行的勇气和微光。",
+    imgUrl: "/chat/agent-5.png",
     model: "deyu-xy",
   },
   {
-    name: "家育良方",
+    name: "暖心阁",
     description:
-      "面向家长的社会情感教育智鋤理，帮助家长识别、理解并改善孩子在成长过程中面临的社会情感问题。",
-    imgUrl: "/chat/deyu-jylf.png",
+      "做家长的教育知心人。解读孩子成长密码，提供亲子沟通建议，让家庭教育不再迷茫——让我们陪着你，一起静待花开。",
+    imgUrl: "/chat/agent-6.png",
     model: "deyu-jylf",
   },
 ];
