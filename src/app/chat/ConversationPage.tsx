@@ -1,5 +1,5 @@
 "use client";
-import UserPromptTextarea, {} from "@/app/chat/components/UserPromptTextarea";
+import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
 import { Actions } from "@/components/ai-elements/actions";
 import { Action } from "@/components/ai-elements/actions";
 import {
@@ -85,14 +85,14 @@ export default function ConversationPage() {
   ]);
   const handleRegenerate = () => {
     const lastUserMessage = messages.find(
-      (message) => message.id === lastUserMessageId.current,
+      (message) => message.id === lastUserMessageId.current
     );
     if (!lastUserMessage) return;
     const message = lastUserMessage.content;
     if (message && status === "ready") {
       rollbackMessagesTo(
         lastUserMessage.id,
-        lastAssistantMessageBranch.length === 0,
+        lastAssistantMessageBranch.length === 0
       );
       setTimeout(() => {
         sendMessage(message, {
@@ -134,14 +134,14 @@ export default function ConversationPage() {
             completionsOption: {
               isReplace,
               selectedRegenId: lastAssistantMessageBranch.length
-                ? (selectBranchIdRef.current ??
+                ? selectBranchIdRef.current ??
                   lastAssistantMessageBranch[
                     lastAssistantMessageBranch.length - 1
-                  ].id)
+                  ].id
                 : undefined,
             },
           },
-          onSuccess,
+          onSuccess
         );
       }, 0);
     }
@@ -168,7 +168,7 @@ export default function ConversationPage() {
             fetchEarlier();
           }
         },
-        { root: null, threshold: 0 },
+        { root: null, threshold: 0 }
       );
       observer.observe(el);
       return () => observer.disconnect();
@@ -176,7 +176,7 @@ export default function ConversationPage() {
     [fetchEarlier, hasMoreEarlier, isFetchingEarlier],
     {
       wait: 800,
-    },
+    }
   );
   useEffect(() => {
     const el = topSentinelRef.current;
@@ -256,11 +256,9 @@ export default function ConversationPage() {
                 ) : (
                   <div className="flex gap-3">
                     <div>
-                      <MessageAvatar
-                        src="/logo.svg"
-                        className="order-1"
-                        name="启创"
-                      />
+                      <div className="size-10 order-1 rounded-full overflow-hidden">
+                        <img src="/logo.jpg" alt="张江高科·高科芯" />
+                      </div>
                     </div>
                     <div className="flex flex-col bg-white style__shallow-shadow rounded-3xl">
                       <MessageContent>
