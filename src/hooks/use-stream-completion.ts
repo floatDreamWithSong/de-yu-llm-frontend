@@ -6,7 +6,7 @@ import {
 import { feedbackMessage } from "@/apis/requests/conversation/feedback";
 import ClientQueryKeys from "@/apis/queryKeys";
 import { env } from "@/env";
-import { GlobalHeader, tokenStore } from "@/lib/request";
+import { BASE_URL, GlobalHeader, tokenStore } from "@/lib/request";
 import { useChatStore } from "@/store/chat";
 import { useInitMessageStore } from "@/store/initMessage";
 import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
@@ -368,7 +368,7 @@ export function useStreamCompletion(conversationId: string) {
 
         const token = tokenStore.get();
         const response = await fetch(
-          `${env.VITE_API_BASE_URL}/v1/completions`,
+          `${BASE_URL}/v1/completions`,
           {
             method: "POST",
             headers: {
