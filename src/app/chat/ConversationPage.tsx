@@ -9,7 +9,6 @@ import {
 } from "@/components/ai-elements/conversation";
 import {
   Message,
-  MessageAvatar,
   MessageContent,
 } from "@/components/ai-elements/message";
 import {
@@ -85,14 +84,14 @@ export default function ConversationPage() {
   ]);
   const handleRegenerate = () => {
     const lastUserMessage = messages.find(
-      (message) => message.id === lastUserMessageId.current
+      (message) => message.id === lastUserMessageId.current,
     );
     if (!lastUserMessage) return;
     const message = lastUserMessage.content;
     if (message && status === "ready") {
       rollbackMessagesTo(
         lastUserMessage.id,
-        lastAssistantMessageBranch.length === 0
+        lastAssistantMessageBranch.length === 0,
       );
       setTimeout(() => {
         sendMessage(message, {
@@ -134,14 +133,14 @@ export default function ConversationPage() {
             completionsOption: {
               isReplace,
               selectedRegenId: lastAssistantMessageBranch.length
-                ? selectBranchIdRef.current ??
+                ? (selectBranchIdRef.current ??
                   lastAssistantMessageBranch[
                     lastAssistantMessageBranch.length - 1
-                  ].id
+                  ].id)
                 : undefined,
             },
           },
-          onSuccess
+          onSuccess,
         );
       }, 0);
     }
@@ -168,7 +167,7 @@ export default function ConversationPage() {
             fetchEarlier();
           }
         },
-        { root: null, threshold: 0 }
+        { root: null, threshold: 0 },
       );
       observer.observe(el);
       return () => observer.disconnect();
@@ -176,7 +175,7 @@ export default function ConversationPage() {
     [fetchEarlier, hasMoreEarlier, isFetchingEarlier],
     {
       wait: 800,
-    }
+    },
   );
   useEffect(() => {
     const el = topSentinelRef.current;

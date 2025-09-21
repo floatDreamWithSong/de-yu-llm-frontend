@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { create } from "zustand";
 import { TOKEN_KEY } from "@/lib/request";
 interface User extends UserCredentials {
-  setCredentials: (data: Pick<UserCredentials, "expire" | "token">) => void
+  setCredentials: (data: Pick<UserCredentials, "expire" | "token">) => void;
 }
 export const userInfoStore = create<User>()(
   persist(
@@ -22,7 +22,7 @@ export const userInfoStore = create<User>()(
       storage: createJSONStorage(() => localStorage),
 
       onRehydrateStorage: () => (state) => {
-        console.log('恢复',state)
+        console.log("恢复", state);
         // state 就是刚刚恢复出来的值（可能为 undefined）
         if (!state) return;
 
@@ -36,6 +36,6 @@ export const userInfoStore = create<User>()(
           localStorage.setItem(TOKEN_KEY, "");
         }
       },
-    }
-  )
+    },
+  ),
 );

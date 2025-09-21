@@ -131,7 +131,7 @@ export default function LoginPage() {
               </form>
             </Form>
             <div className="[&>button]:rounded-full flex justify-between px-4 items-end h-full">
-              <Outline>
+              {/* <Outline>
                 <AppleCompany size={iconSize} />
               </Outline>
               <Outline>
@@ -139,7 +139,7 @@ export default function LoginPage() {
               </Outline>
               <Outline>
                 <Sina size={iconSize} />
-              </Outline>
+              </Outline> */}
             </div>
           </div>
         </AuthWrapper>

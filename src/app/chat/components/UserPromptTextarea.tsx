@@ -1,19 +1,11 @@
 import {
   PromptInput,
-  PromptInputButton,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { cn } from "@/lib/utils";
-import { useChatStore } from "@/store/chat";
+import { useInitMessageStore } from "@/store/initMessage";
 import type { ChatStatus } from "ai";
-import {
-  Atom,
-  Earth,
-  FolderOpen,
-  MicIcon,
-  Paperclip,
-  PencilLine,
-} from "lucide-react";
+import { Bot, PencilLine } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type React from "react";
 
@@ -33,7 +25,8 @@ export default function UserPromptTextarea({
   const spanRef = useRef<HTMLSpanElement>(null);
 
   // 使用 Zustand store 管理深度思考状态
-  const { isDeepThink, toggleDeepThink } = useChatStore();
+  // const { isDeepThink, toggleDeepThink } = useChatStore();
+  const modelName = useInitMessageStore((s) => s.modelName);
 
   const handleInput = useCallback(
     (e: React.FormEvent<HTMLSpanElement>) => {
@@ -104,7 +97,13 @@ export default function UserPromptTextarea({
         }}
       >
         <div className="inline m-2 mt-0 ">
-          <PencilLine className="size-4 inline stoke-3 stroke-primary -translate-y-0.5" />
+          {!!modelName && (
+            <span className="text-primary p-1 mr-1">
+              <Bot className="size-6 inline stoke-3 stroke-primary -translate-y-1 mr-1" />
+              <strong>智能体 | {modelName}</strong>
+            </span>
+          )}
+          <PencilLine className="size-5 inline stoke-3 stroke-primary -translate-y-0.5" />
         </div>
         <span
           ref={spanRef}
@@ -112,7 +111,7 @@ export default function UserPromptTextarea({
           onInput={handleInput}
           onPaste={handlePaste}
           className={cn(
-            "outline-none border-none",
+            "outline-none border-none hover:cursor-text",
             (status !== "ready" || disabled) && "opacity-50 cursor-not-allowed",
           )}
           suppressContentEditableWarning
@@ -121,15 +120,15 @@ export default function UserPromptTextarea({
       </div>
       <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
         <div>
-          <PromptInputButton
+          {/* <PromptInputButton
             onClick={toggleDeepThink}
             variant={isDeepThink ? "default" : "outline"}
             className="rounded-full"
           >
             <Atom size={16} />
             <span>深度思考</span>
-          </PromptInputButton>
-          <PromptInputButton variant={"outline"} className="rounded-full">
+          </PromptInputButton> */}
+          {/* <PromptInputButton variant={"outline"} className="rounded-full">
             <Earth size={16} />
             <span>联网搜索</span>
           </PromptInputButton>
@@ -138,15 +137,15 @@ export default function UserPromptTextarea({
           </PromptInputButton>
           <PromptInputButton variant={"outline"} className="rounded-full">
             <Paperclip size={16} />
-          </PromptInputButton>
+          </PromptInputButton> */}
         </div>
         <div>
-          <PromptInputButton
+          {/* <PromptInputButton
             variant={"outline"}
             className="rounded-full border-0"
           >
             <MicIcon size={16} />
-          </PromptInputButton>
+          </PromptInputButton> */}
           <PromptInputSubmit
             className="rounded-full"
             status={status}

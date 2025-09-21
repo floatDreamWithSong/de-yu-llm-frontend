@@ -11,7 +11,7 @@ export const RequestSchema = z.object({
 export const ResponseSchema = z.object({
   conversations: z.array(ConversationSchema),
   hasMore: z.boolean(),
-  cursor: z.string()
+  cursor: z.string(),
 });
 
 export function queryHistory(data: z.infer<typeof RequestSchema>) {

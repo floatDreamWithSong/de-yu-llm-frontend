@@ -144,16 +144,16 @@ code {
 }
 
 /* WebKit 滚动条样式（Chrome、Edge、Safari 等） */
-.style__scoller{
+.style__scoller {
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background-color: var(--color-secondary); /* 黑色滑块 */
     border-radius: 9999px;

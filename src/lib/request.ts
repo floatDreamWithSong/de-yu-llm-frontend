@@ -6,11 +6,20 @@ import type {
 } from "axios";
 import axios from "axios";
 import z from "zod";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import { env } from "@/env";
 
 // 基础配置
-const BASE_URL = env.VITE_API_BASE_URL;
+export let BASE_URL = env.VITE_API_BASE_URL;
+declare global {
+  interface Window {
+    setBase(base: string): void
+  }
+}
+window.setBase = (base: string)=> {
+  BASE_URL = base
+  httpClient= createAxiosInstance()
+}
 const DEFAULT_TIMEOUT = 120000;
 export const TOKEN_KEY = "token";
 export const tokenStore = {
@@ -23,7 +32,7 @@ export const tokenStore = {
   },
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
   remove: () => {
-    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(TOKEN_KEY);
   },
 };
 export const GlobalHeader = {
@@ -155,7 +164,7 @@ function createAxiosInstance(): AxiosInstance {
 }
 
 // 创建axios客户端
-const httpClient = createAxiosInstance();
+let httpClient = createAxiosInstance();
 
 // 基础请求方法
 export async function request<T extends z.ZodSchema>(

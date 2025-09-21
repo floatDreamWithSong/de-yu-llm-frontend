@@ -1,9 +1,5 @@
-
-
 const AgentPage = () => {
-  return (
-    <div>AgentPage</div>
-  )
-}
+  return <div>AgentPage</div>;
+};
 
-export default AgentPage
+export default AgentPage;

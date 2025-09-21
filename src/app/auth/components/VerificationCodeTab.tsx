@@ -42,7 +42,7 @@ export default function VerificationCodeTab({
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth/login" });
   const [countDown, setCountDown] = useState<number>(60);
-  const userInfo = userInfoStore()
+  const userInfo = userInfoStore();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -95,8 +95,8 @@ export default function VerificationCodeTab({
           });
         },
         onSuccess(data) {
-          toast.success('登录成功')
-          userInfo.setCredentials(data)
+          toast.success("登录成功");
+          userInfo.setCredentials(data);
           // 获取 redirect 参数，如果没有则默认跳转到 /chat
           const redirectUrl = search.redirect || "/chat";
           navigate({

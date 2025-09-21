@@ -1,8 +1,5 @@
-
 const DatabasePage = () => {
-  return (
-    <div>DatabasePage</div>
-  )
-}
+  return <div>DatabasePage</div>;
+};
 
-export default DatabasePage
+export default DatabasePage;

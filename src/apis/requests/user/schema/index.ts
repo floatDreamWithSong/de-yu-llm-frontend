@@ -2,7 +2,7 @@ import z from "zod";
 
 export const AuthInfoSchema = z.object({
   authId: z.string(),
-  authType: z.literal('phone'),
+  authType: z.literal("phone"),
 });
 export const CredentialsSchema = z.object({
   expire: z.number(),

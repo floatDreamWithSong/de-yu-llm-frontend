@@ -10,8 +10,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useGSAP } from "@gsap/react";
 import { Outlet } from "@tanstack/react-router";
 import gsap from "gsap";
-import { ChevronRight } from "lucide-react";
 import { useRef } from "react";
+import Collapse from "../components/collapse";
 
 const sidebarWidth = "380px";
 
@@ -47,7 +47,7 @@ function SidebarExpandTrigger() {
   const isMobile = useIsMobile();
   const ref = useRef<HTMLButtonElement>(null);
   useGSAP(() => {
-    if(!ref.current) return
+    if (!ref.current) return;
     if (state === "expanded" && !isMobile) {
       gsap.set(ref.current, {
         opacity: 0,
@@ -56,7 +56,6 @@ function SidebarExpandTrigger() {
       gsap.to(ref.current, {
         duration: 0.6,
         opacity: 1,
-        x: 0,
         ease: "circ",
         delay: 0.2,
       });
@@ -66,8 +65,8 @@ function SidebarExpandTrigger() {
     (state === "collapsed" || isMobile) && (
       <SidebarTrigger
         variant={"outline"}
-        icon={<ChevronRight className="size-5" />}
-        className="transition-none opacity-0 absolute z-50 size-10 left-0 -translate-x-full top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2"
+        icon={<Collapse />}
+        className="transition-none opacity-0 absolute z-50 size-10 left-4 top-4 rounded-full bg-white border-2"
         ref={ref}
         iconClassName="size-6"
       />
