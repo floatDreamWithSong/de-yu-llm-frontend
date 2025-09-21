@@ -7,9 +7,9 @@ const MessageCiteButton = ({
 }: { message: ChatMessage; onClick: () => unknown }) => {
   return (
     message.isSearching !== undefined &&
-    (message.searchRes && message.chooseSearch ? (
+    (message.searchRes && message.choiceSearch ? (
       <Button className="mb-2" variant={"link"} onClick={onClick}>
-        引用{message.chooseSearch}篇资料作为参考 &gt;
+        引用{message.choiceSearch}篇资料作为参考 &gt;
       </Button>
     ) : message.totalSearch ? (
       <Button className="mb-2 decoration-0" variant={"link"}>

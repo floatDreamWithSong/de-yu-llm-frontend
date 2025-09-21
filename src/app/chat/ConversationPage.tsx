@@ -283,7 +283,7 @@ export default function ConversationPage() {
                               lastAssistantMessageBranch[index].id;
                           }}
                         >
-                          <BranchMessages className="bg-transparent">
+                          <BranchMessages>
                             {(message.id === lastAssistantMessageId.current
                               ? lastAssistantMessageBranch.length
                                 ? message.isStreaming
@@ -310,7 +310,7 @@ export default function ConversationPage() {
                                       }
                                     }}
                                   />
-                                  <MessageContent className="group-[.is-assistant]:bg-white style__shallow-shadow rounded-3xl">
+                                  <MessageContent className="group-[.is-assistant]:bg-white m-2 style__shallow-shadow rounded-3xl">
                                     <div>
                                       {_message.think && (
                                         <Reasoning

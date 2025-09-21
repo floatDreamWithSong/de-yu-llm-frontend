@@ -34,7 +34,7 @@ export interface ChatMessage {
   replyId?: string;
   isSearching?: boolean;
   totalSearch?: number;
-  chooseSearch?: number;
+  choiceSearch?: number;
   searchRes?: SseSearchCite[];
 }
 export type FeedbackProps = {
@@ -132,7 +132,7 @@ export function useStreamCompletion(conversationId: string) {
           isCompleteThink: message.ext.think !== "" && message.content !== "",
           feedback: message.feedback,
           replyId: message.replyId ?? undefined,
-          chooseSearch: message.ext.cite?.length,
+          choiceSearch: message.ext.cite?.length,
           isSearching: false,
           searchRes: message.ext.cite ?? undefined,
         }))
@@ -153,7 +153,7 @@ export function useStreamCompletion(conversationId: string) {
                 message.ext.think !== "" && message.content !== "",
               feedback: message.feedback,
               replyId: message.replyId ?? undefined,
-              chooseSearch: message.ext.cite?.length,
+              choiceSearch: message.ext.cite?.length,
               isSearching: false,
               searchRes: message.ext.cite ?? undefined,
             }))
@@ -459,7 +459,7 @@ export function useStreamCompletion(conversationId: string) {
                 } else if (currentType === "searchChoice") {
                   console.log("筛选结果", _data);
                   modifyMessage(aiMessageId, {
-                    chooseSearch: _data as number,
+                    choiceSearch: _data as number,
                   });
                 } else if (currentType === "searchCite") {
                   console.log("搜索详情");
@@ -475,7 +475,7 @@ export function useStreamCompletion(conversationId: string) {
                         };
                         if (
                           msg.searchRes?.length ===
-                          (msg.chooseSearch ?? 0) - 1
+                          (msg.choiceSearch ?? 0) - 1
                         ) {
                           newMsg.isSearching = false;
                         }
