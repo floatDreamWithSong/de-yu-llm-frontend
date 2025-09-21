@@ -5,7 +5,6 @@ import {
 } from "@/apis/requests/conversation/detail";
 import { feedbackMessage } from "@/apis/requests/conversation/feedback";
 import ClientQueryKeys from "@/apis/queryKeys";
-import { env } from "@/env";
 import { BASE_URL, GlobalHeader, tokenStore } from "@/lib/request";
 import { useChatStore } from "@/store/chat";
 import { useInitMessageStore } from "@/store/initMessage";
@@ -13,46 +12,16 @@ import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import {throttledStream} from '@/utils/throttledStream'
+import { throttledStream } from "@/utils/throttledStream";
+import type {
+  SseChat,
+  SseMeta,
+  SseModel,
+  StreamChunk,
+  TextContent,
+} from "./sse/type";
+import type { SseSearchCite } from "@/apis/requests/conversation/schema";
 
-export interface StreamChunk {
-  id: number;
-  event: "meta" | "model" | "chat" | "end";
-  data: Record<string, unknown>;
-}
-// 后端 SSE 单帧 payload
-export interface SSEDataPayload {
-  message: {
-    content: string; // 实际是 JSON 字符串，如 "{\"text\":\"这里\"}"
-    contentType: number;
-  };
-  conversationId: string;
-  sectionId: string;
-  replyId: string;
-  isDeleted: boolean;
-  status: number;
-  inputContentType: number;
-  messageIndex: number;
-  botId: string;
-}
-export interface SSEMeta {
-  messageId: string;
-  conversationId: string;
-  sectionId: string;
-  messageIndex: number;
-  conversationType: number;
-  replyId: string;
-}
-export interface SSEModel {
-  model: string;
-  botId: string;
-  botName: string;
-}
-// 如果 content 里是 {text: string}，可再定义一个解析后的结构
-export interface TextContent {
-  text?: string;
-  think?: string;
-}
 export interface ChatMessage {
   id: string;
   think?: string;
@@ -63,6 +32,10 @@ export interface ChatMessage {
   isCompleteThink?: boolean;
   feedback?: number;
   replyId?: string;
+  isSearching?: boolean;
+  totalSearch?: number;
+  chooseSearch?: number;
+  searchRes?: SseSearchCite[];
 }
 export type FeedbackProps = {
   messageId: string;
@@ -80,6 +53,7 @@ export function useStreamCompletion(conversationId: string) {
   const [lastAssistantMessageBranch, setLastAssistantMessageBranch] = useState<
     ChatMessage[]
   >([]);
+  const [isOpenCite, setIsOpenCite] = useState("");
   const selectBranchIdRef = useRef<string | null>(null);
   // 使用 Zustand store 获取完成配置
   const completionConfig = useChatStore((state) => state.completionConfig);
@@ -158,6 +132,9 @@ export function useStreamCompletion(conversationId: string) {
           isCompleteThink: message.ext.think !== "" && message.content !== "",
           feedback: message.feedback,
           replyId: message.replyId ?? undefined,
+          chooseSearch: message.ext.cite?.length,
+          isSearching: false,
+          searchRes: message.ext.cite ?? undefined,
         }))
         .reverse();
 
@@ -176,6 +153,9 @@ export function useStreamCompletion(conversationId: string) {
                 message.ext.think !== "" && message.content !== "",
               feedback: message.feedback,
               replyId: message.replyId ?? undefined,
+              chooseSearch: message.ext.cite?.length,
+              isSearching: false,
+              searchRes: message.ext.cite ?? undefined,
             }))
             .reverse() ?? [],
       };
@@ -341,7 +321,7 @@ export function useStreamCompletion(conversationId: string) {
 
       status.current = "submitted";
       let aiMessageId = "";
-
+      setIsOpenCite("");
       try {
         // 添加用户消息
         let tempUserMessageId = addMessage({ content, role: "user" });
@@ -367,25 +347,22 @@ export function useStreamCompletion(conversationId: string) {
         };
 
         const token = tokenStore.get();
-        const response = await fetch(
-          `${BASE_URL}/v1/completions`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: token || "",
-              ...GlobalHeader.get(),
-            },
-            body: JSON.stringify(requestData),
-            signal: newAbortController.signal,
-          }
-        );
+        const response = await fetch(`${BASE_URL}/v1/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: token || "",
+            ...GlobalHeader.get(),
+          },
+          body: JSON.stringify(requestData),
+          signal: newAbortController.signal,
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        if(!response.body){
-          throw new Error('Empty Body!')
+        if (!response.body) {
+          throw new Error("Empty Body!");
         }
         const reader = throttledStream(response.body, 100)?.getReader();
         if (!reader) {
@@ -440,7 +417,7 @@ export function useStreamCompletion(conversationId: string) {
               try {
                 const _data = JSON.parse(dataStr);
                 if (currentType === "chat") {
-                  const data = _data as SSEDataPayload;
+                  const data = _data as SseChat;
                   const content = JSON.parse(
                     data.message.content
                   ) as TextContent;
@@ -451,7 +428,7 @@ export function useStreamCompletion(conversationId: string) {
                     accumulativeMessage(aiMessageId, { think: content.think });
                   }
                 } else if (currentType === "meta") {
-                  const data = _data as SSEMeta;
+                  const data = _data as SseMeta;
                   console.log("meta:", data);
                   if (!aiMessageId) {
                     aiMessageId = addMessage({
@@ -467,8 +444,50 @@ export function useStreamCompletion(conversationId: string) {
                     lastUserMessageId.current = tempUserMessageId;
                   }
                 } else if (currentType === "model") {
-                  const data = _data as SSEModel;
+                  const data = _data as SseModel;
                   console.log("model:", data);
+                } else if (currentType === "searchStart") {
+                  console.log("开始搜索");
+                  modifyMessage(aiMessageId, {
+                    isSearching: true,
+                  });
+                } else if (currentType === "searchFind") {
+                  console.log("搜索到", _data);
+                  modifyMessage(aiMessageId, {
+                    totalSearch: _data as number,
+                  });
+                } else if (currentType === "searchChoice") {
+                  console.log("筛选结果", _data);
+                  modifyMessage(aiMessageId, {
+                    chooseSearch: _data as number,
+                  });
+                } else if (currentType === "searchCite") {
+                  console.log("搜索详情");
+                  setMessages((prev) =>
+                    prev.map((msg) => {
+                      if (msg.id === aiMessageId) {
+                        const newMsg: ChatMessage = {
+                          ...msg,
+                          searchRes: [
+                            ...(msg.searchRes ?? []),
+                            _data as SseSearchCite,
+                          ],
+                        };
+                        if (
+                          msg.searchRes?.length ===
+                          (msg.chooseSearch ?? 0) - 1
+                        ) {
+                          newMsg.isSearching = false;
+                        }
+                        return newMsg;
+                      }
+                      return msg;
+                    })
+                  );
+                } else if (currentType === "searchEnd") {
+                  console.log("搜索完成");
+                } else if (currentType === "end") {
+                  console.log("对话结束");
                 }
               } catch (e) {
                 console.error("解析数据失败:", e, dataStr);
@@ -552,5 +571,7 @@ export function useStreamCompletion(conversationId: string) {
     hasMoreEarlier,
     isFetchingEarlier,
     selectBranchIdRef,
+    isOpenCite,
+    setIsOpenCite,
   };
 }

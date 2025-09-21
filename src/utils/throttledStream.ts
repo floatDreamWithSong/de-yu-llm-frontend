@@ -16,7 +16,6 @@ export function throttledStream(
         // 限速
         const now = performance.now();
         const elapsed = now - last;
-        console.log('是否限速',elapsed < interval)
         if (elapsed < interval) await sleep(interval - elapsed);
         last = now;
 

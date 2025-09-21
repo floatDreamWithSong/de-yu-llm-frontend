@@ -43,6 +43,10 @@ import {
   BranchNext,
   BranchSelector,
 } from "@/components/ai-elements/branch";
+import type { SseSearchCite } from "@/apis/requests/conversation/schema";
+import { cn } from "@/lib/utils";
+import CiteBar from "./components/CiteBar";
+import MessageCiteButton from "./components/MessageCiteButton";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
@@ -51,6 +55,7 @@ export default function ConversationPage() {
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
   const previousMessageIdRef = useRef<string | null>(null);
+  const [uiCites, setUiCites] = useState<SseSearchCite[]>([]);
 
   const {
     status,
@@ -66,6 +71,8 @@ export default function ConversationPage() {
     lastAssistantMessageBranch,
     hasMoreEarlier,
     isFetchingEarlier,
+    isOpenCite,
+    setIsOpenCite,
   } = useStreamCompletion(conversationId as string);
 
   useEffect(() => {
@@ -200,77 +207,83 @@ export default function ConversationPage() {
     }
   }, [messages]);
   return (
-    <div className="max-w-[1000px] mx-auto p-6 relative size-full rounded-lg">
-      <div className="flex flex-col h-full">
-        <Conversation id="list-container" className="style__scoller-none">
-          <ConversationContent className="relative">
-            {!initMessage && !hasProcessed ? (
-              isFetchingEarlier ? (
-                <div className="absolute w-full justify-center flex py-4">
-                  <LoaderCircle className="animate-spin duration-500 stroke-primary" />
-                </div>
-              ) : (
-                <div ref={topSentinelRef} className="w-full p-1" />
-              )
-            ) : null}
-            {messages.map((message) => (
-              <Message
-                id={`mid-${message.id}`}
-                key={message.id}
-                from={message.role}
-              >
-                {message.role === "user" ? (
-                  message.id !== lastUserMessageId.current || !isReplace ? (
-                    <div className="flex flex-col items-end">
-                      <MessageContent>
-                        <p>{message.content}</p>
-                      </MessageContent>
-                      {status === "ready" &&
-                        lastUserMessageId.current === message.id && (
-                          <Actions className="mt-2">
-                            <Action
-                              label="Copy"
-                              onClick={() => handleCopy(message.content)}
-                            >
-                              <Copy className="size-4" />
-                            </Action>
-                            <Action
-                              label="Regenerate"
-                              onClick={() =>
-                                handleEditUserMessage(message.content)
-                              }
-                            >
-                              <PencilLine className="size-4" />
-                            </Action>
-                          </Actions>
-                        )}
-                    </div>
-                  ) : (
-                    <MessageEditor
-                      ref={inlinePromptTextareaRef}
-                      onSubmit={handleSubmit}
-                      onExit={cancelEditUserMessage}
-                      disabled={status !== "ready"}
-                    />
-                  )
+    <div className="size-full flex overflow-x-hidden relative">
+      <div
+        className={cn([
+          " mx-auto py-6 size-full duration-300 transition-all",
+          !!isOpenCite && "lg:pr-80",
+        ])}
+      >
+        <div className="max-w-[1000px] mx-auto px-4 flex flex-col h-full transition-none">
+          <Conversation id="list-container" className="style__scoller-none">
+            <ConversationContent className="relative">
+              {!initMessage && !hasProcessed ? (
+                isFetchingEarlier ? (
+                  <div className="absolute w-full justify-center flex py-4">
+                    <LoaderCircle className="animate-spin duration-500 stroke-primary" />
+                  </div>
                 ) : (
-                  <div className="flex gap-3">
-                    <div>
-                      <MessageAvatar
-                        src="/logo.svg"
-                        className="order-1"
-                        name="启创"
+                  <div ref={topSentinelRef} className="w-full p-1" />
+                )
+              ) : null}
+              {messages.map((message) => (
+                <Message
+                  id={`mid-${message.id}`}
+                  key={message.id}
+                  from={message.role}
+                >
+                  {message.role === "user" ? (
+                    message.id !== lastUserMessageId.current || !isReplace ? (
+                      <div className="flex flex-col items-end">
+                        <MessageContent>
+                          <p>{message.content}</p>
+                        </MessageContent>
+                        {status === "ready" &&
+                          lastUserMessageId.current === message.id && (
+                            <Actions className="mt-2">
+                              <Action
+                                label="Copy"
+                                onClick={() => handleCopy(message.content)}
+                              >
+                                <Copy className="size-4" />
+                              </Action>
+                              <Action
+                                label="Regenerate"
+                                onClick={() =>
+                                  handleEditUserMessage(message.content)
+                                }
+                              >
+                                <PencilLine className="size-4" />
+                              </Action>
+                            </Actions>
+                          )}
+                      </div>
+                    ) : (
+                      <MessageEditor
+                        ref={inlinePromptTextareaRef}
+                        onSubmit={handleSubmit}
+                        onExit={cancelEditUserMessage}
+                        disabled={status !== "ready"}
                       />
-                    </div>
-                    <div className="flex flex-col bg-white style__shallow-shadow rounded-3xl">
-                      <MessageContent>
+                    )
+                  ) : (
+                    <div className="flex gap-3">
+                      <div>
+                        <MessageAvatar
+                          src="/logo.svg"
+                          className="order-1"
+                          name="启创"
+                        />
+                      </div>
+                      <div>
                         <Branch
+                          className="flex flex-col bg-transparent"
                           onBranchChange={(index) => {
                             selectBranchIdRef.current =
                               lastAssistantMessageBranch[index].id;
                           }}
                         >
-                          <BranchMessages>
+                          <BranchMessages className="bg-transparent">
                             {(message.id === lastAssistantMessageId.current
                               ? lastAssistantMessageBranch.length
                                 ? message.isStreaming
@@ -286,125 +299,158 @@ export default function ConversationPage() {
                                 messageArray.length > 1;
                               return (
                                 <div key={_message.id}>
-                                  <div>
-                                    {_message.think && (
-                                      <Reasoning
-                                        defaultOpen={!_message.isCompleteThink}
-                                        className=""
-                                        isStreaming={status === "streaming"}
-                                      >
-                                        <ReasoningTrigger
-                                          isCompleted={_message.isCompleteThink}
-                                        />
-                                        <ReasoningContent className="text-[#80808f]">
-                                          {_message.think}
-                                        </ReasoningContent>
-                                      </Reasoning>
-                                    )}
-                                    {!!_message.content && (
-                                      <Response>{_message.content}</Response>
-                                    )}
-                                    {_message.isStreaming &&
-                                      !_message.think &&
-                                      !_message.content && (
-                                        <LoaderCircle className="size-4 animate-spin" />
+                                  <MessageCiteButton
+                                    message={_message}
+                                    onClick={() => {
+                                      setUiCites(_message.searchRes ?? []);
+                                      if (isOpenCite !== _message.id)
+                                        setIsOpenCite(_message.id);
+                                      else {
+                                        setIsOpenCite("");
+                                      }
+                                    }}
+                                  />
+                                  <MessageContent className="group-[.is-assistant]:bg-white style__shallow-shadow rounded-3xl">
+                                    <div>
+                                      {_message.think && (
+                                        <Reasoning
+                                          defaultOpen={
+                                            !_message.isCompleteThink
+                                          }
+                                          className=""
+                                          isStreaming={status === "streaming"}
+                                        >
+                                          <ReasoningTrigger
+                                            isCompleted={
+                                              _message.isCompleteThink
+                                            }
+                                          />
+                                          <ReasoningContent className="text-[#80808f]">
+                                            {_message.think}
+                                          </ReasoningContent>
+                                        </Reasoning>
                                       )}
-                                  </div>
+                                      {!!_message.content && (
+                                        <Response cites={_message.searchRes}>
+                                          {_message.content}
+                                        </Response>
+                                      )}
+                                      {_message.isStreaming &&
+                                        !_message.think &&
+                                        !_message.content && (
+                                          <LoaderCircle className="size-4 animate-spin" />
+                                        )}
+                                    </div>
 
-                                  {!message.isStreaming && (
-                                    <Actions className="mt-2">
-                                      <Action
-                                        label="Copy"
-                                        onClick={() =>
-                                          handleCopy(_message.content)
-                                        }
-                                      >
-                                        <Copy className="size-4" />
-                                      </Action>
-                                      {regenerateable && (
+                                    {!message.isStreaming && (
+                                      <Actions className="mt-2">
                                         <Action
-                                          label="Regenerate"
-                                          onClick={handleRegenerate}
+                                          label="Copy"
+                                          onClick={() =>
+                                            handleCopy(_message.content)
+                                          }
                                         >
-                                          <RefreshCcw className="size-4" />
+                                          <Copy className="size-4" />
                                         </Action>
-                                      )}
-                                      {_message.feedback === 1 ? (
-                                        <Action
-                                          onClick={handleFeedback.bind(null, {
-                                            action: 0,
-                                            messageId: _message.id,
-                                            forRegenList,
-                                          })}
-                                          label="Like"
-                                        >
-                                          <ThumbsUpIcon className="size-4 fill-primary" />
-                                        </Action>
-                                      ) : _message.feedback === 2 ? (
-                                        <Action
-                                          onClick={handleFeedback.bind(null, {
-                                            action: 0,
-                                            messageId: _message.id,
-                                            forRegenList,
-                                          })}
-                                          label="DisLike"
-                                        >
-                                          <ThumbsDownIcon className="size-4 fill-primary" />
-                                        </Action>
-                                      ) : (
-                                        <>
+                                        {regenerateable && (
+                                          <Action
+                                            label="Regenerate"
+                                            onClick={handleRegenerate}
+                                          >
+                                            <RefreshCcw className="size-4" />
+                                          </Action>
+                                        )}
+                                        {_message.feedback === 1 ? (
                                           <Action
                                             onClick={handleFeedback.bind(null, {
-                                              action: 1,
+                                              action: 0,
                                               messageId: _message.id,
                                               forRegenList,
                                             })}
                                             label="Like"
                                           >
-                                            <ThumbsUpIcon className="size-4" />
+                                            <ThumbsUpIcon className="size-4 fill-primary" />
                                           </Action>
+                                        ) : _message.feedback === 2 ? (
                                           <Action
                                             onClick={handleFeedback.bind(null, {
-                                              action: 2,
+                                              action: 0,
                                               messageId: _message.id,
                                               forRegenList,
                                             })}
-                                            label="Dislike"
+                                            label="DisLike"
                                           >
-                                            <ThumbsDownIcon className="size-4" />
+                                            <ThumbsDownIcon className="size-4 fill-primary" />
                                           </Action>
-                                        </>
-                                      )}
-                                      {messageArray.length > 1 && (
-                                        <BranchSelector from="assistant">
-                                          <BranchPrevious />
-                                          <BranchPage />
-                                          <BranchNext />
-                                        </BranchSelector>
-                                      )}
-                                    </Actions>
-                                  )}
+                                        ) : (
+                                          <>
+                                            <Action
+                                              onClick={handleFeedback.bind(
+                                                null,
+                                                {
+                                                  action: 1,
+                                                  messageId: _message.id,
+                                                  forRegenList,
+                                                },
+                                              )}
+                                              label="Like"
+                                            >
+                                              <ThumbsUpIcon className="size-4" />
+                                            </Action>
+                                            <Action
+                                              onClick={handleFeedback.bind(
+                                                null,
+                                                {
+                                                  action: 2,
+                                                  messageId: _message.id,
+                                                  forRegenList,
+                                                },
+                                              )}
+                                              label="Dislike"
+                                            >
+                                              <ThumbsDownIcon className="size-4" />
+                                            </Action>
+                                          </>
+                                        )}
+                                        {messageArray.length > 1 && (
+                                          <BranchSelector from="assistant">
+                                            <BranchPrevious />
+                                            <BranchPage />
+                                            <BranchNext />
+                                          </BranchSelector>
+                                        )}
+                                      </Actions>
+                                    )}
+                                  </MessageContent>
                                 </div>
                               );
                             })}
                           </BranchMessages>
                         </Branch>
-                      </MessageContent>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </Message>
-            ))}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-        <UserPromptTextarea
-          className="mx-auto sticky bottom-4"
-          onSubmit={handleSubmit}
-          onAbort={abortRequest}
-          status={status}
-        />
+                  )}
+                </Message>
+              ))}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
+          <UserPromptTextarea
+            className="mx-auto sticky bottom-4"
+            onSubmit={handleSubmit}
+            onAbort={abortRequest}
+            status={status}
+          />
+        </div>
       </div>
+      <CiteBar
+        onClose={() => setIsOpenCite("")}
+        className={cn([
+          "bg-chat h-full w-80 style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform absolute right-0",
+          !isOpenCite && "translate-x-full",
+        ])}
+        uiCites={uiCites}
+      />
     </div>
   );
 }

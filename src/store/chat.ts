@@ -4,6 +4,7 @@ import type { Request as CompletionRequest } from "@/apis/requests/conversation/
 export interface ChatState {
   // 深度思考状态
   isDeepThink: boolean;
+  isWebSearch: boolean;
   // 完成配置
   completionConfig: Pick<
     CompletionRequest,
@@ -12,10 +13,11 @@ export interface ChatState {
 
   // Actions
   toggleDeepThink: () => void;
+  toggleWebSearch: () => void;
   setCompletionConfig: (
     config: Partial<
       Pick<CompletionRequest, "model" | "botId" | "completionsOption">
-    >,
+    >
   ) => void;
 }
 
@@ -31,11 +33,13 @@ const defaultConfig: Pick<
     isReplace: false,
     useDeepThink: false,
     stream: true,
+    webSearch: false,
   },
 };
 
 export const useChatStore = create<ChatState>((set, get) => ({
   isDeepThink: false,
+  isWebSearch: false,
   completionConfig: defaultConfig,
 
   toggleDeepThink: () => {
@@ -55,6 +59,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
 
+  toggleWebSearch: () => {
+    const currentState = get();
+
+    set({
+      isWebSearch: !currentState.isWebSearch,
+      completionConfig: {
+        ...currentState.completionConfig,
+        completionsOption: {
+          ...currentState.completionConfig.completionsOption,
+          webSearch: !currentState.completionConfig.completionsOption.webSearch,
+        },
+      },
+    });
+  },
   setCompletionConfig: (config) => {
     set((state) => ({
       completionConfig: {

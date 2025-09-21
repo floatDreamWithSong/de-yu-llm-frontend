@@ -1,6 +1,6 @@
 import { request } from "@/lib/request";
 import z from "zod";
-import { PageSchema } from "./schema";
+import { PageSchema, SseSearchCiteSchema } from "./schema";
 
 export const RequestSchema = z.object({
   conversationId: z.string(),
@@ -12,6 +12,7 @@ export const ExtSchema = z.object({
   brief: z.string(),
   suggest: z.string(),
   think: z.string(),
+  cite: z.array(SseSearchCiteSchema).nullable()
 });
 export type Ext = z.infer<typeof ExtSchema>;
 

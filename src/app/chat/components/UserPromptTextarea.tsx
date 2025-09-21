@@ -33,7 +33,8 @@ export default function UserPromptTextarea({
   const spanRef = useRef<HTMLSpanElement>(null);
 
   // 使用 Zustand store 管理深度思考状态
-  const { isDeepThink, toggleDeepThink } = useChatStore();
+  const { isDeepThink, toggleDeepThink, toggleWebSearch, isWebSearch } =
+    useChatStore();
 
   const handleInput = useCallback(
     (e: React.FormEvent<HTMLSpanElement>) => {
@@ -129,7 +130,11 @@ export default function UserPromptTextarea({
             <Atom size={16} />
             <span>深度思考</span>
           </PromptInputButton>
-          <PromptInputButton variant={"outline"} className="rounded-full">
+          <PromptInputButton
+            onClick={toggleWebSearch}
+            variant={isWebSearch ? "default" : "outline"}
+            className="rounded-full"
+          >
             <Earth size={16} />
             <span>联网搜索</span>
           </PromptInputButton>

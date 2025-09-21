@@ -40,6 +40,7 @@ export const CompletionsOptionSchema = z.object({
   isReplace: z.boolean(),
   selectedRegenId: z.union([z.null(), z.string()]).optional(),
   stream: z.boolean(),
+  webSearch: z.boolean(),
   useDeepThink: z.boolean(),
   withSuggest: z.boolean(),
 });

@@ -12,7 +12,13 @@
       "src/components/ai-elements",
       "src/components/ui"
     ],
-    "include": ["src/*", ".vscode/*", "index.html", "vite.config.js"]
+    "include": [
+      "src/*",
+      ".vscode/*",
+      "index.html",
+      "vite.config.js",
+      "src/components/ai-elements/response.tsx"
+    ]
   },
   "formatter": {
     "enabled": true,
