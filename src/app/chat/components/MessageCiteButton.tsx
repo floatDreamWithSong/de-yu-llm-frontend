@@ -1,25 +1,31 @@
+import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { Button } from "@/components/ui/button";
+import { TextAnimate } from "@/components/ui/text-animate";
 import type { ChatMessage } from "@/hooks/use-stream-completion";
-
 const MessageCiteButton = ({
   message,
   onClick,
 }: { message: ChatMessage; onClick: () => unknown }) => {
+  if (message.isSearching === undefined) {
+    return;
+  }
   return (
-    message.isSearching !== undefined &&
-    (message.searchRes && message.choiceSearch ? (
-      <Button className="mb-2" variant={"link"} onClick={onClick}>
-        引用{message.choiceSearch}篇资料作为参考 &gt;
-      </Button>
-    ) : message.totalSearch ? (
-      <Button className="mb-2 decoration-0" variant={"link"}>
-        搜索到{message.totalSearch}篇资料
-      </Button>
-    ) : message.isSearching ? (
-      <Button className="mb-2 decoration-0" variant={"link"}>
-        正在搜索...
-      </Button>
-    ) : null)
+    <Button variant={"link"} onClick={onClick}>
+      {message.choiceSearch &&
+      message.searchRes?.length === message.choiceSearch ? (
+        <TextAnimate
+          once={true}
+          animation="blurIn"
+          by="character"
+        >{`引用${message.choiceSearch}篇资料作为参考 >`}</TextAnimate>
+      ) : message.choiceSearch ? (
+        <AnimatedShinyText>选择{message.choiceSearch}篇资料</AnimatedShinyText>
+      ) : message.totalSearch ? (
+        <AnimatedShinyText>搜索到{message.totalSearch}篇资料</AnimatedShinyText>
+      ) : message.isSearching ? (
+        <AnimatedShinyText>正在搜索...</AnimatedShinyText>
+      ) : null}
+    </Button>
   );
 };
 

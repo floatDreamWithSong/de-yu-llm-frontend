@@ -364,7 +364,7 @@ export function useStreamCompletion(conversationId: string) {
         if (!response.body) {
           throw new Error("Empty Body!");
         }
-        const reader = throttledStream(response.body, 100)?.getReader();
+        const reader = throttledStream(response.body, 0)?.getReader();
         if (!reader) {
           throw new Error("无法读取响应流");
         }
@@ -408,6 +408,12 @@ export function useStreamCompletion(conversationId: string) {
             }
             if (line.startsWith("event: ")) {
               currentType = line.substring(7) as StreamChunk["event"];
+              if (currentType === "searchStart") {
+                console.log("开始搜索", aiMessageId);
+                modifyMessage(aiMessageId, {
+                  isSearching: true,
+                });
+              }
               continue;
             }
             if (line.startsWith("data: ")) {
@@ -446,21 +452,16 @@ export function useStreamCompletion(conversationId: string) {
                 } else if (currentType === "model") {
                   const data = _data as SseModel;
                   console.log("model:", data);
-                } else if (currentType === "searchStart") {
-                  console.log("开始搜索");
-                  modifyMessage(aiMessageId, {
-                    isSearching: true,
-                  });
                 } else if (currentType === "searchFind") {
                   console.log("搜索到", _data);
                   modifyMessage(aiMessageId, {
                     totalSearch: _data as number,
-                  });
+                  },console.log);
                 } else if (currentType === "searchChoice") {
                   console.log("筛选结果", _data);
                   modifyMessage(aiMessageId, {
                     choiceSearch: _data as number,
-                  });
+                  },console.log);
                 } else if (currentType === "searchCite") {
                   console.log("搜索详情");
                   setMessages((prev) =>
@@ -488,6 +489,8 @@ export function useStreamCompletion(conversationId: string) {
                   console.log("搜索完成");
                 } else if (currentType === "end") {
                   console.log("对话结束");
+                } else {
+                  console.warn('未匹配的', currentType)
                 }
               } catch (e) {
                 console.error("解析数据失败:", e, dataStr);
