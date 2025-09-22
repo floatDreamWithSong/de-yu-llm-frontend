@@ -33,8 +33,16 @@ export default function UserPromptTextarea({
   const spanRef = useRef<HTMLSpanElement>(null);
 
   // 使用 Zustand store 管理深度思考状态
-  const { isDeepThink, toggleDeepThink, toggleWebSearch, isWebSearch } =
-    useChatStore();
+  const isDeepThink = useChatStore(
+    (s) => s.completionConfig.completionsOption.useDeepThink,
+  );
+  const isWebSearch = useChatStore(
+    (s) => s.completionConfig.completionsOption.webSearch,
+  );
+  const botId = useChatStore((s) => s.completionConfig.botId);
+  const toggleDeepThink = useChatStore((s) => s.toggleDeepThink);
+  const toggleWebSearch = useChatStore((s) => s.toggleWebSearch);
+  const setCompletionConfig = useChatStore((s) => s.setCompletionConfig);
 
   const handleInput = useCallback(
     (e: React.FormEvent<HTMLSpanElement>) => {
@@ -137,6 +145,18 @@ export default function UserPromptTextarea({
           >
             <Earth size={16} />
             <span>联网搜索</span>
+          </PromptInputButton>
+          <PromptInputButton
+            onClick={() =>
+              setCompletionConfig({
+                botId: botId === "code-gen" ? "default" : "code-gen",
+              })
+            }
+            variant={botId === "code-gen" ? "default" : "outline"}
+            className="rounded-full"
+          >
+            <Earth size={16} />
+            <span>代码生成</span>
           </PromptInputButton>
           <PromptInputButton variant={"outline"} className="rounded-full">
             <FolderOpen size={16} />

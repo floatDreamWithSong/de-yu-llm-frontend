@@ -47,7 +47,7 @@ export const CompletionsOptionSchema = z.object({
 export type CompletionsOption = z.infer<typeof CompletionsOptionSchema>;
 
 export const RequestSchema = z.object({
-  botId: z.literal("default"),
+  botId: z.union([z.literal("default"),z.literal("code-gen")]),
   completionsOption: CompletionsOptionSchema,
   conversationId: z.string(),
   messages: z.array(MessageSchema),
