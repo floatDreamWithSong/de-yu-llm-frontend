@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const PageSchema = z.object({
   cursor: z.string().optional(),
-  size: z.number()
-})
+  size: z.number(),
+});
 
 export const SseSearchCiteSchema = z.object({
   index: z.number(), // Int, 引用的索引
@@ -15,3 +15,10 @@ export const SseSearchCiteSchema = z.object({
   datePublished: z.string(), // St, 数据发布时间
 });
 export type SseSearchCite = z.infer<typeof SseSearchCiteSchema>;
+
+export const SseEditorCodeSchema = z.object({
+  index: z.number(),
+  codeType: z.literal("html"),
+  code: z.string(),
+});
+export type SseEditorCode = z.infer<typeof SseEditorCodeSchema>;

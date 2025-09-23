@@ -11,6 +11,9 @@ import {
   HoverCardTrigger,
 } from "../ui/hover-card";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { CodeXml } from "lucide-react";
+import { ShineBorder } from "../ui/shine-border";
 
 type ResponseProps = ComponentProps<typeof Streamdown>;
 
@@ -57,13 +60,60 @@ function remarkCitePlugin() {
     });
   };
 }
+
+/* 2. remark 插件：把 [code:0] 换成 <button class="code-ref" data-code-id="0">Code 1</button> */
+function remarkCodeRefPlugin() {
+  return (tree: any) => {
+    visit(tree, "text", (node, idx, parent) => {
+      if (idx == null || !parent) return;
+
+      const text = node.value as string;
+      const codeRegex = /\[code:(\d+)]/g;
+      if (!codeRegex.test(text)) return;
+
+      const newChildren: any[] = [];
+      let lastIndex = 0;
+
+      text.replace(codeRegex, (match, idStr, offset) => {
+        if (offset > lastIndex) {
+          newChildren.push({
+            type: "text",
+            value: text.slice(lastIndex, offset),
+          });
+        }
+        const num = Number(idStr) + 1;
+        // 使用标准 link 节点占位，并通过 class 和 data 标识
+        newChildren.push({
+          type: "link",
+          url: "#",
+          data: {
+            hProperties: {
+              className: "code-ref",
+              "data-code-id": idStr,
+            },
+          },
+          children: [{ type: "text", value: `Code ${num}` }],
+        });
+        lastIndex = offset + match.length;
+        return match;
+      });
+
+      if (lastIndex < text.length) {
+        newChildren.push({ type: "text", value: text.slice(lastIndex) });
+      }
+      parent.children.splice(idx, 1, ...newChildren);
+      return idx + newChildren.length;
+    });
+  };
+}
 /* 3. Streamdown 包装 */
 export const Response = memo(
   ({
     className,
     cites,
+    onToggleCodeEditor,
     ...props
-  }: ResponseProps & { cites?: SseSearchCite[] }) => (
+  }: ResponseProps & { cites?: SseSearchCite[], onToggleCodeEditor?: ()=>unknown }) => (
     <Streamdown
       className={cn(
         "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
@@ -71,7 +121,7 @@ export const Response = memo(
       )}
       defaultOrigin="http://localhost:3000"
       allowedLinkPrefixes={["#"]}
-      remarkPlugins={[remarkCitePlugin]}
+      remarkPlugins={[remarkCitePlugin, remarkCodeRefPlugin]}
       components={{
         a: ({ node, className, children, ...rest }) =>
           className?.includes("cite-ref") ? (
@@ -124,9 +174,13 @@ export const Response = memo(
                 </HoverCard>
               );
             })()
-          ) : (
-            <div>1</div>
-          ),
+          ) : className?.includes("code-ref") ? (
+            <Button onClick={onToggleCodeEditor} variant={"outline"} className="relative h-16 rounded-md px-12 has-[>svg]:px-8" size={"lg"}>
+              <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+              <CodeXml className="stroke-primary" size={14} />
+              代码预览
+            </Button>
+          ) : null,
       }}
       {...props}
     />

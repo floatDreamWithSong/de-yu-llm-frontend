@@ -18,7 +18,9 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
-import { useStreamCompletion } from "@/hooks/use-stream-completion";
+import {
+  useStreamCompletion,
+} from "@/hooks/use-stream-completion";
 import { toast } from "sonner";
 import { useInitMessageStore } from "@/store/initMessage";
 import { useParams } from "@tanstack/react-router";
@@ -47,6 +49,7 @@ import type { SseSearchCite } from "@/apis/requests/conversation/schema";
 import { cn } from "@/lib/utils";
 import CiteBar from "./components/CiteBar";
 import MessageCiteButton from "./components/MessageCiteButton";
+import CodeEditorBar from "./components/CodeEditorBar";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
@@ -56,7 +59,6 @@ export default function ConversationPage() {
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
   const previousMessageIdRef = useRef<string | null>(null);
   const [uiCites, setUiCites] = useState<SseSearchCite[]>([]);
-
   const {
     status,
     messages,
@@ -73,7 +75,20 @@ export default function ConversationPage() {
     isFetchingEarlier,
     isOpenCite,
     setIsOpenCite,
+    isOpenCodeEditor,
+    setIsOpenCodeEditor,
   } = useStreamCompletion(conversationId as string);
+  const getTargetMes = (id: string) => {
+    if (!id) {
+      return;
+    }
+    const res = messages.find((mes) => mes.id === id);
+    if (!res) {
+      return lastAssistantMessageBranch.find((mes) => mes.id === id);
+    }
+    return res;
+  };
+  const codeMes = getTargetMes(isOpenCodeEditor);
 
   useEffect(() => {
     if (initMessage && !hasProcessed) {
@@ -212,6 +227,7 @@ export default function ConversationPage() {
         className={cn([
           " mx-auto py-6 size-full duration-300 transition-all",
           !!isOpenCite && "lg:pr-80",
+          isOpenCodeEditor && "lg:pr-240",
         ])}
       >
         <div className="max-w-[1000px] mx-auto px-4 flex flex-col h-full transition-none">
@@ -331,7 +347,16 @@ export default function ConversationPage() {
                                         </Reasoning>
                                       )}
                                       {!!_message.content && (
-                                        <Response cites={_message.searchRes}>
+                                        <Response
+                                          onToggleCodeEditor={() => {
+                                            if (isOpenCite !== _message.id) {
+                                              setIsOpenCodeEditor(_message.id);
+                                            } else {
+                                              setIsOpenCodeEditor("");
+                                            }
+                                          }}
+                                          cites={_message.searchRes}
+                                        >
                                           {_message.content}
                                         </Response>
                                       )}
@@ -450,6 +475,16 @@ export default function ConversationPage() {
           !isOpenCite && "translate-x-full",
         ])}
         uiCites={uiCites}
+      />
+
+      <CodeEditorBar
+        code={codeMes?.code}
+        codeType={codeMes?.codeType}
+        onClose={() => setIsOpenCodeEditor("")}
+        className={cn([
+          "bg-chat h-full w-240 style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform absolute right-0",
+          !isOpenCodeEditor && "translate-x-full",
+        ])}
       />
     </div>
   );

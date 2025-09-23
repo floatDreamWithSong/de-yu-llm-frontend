@@ -8,8 +8,9 @@ import { useChatStore } from "@/store/chat";
 import type { ChatStatus } from "ai";
 import {
   Atom,
+  CodeXml,
   Earth,
-  FolderOpen,
+  // FolderOpen,
   MicIcon,
   Paperclip,
   PencilLine,
@@ -32,14 +33,10 @@ export default function UserPromptTextarea({
   const [value, setValue] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
 
-  // 使用 Zustand store 管理深度思考状态
-  const isDeepThink = useChatStore(
-    (s) => s.completionConfig.completionsOption.useDeepThink,
-  );
-  const isWebSearch = useChatStore(
-    (s) => s.completionConfig.completionsOption.webSearch,
-  );
-  const botId = useChatStore((s) => s.completionConfig.botId);
+  const {
+    botId,
+    completionsOption: { useDeepThink: isDeepThink, webSearch: isWebSearch },
+  } = useChatStore((s) => s.completionConfig);
   const toggleDeepThink = useChatStore((s) => s.toggleDeepThink);
   const toggleWebSearch = useChatStore((s) => s.toggleWebSearch);
   const setCompletionConfig = useChatStore((s) => s.setCompletionConfig);
@@ -155,17 +152,14 @@ export default function UserPromptTextarea({
             variant={botId === "code-gen" ? "default" : "outline"}
             className="rounded-full"
           >
-            <Earth size={16} />
+            <CodeXml size={16} />
             <span>代码生成</span>
-          </PromptInputButton>
-          <PromptInputButton variant={"outline"} className="rounded-full">
-            <FolderOpen size={16} />
           </PromptInputButton>
           <PromptInputButton variant={"outline"} className="rounded-full">
             <Paperclip size={16} />
           </PromptInputButton>
         </div>
-        <div>
+        <div className="ml-1">
           <PromptInputButton
             variant={"outline"}
             className="rounded-full border-0"

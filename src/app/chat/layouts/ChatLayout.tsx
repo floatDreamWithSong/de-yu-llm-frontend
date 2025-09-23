@@ -62,7 +62,7 @@ function SidebarExpandTrigger() {
       <SidebarTrigger
         variant={"outline"}
         icon={<ChevronRight className="size-5" />}
-        className="transition-none opacity-0 absolute z-50 size-10 left-0 -translate-x-full top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2"
+        className="transition-none opacity-0 absolute z-50 size-10 left-0 -translate-x-full top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2 container"
         ref={ref}
         iconClassName="size-6"
       />

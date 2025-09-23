@@ -20,7 +20,11 @@ import type {
   StreamChunk,
   TextContent,
 } from "./sse/type";
-import type { SseSearchCite } from "@/apis/requests/conversation/schema";
+import type {
+  SseEditorCode,
+  SseSearchCite,
+} from "@/apis/requests/conversation/schema";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export interface ChatMessage {
   id: string;
@@ -36,6 +40,8 @@ export interface ChatMessage {
   totalSearch?: number;
   choiceSearch?: number;
   searchRes?: SseSearchCite[];
+  codeType?: SseEditorCode["codeType"];
+  code?: string;
 }
 export type FeedbackProps = {
   messageId: string;
@@ -53,7 +59,27 @@ export function useStreamCompletion(conversationId: string) {
   const [lastAssistantMessageBranch, setLastAssistantMessageBranch] = useState<
     ChatMessage[]
   >([]);
-  const [isOpenCite, setIsOpenCite] = useState("");
+  const [isOpenCite, setIsOpenCiteCore] = useState("");
+  const [isOpenCodeEditor, setIsOpenCodeEditorCore] = useState("");
+  const { setOpen } = useSidebar();
+  const setIsOpenCite = useCallback(
+    (p: Parameters<typeof setIsOpenCiteCore>[0]) => {
+      setIsOpenCiteCore(p);
+      if (p !== "") setIsOpenCodeEditorCore("");
+    },
+    []
+  );
+  const setIsOpenCodeEditor = useCallback(
+    (p: Parameters<typeof setIsOpenCodeEditorCore>[0]) => {
+      setIsOpenCodeEditorCore(p);
+      if (p !== "") {
+        setIsOpenCiteCore("");
+        setOpen(false);
+      }
+    },
+    [setOpen]
+  );
+
   const selectBranchIdRef = useRef<string | null>(null);
   // 使用 Zustand store 获取完成配置
   const completionConfig = useChatStore((state) => state.completionConfig);
@@ -135,6 +161,8 @@ export function useStreamCompletion(conversationId: string) {
           choiceSearch: message.ext.cite?.length,
           isSearching: false,
           searchRes: message.ext.cite ?? undefined,
+          codeType: message.ext.code?.[0].codeType,
+          code: message.ext.code?.[0].code,
         }))
         .reverse();
 
@@ -156,6 +184,8 @@ export function useStreamCompletion(conversationId: string) {
               choiceSearch: message.ext.cite?.length,
               isSearching: false,
               searchRes: message.ext.cite ?? undefined,
+              codeType: message.ext.code?.[0].codeType,
+              code: message.ext.code?.[0].code,
             }))
             .reverse() ?? [],
       };
@@ -281,14 +311,18 @@ export function useStreamCompletion(conversationId: string) {
 
   const accumulativeMessage = useCallback((id: string, opt: TextContent) => {
     setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === id
-          ? {
-              ...msg,
-              content: (msg.content ?? "") + (opt.text ?? ""),
-              think: (msg.think ?? "") + (opt.think ?? ""),
-            }
-          : msg
+      prev.map((msg) =>{
+        console.log(msg, opt)
+        return msg.id === id
+        ? {
+          ...msg,
+          content: (msg.content ?? "") + (opt.text ?? ""),
+          think: (msg.think ?? "") + (opt.think ?? ""),
+          codeType: opt.codeType,
+          code: (msg.code ?? "") + (opt.code ?? ""),
+        }
+        : msg
+      }
       )
     );
   }, []);
@@ -433,9 +467,19 @@ export function useStreamCompletion(conversationId: string) {
                   if (content.think) {
                     accumulativeMessage(aiMessageId, { think: content.think });
                   }
+                  if (content.codeType) {
+                    setIsOpenCodeEditor(aiMessageId)
+                    accumulativeMessage(aiMessageId, {
+                      codeType: content.codeType,
+                    });
+                  }
+                  if (content.code) {
+                    accumulativeMessage(aiMessageId, {
+                      code: content.code,
+                    });
+                  }
                 } else if (currentType === "meta") {
                   const data = _data as SseMeta;
-                  console.log("meta:", data);
                   if (!aiMessageId) {
                     aiMessageId = addMessage({
                       id: data.messageId,
@@ -454,14 +498,22 @@ export function useStreamCompletion(conversationId: string) {
                   console.log("model:", data);
                 } else if (currentType === "searchFind") {
                   console.log("搜索到", _data);
-                  modifyMessage(aiMessageId, {
-                    totalSearch: _data as number,
-                  },console.log);
+                  modifyMessage(
+                    aiMessageId,
+                    {
+                      totalSearch: _data as number,
+                    },
+                    console.log
+                  );
                 } else if (currentType === "searchChoice") {
                   console.log("筛选结果", _data);
-                  modifyMessage(aiMessageId, {
-                    choiceSearch: _data as number,
-                  },console.log);
+                  modifyMessage(
+                    aiMessageId,
+                    {
+                      choiceSearch: _data as number,
+                    },
+                    console.log
+                  );
                 } else if (currentType === "searchCite") {
                   console.log("搜索详情");
                   setMessages((prev) =>
@@ -490,7 +542,7 @@ export function useStreamCompletion(conversationId: string) {
                 } else if (currentType === "end") {
                   console.log("对话结束");
                 } else {
-                  console.warn('未匹配的', currentType)
+                  console.warn("未匹配的", currentType);
                 }
               } catch (e) {
                 console.error("解析数据失败:", e, dataStr);
@@ -535,6 +587,8 @@ export function useStreamCompletion(conversationId: string) {
       accumulativeMessage,
       completionConfig,
       queryClient,
+      setIsOpenCite,
+      setIsOpenCodeEditor
     ] // 移除 lastAssistantMessageBranch 依赖
   );
   const handleFeedback = useCallback((props: FeedbackProps) => {
@@ -576,5 +630,7 @@ export function useStreamCompletion(conversationId: string) {
     selectBranchIdRef,
     isOpenCite,
     setIsOpenCite,
+    isOpenCodeEditor,
+    setIsOpenCodeEditor,
   };
 }

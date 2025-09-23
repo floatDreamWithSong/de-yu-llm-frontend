@@ -28,7 +28,6 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // 获取该行需要应用的延时（按匹配关键字的最大值计算）
 function getDelayForLine(text: string): number {
   let maxDelay = 0;
-  console.log(text);
   for (const { key, delay = 0 } of delatTargetArr) {
     if (text.includes(key)) {
       if (delay > maxDelay) maxDelay = delay;

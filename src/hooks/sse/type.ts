@@ -1,4 +1,4 @@
-import type { SseSearchCite } from "@/apis/requests/conversation/schema";
+import type { SseEditorCode, SseSearchCite } from "@/apis/requests/conversation/schema";
 
 // 后端 SSE 单帧 payload
 export interface SseChat {
@@ -49,6 +49,8 @@ export type StreamChunk =
 export interface TextContent {
   text?: string;
   think?: string;
+  codeType?: SseEditorCode['codeType']
+  code?: string
 }
 
 
