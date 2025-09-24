@@ -74,6 +74,16 @@ export default function ChatPage() {
         onSubmit={handleSubmit}
         onAbort={abortRequest}
         status={status}
+        templateArr={
+          model === "deyu-bzr"
+            ? [
+                "请你为我设计一节",
+                "为主题的班会，对象是小学",
+                "年级学生，教学目标是",
+                "，不输出除此之外的东西",
+              ]
+            : void 0
+        }
       />
       <div className="row-span-4 grid grid-rows-2 grid-cols-3 gap-6 mt-6">
         {cardList.map((card) => (
@@ -83,8 +93,8 @@ export default function ChatPage() {
               model === card.model
                 ? "scale-105"
                 : model !== "deyu-default"
-                  ? "brightness-75"
-                  : "",
+                ? "brightness-75"
+                : "",
             ])}
             onClick={() => {
               model === card.model
