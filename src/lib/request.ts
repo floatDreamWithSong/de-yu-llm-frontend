@@ -13,13 +13,13 @@ import { env } from "@/env";
 export let BASE_URL = env.VITE_API_BASE_URL;
 declare global {
   interface Window {
-    setBase(base: string): void
+    setBase(base: string): void;
   }
 }
-window.setBase = (base: string)=> {
-  BASE_URL = base
-  httpClient= createAxiosInstance()
-}
+window.setBase = (base: string) => {
+  BASE_URL = base;
+  httpClient = createAxiosInstance();
+};
 const DEFAULT_TIMEOUT = 120000;
 export const TOKEN_KEY = "token";
 export const tokenStore = {
@@ -28,7 +28,7 @@ export const tokenStore = {
     if (import.meta.env.MODE === "test") {
       return "xh-polaris";
     }
-    return token ? `Bearer ${token}` : void 0;
+    return token;
   },
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
   remove: () => {

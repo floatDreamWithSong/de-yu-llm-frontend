@@ -66,7 +66,7 @@ export interface ChatMessage {
   isCompleteThink?: boolean;
   feedback?: number;
   replyId?: string;
-  botState?: z.infer<typeof BotStateSchema>
+  botState?: z.infer<typeof BotStateSchema>;
 }
 export type FeedbackProps = {
   messageId: string;
@@ -166,7 +166,7 @@ export function useStreamCompletion(conversationId: string) {
           isCompleteThink: message.ext.think !== "" && message.content !== "",
           feedback: message.feedback,
           replyId: message.replyId ?? undefined,
-          botState: message.ext.botState
+          botState: message.ext.botState,
         }))
         .reverse();
 
@@ -185,7 +185,7 @@ export function useStreamCompletion(conversationId: string) {
                 message.ext.think !== "" && message.content !== "",
               feedback: message.feedback,
               replyId: message.replyId ?? undefined,
-              botState: message.ext.botState
+              botState: message.ext.botState,
             }))
             .reverse() ?? [],
       };
@@ -228,11 +228,13 @@ export function useStreamCompletion(conversationId: string) {
             if (stableEarlierMessages.regenList.length > 0) {
               setLastAssistantMessageBranch(stableEarlierMessages.regenList);
             }
-            const model = stableEarlierMessages.earlierMessages.find(i => i.botState?.model)?.botState?.model
+            const model = stableEarlierMessages.earlierMessages.find(
+              (i) => i.botState?.model,
+            )?.botState?.model;
             if (model) {
               // 将 store 更新推迟到微任务，避免在父组件渲染期间触发订阅组件更新
               Promise.resolve().then(() => {
-                setModel(model, modelMap.get(model) ?? '');
+                setModel(model, modelMap.get(model) ?? "");
               });
             }
           }
@@ -321,10 +323,10 @@ export function useStreamCompletion(conversationId: string) {
       prev.map((msg) =>
         msg.id === id
           ? {
-            ...msg,
-            content: (msg.content ?? "") + (opt.text ?? ""),
-            think: (msg.think ?? "") + (opt.think ?? ""),
-          }
+              ...msg,
+              content: (msg.content ?? "") + (opt.text ?? ""),
+              think: (msg.think ?? "") + (opt.think ?? ""),
+            }
           : msg,
       ),
     );
@@ -335,7 +337,7 @@ export function useStreamCompletion(conversationId: string) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
       status.current = "ready";
-    hasInitializedRef.current = false;
+      hasInitializedRef.current = false;
     }
   }, []);
 
@@ -382,18 +384,15 @@ export function useStreamCompletion(conversationId: string) {
       try {
         let tempUserMessageId = addMessage({ content, role: "user" });
         const token = tokenStore.get();
-        const response = await fetch(
-          `${BASE_URL}/v1/completions`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: token || "",
-              ...GlobalHeader.get(),
-            },
-            body: JSON.stringify(requestData),
-            signal: newAbortController.signal,
+        const response = await fetch(`${BASE_URL}/v1/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: token || "",
+            ...GlobalHeader.get(),
           },
-        );
+          body: JSON.stringify(requestData),
+          signal: newAbortController.signal,
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -504,7 +503,7 @@ export function useStreamCompletion(conversationId: string) {
         });
       } finally {
         status.current = "ready";
-    hasInitializedRef.current = false;
+        hasInitializedRef.current = false;
         abortControllerRef.current = null;
         // 完成流式输出
         modifyMessage(aiMessageId, { isStreaming: false }, (msg) => {
@@ -582,4 +581,3 @@ export function useStreamCompletion(conversationId: string) {
     selectBranchIdRef,
   };
 }
-

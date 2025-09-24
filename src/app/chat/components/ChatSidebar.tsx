@@ -448,11 +448,13 @@ export default function ChatSidebar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center" className="ml-2">
-            <DropdownMenuItem onClick={() => {
-              userInfoStore.setState({ token: "", expire: -1, userId: "" });
-              localStorage.setItem(TOKEN_KEY, "");
-              navigate({ to: "/auth/login", search: { redirect: "/chat" } });
-            }}>
+            <DropdownMenuItem
+              onClick={() => {
+                userInfoStore.setState({ token: "", expire: -1, userId: "" });
+                localStorage.setItem(TOKEN_KEY, "");
+                navigate({ to: "/auth/login", search: { redirect: "/chat" } });
+              }}
+            >
               <LogOut className="size-4" />
               退出登录
             </DropdownMenuItem>

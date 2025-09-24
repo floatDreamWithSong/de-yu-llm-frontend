@@ -15,9 +15,9 @@ export default function ChatPage() {
   const [status, setStatus] = useState<ChatStatus>("ready");
   const signal = useRef<AbortController | null>(null);
   const { setInitMessage, model, setModel } = useInitMessageStore();
-  useEffect(()=>{
-    setModel('deyu-default','')
-  },[setModel])
+  useEffect(() => {
+    setModel("deyu-default", "");
+  }, [setModel]);
   const abortRequest = useCallback(() => {
     if (signal.current) {
       setStatus("ready");

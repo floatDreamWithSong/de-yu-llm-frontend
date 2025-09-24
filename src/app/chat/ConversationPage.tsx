@@ -7,10 +7,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   Reasoning,
   ReasoningContent,

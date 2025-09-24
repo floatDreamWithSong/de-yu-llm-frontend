@@ -15,12 +15,12 @@ export const BotStateSchema = z.object({
 });
 
 export const ExtSchema = z.object({
-  botState: z.string().transform(i => {
-    if (i.length < 10) return
-    const target = JSON.parse(i)
-    const res = BotStateSchema.safeParse(target)
+  botState: z.string().transform((i) => {
+    if (i.length < 10) return;
+    const target = JSON.parse(i);
+    const res = BotStateSchema.safeParse(target);
     if (res.success) {
-      return res.data
+      return res.data;
     }
   }),
   brief: z.string(),
@@ -64,4 +64,3 @@ export function getConversationDetail(data: z.infer<typeof RequestSchema>) {
     responseValidator: DataSchema,
   });
 }
-

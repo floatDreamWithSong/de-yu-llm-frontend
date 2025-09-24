@@ -1,19 +1,18 @@
 import { create } from "zustand";
 
 export const avaliableModelName = [
-  "deyu-default"
-  , "deyu-bzr"
-  , "deyu-xkjs"
-  , "deyu-qyds"
-  , "deyu-dygb"
-  , "deyu-xy"
-  , "deyu-jylf"
-] as const
+  "deyu-default",
+  "deyu-bzr",
+  "deyu-xkjs",
+  "deyu-qyds",
+  "deyu-dygb",
+  "deyu-xy",
+  "deyu-jylf",
+] as const;
 
-export type AvaliableModelName = (typeof avaliableModelName)[number]
+export type AvaliableModelName = (typeof avaliableModelName)[number];
 
-
-  export interface InitMessageState {
+export interface InitMessageState {
   // 初始消息
   initMessage: string | null;
   // 是否已处理初始消息
