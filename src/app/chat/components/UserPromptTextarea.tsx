@@ -36,8 +36,9 @@ export default function UserPromptTextarea({
       if (status !== "ready" || disabled) return;
       e.preventDefault();
       const target = e.target as HTMLSpanElement;
-      const newValue = target.innerHTML;
-      setValue(newValue);
+      const newValue = target.textContent ?? "";
+      console.log(newValue)
+      setValue(newValue.trim());
     },
     [status, disabled]
   );
@@ -52,7 +53,7 @@ export default function UserPromptTextarea({
 
   useEffect(() => {
     if (spanRef.current && !isInitialized) {
-      spanRef.current.innerHTML = value;
+      spanRef.current.textContent = value;
       setIsInitialized(true);
     }
   }, [value, isInitialized]);
@@ -64,7 +65,7 @@ export default function UserPromptTextarea({
           onSubmit?.(textContent, () => {
             setValue("");
             if (spanRef.current) {
-              spanRef.current.innerHTML = "";
+              spanRef.current.textContent = "";
             }
           });
         }
@@ -77,7 +78,7 @@ export default function UserPromptTextarea({
           onSubmit?.(textContent, () => {
             setValue("");
             if (spanRef.current) {
-              spanRef.current.innerHTML = "";
+              spanRef.current.textContent = "";
             }
           });
         } else {
@@ -115,6 +116,13 @@ export default function UserPromptTextarea({
           contentEditable={status === "ready" && !disabled}
           onInput={handleInput}
           onPaste={handlePaste}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.ctrlKey) {
+              e.preventDefault();
+              // 避免浏览器插入 <br>，改为纯文本换行
+              document.execCommand("insertText", false, "\n");
+            }
+          }}
           className={cn(
             "outline-none border-none hover:cursor-text",
             (status !== "ready" || disabled) && "opacity-50 cursor-not-allowed",
