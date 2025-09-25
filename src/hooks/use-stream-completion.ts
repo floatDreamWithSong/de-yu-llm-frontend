@@ -25,6 +25,7 @@ import type {
   SseSearchCite,
 } from "@/apis/requests/conversation/schema";
 import { useSidebar } from "@/components/ui/sidebar";
+import { genConversationTitle } from "@/apis/requests/conversation/gen-title";
 
 export interface ChatMessage {
   id: string;
@@ -356,29 +357,29 @@ export function useStreamCompletion(conversationId: string) {
       status.current = "submitted";
       let aiMessageId = "";
       setIsOpenCite("");
+      const requestData: CompletionRequest = {
+        model: completionConfig.model,
+        botId: completionConfig.botId,
+        conversationId,
+        ...options,
+        completionsOption: {
+          ...completionConfig.completionsOption,
+          ...options?.completionsOption,
+        },
+        messages: [
+          {
+            content,
+            contentType: 0,
+            attaches: [],
+            references: [],
+            role: "user",
+          },
+        ],
+      };
       try {
         // 添加用户消息
         let tempUserMessageId = addMessage({ content, role: "user" });
 
-        const requestData: CompletionRequest = {
-          model: completionConfig.model,
-          botId: completionConfig.botId,
-          conversationId,
-          ...options,
-          completionsOption: {
-            ...completionConfig.completionsOption,
-            ...options?.completionsOption,
-          },
-          messages: [
-            {
-              content,
-              contentType: 0,
-              attaches: [],
-              references: [],
-              role: "user",
-            },
-          ],
-        };
 
         const token = tokenStore.get();
         const response = await fetch(`${BASE_URL}/v1/completions`, {
@@ -575,9 +576,19 @@ export function useStreamCompletion(conversationId: string) {
             });
           }
         });
-        queryClient.invalidateQueries({
-          queryKey: [ClientQueryKeys.consversation.conversationHistory],
-        });
+        const {
+          initMessage: currentInitMessage,
+          hasProcessed: currentHasProcessed,
+        } = useInitMessageStore.getState();
+        if (!currentInitMessage && currentHasProcessed) {
+          await genConversationTitle({
+            conversationId,
+            messages: requestData.messages,
+          });
+          queryClient.invalidateQueries({
+            queryKey: [ClientQueryKeys.consversation.conversationHistory],
+          });
+        }
       }
     },
     [

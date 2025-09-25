@@ -13,7 +13,7 @@ export const authenticatedRoute = createRoute({
       import.meta.env.MODE === "test"
         ? true
         : Boolean(
-            user.token && user.expire > 0 && user.expire * 1000 > Date.now(),
+            user.token && user.expire > 0 && user.expire * 1000 > Date.now()
           );
 
     if (!isAuthenticated) {
