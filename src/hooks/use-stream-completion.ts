@@ -401,7 +401,7 @@ export function useStreamCompletion(conversationId: string) {
         if (!response.body) {
           throw new Error("Empty Body!");
         }
-        const reader = throttledStream(response.body, 100)?.getReader();
+        const reader = throttledStream(response.body, 20)?.getReader();
         if (!reader) {
           throw new Error("无法读取响应流");
         }
@@ -471,6 +471,7 @@ export function useStreamCompletion(conversationId: string) {
                     aiMessageId = addMessage({
                       id: data.messageId,
                       role: "assistant",
+                      isStreaming: true
                     });
                   }
                   if (data?.replyId !== tempUserMessageId) {
