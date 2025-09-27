@@ -19,6 +19,10 @@ const delatTargetArr: DelayKeyMeta[] = [
     key: "searchCite",
     delay: 0,
   },
+  {
+    key: "event: model",
+    delay: 800,
+  }
 ];
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

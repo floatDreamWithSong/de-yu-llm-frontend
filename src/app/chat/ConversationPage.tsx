@@ -44,6 +44,7 @@ export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
   const { initMessage, hasProcessed, markAsProcessed, clearInitMessage } =
     useInitMessageStore();
+  const hasInitMessageSubmitted = useRef(false)
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
   const previousMessageIdRef = useRef<string | null>(null);
@@ -66,10 +67,13 @@ export default function ConversationPage() {
 
   useEffect(() => {
     if (initMessage && !hasProcessed) {
+      hasInitMessageSubmitted.current = true
       markAsProcessed();
       const message = initMessage;
       clearInitMessage();
-      sendMessage(message);
+      sendMessage(message,void 0,()=>{
+        hasInitMessageSubmitted.current = false
+      });
       // 发送消息后清除初始消息
     }
   }, [
@@ -396,7 +400,7 @@ export default function ConversationPage() {
           className="mx-auto sticky bottom-4"
           onSubmit={handleSubmit}
           onAbort={abortRequest}
-          status={status}
+          status={hasInitMessageSubmitted.current ? "submitted": status}
         />
       </div>
     </div>
