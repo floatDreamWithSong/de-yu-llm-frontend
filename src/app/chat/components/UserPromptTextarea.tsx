@@ -69,9 +69,20 @@ export default function UserPromptTextarea({
   return (
     <PromptInput
       onKeyDown={(e) => {
-        if (e.key === "Enter" && e.ctrlKey && status === "ready" && !disabled) {
-          const textContent = spanRef.current?.textContent || "";
-          onSubmit?.(textContent, () => {
+        if (status !== "ready" || disabled) return;
+        if (e.key === "Enter" && e.ctrlKey) {
+          e.preventDefault();
+          setValue(pre=>`${pre}\n`)
+          setTimeout(()=>{
+            console.log(value)
+          })
+          // 插入纯文本换行，避免 <br> 或块级元素
+          document.execCommand("insertText", false, "\n");
+          return;
+        }
+        if (e.key === "Enter") {
+          e.preventDefault();
+          onSubmit?.(value, () => {
             setValue("");
             if (spanRef.current) {
               spanRef.current.innerHTML = "";
