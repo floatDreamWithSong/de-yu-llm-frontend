@@ -8,14 +8,14 @@ import type { ChatStatus } from "ai";
 import { Bot, PencilLine } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type React from "react";
-import TemplateBlank from "./TemplateBlank";
+// import TemplateBlank from "./TemplateBlank";
 
 export default function UserPromptTextarea({
   className,
   onSubmit,
   onAbort,
   disabled = false,
-  templateArr,
+  // templateArr,
   status,
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
   templateArr?: string[];
@@ -127,13 +127,13 @@ export default function UserPromptTextarea({
           className={cn(
             "outline-none border-none hover:cursor-text",
             (status !== "ready" || disabled) && "opacity-50 cursor-not-allowed",
-            templateArr && "hidden"
+            // templateArr && "hidden"
           )}
           suppressContentEditableWarning
         />
         {!value && <span className="text-gray-500">继续提问</span>}
 
-        {templateArr && (
+        {/* {templateArr && (
           <TemplateBlank
             contentEditable={status === "ready" && !disabled}
             disabled={status === "ready" && !disabled}
@@ -146,7 +146,7 @@ export default function UserPromptTextarea({
             suppressContentEditableWarning
             templateArr={templateArr}
           />
-        )}
+        )} */}
       </div>
       <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
         <div>
