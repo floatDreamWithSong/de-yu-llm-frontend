@@ -24,7 +24,7 @@ function remarkCitePlugin() {
       if (idx == null || !parent) return;
 
       const text = node.value as string;
-      const citeRegex = /\[cite:(\d+)]/g;
+      const citeRegex = /\[(?:cite|索引):(\d+)]/g;
       if (!citeRegex.test(text)) return;
 
       const newChildren: any[] = [];
