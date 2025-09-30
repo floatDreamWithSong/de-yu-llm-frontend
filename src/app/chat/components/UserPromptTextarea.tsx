@@ -66,44 +66,34 @@ export default function UserPromptTextarea({
       setIsInitialized(true);
     }
   }, [value, isInitialized]);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (status === "ready" && !disabled) {
+      const prompt = value.replaceAll("<br>", "\n").trim();
+      onSubmit?.(prompt, () => {
+        setValue("");
+        if (spanRef.current) {
+          spanRef.current.innerHTML = "";
+        }
+      });
+    } else {
+      onAbort();
+    }
+  };
   return (
     <PromptInput
       onKeyDown={(e) => {
         if (status !== "ready" || disabled) return;
-        if (e.key === "Enter" && e.ctrlKey) {
+        if (e.key === "Enter" && e.shiftKey) {
           e.preventDefault();
-          setValue(pre=>`${pre}\n`)
-          setTimeout(()=>{
-            console.log(value)
-          })
-          // 插入纯文本换行，避免 <br> 或块级元素
           document.execCommand("insertText", false, "\n");
           return;
         }
         if (e.key === "Enter") {
-          e.preventDefault();
-          onSubmit?.(value, () => {
-            setValue("");
-            if (spanRef.current) {
-              spanRef.current.innerHTML = "";
-            }
-          });
+          handleSubmit(e);
         }
       }}
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (status === "ready" && !disabled) {
-          const textContent = spanRef.current?.textContent || "";
-          onSubmit?.(textContent, () => {
-            setValue("");
-            if (spanRef.current) {
-              spanRef.current.innerHTML = "";
-            }
-          });
-        } else {
-          onAbort();
-        }
-      }}
+      onSubmit={handleSubmit}
       className={cn(
         "relative flex flex-col divide-none p-2 border-4 mb-4",
         "shadow-none border-primary/30 style__shallow-shadow max-w-[1000px] aspect-[4/1]",
@@ -180,7 +170,7 @@ export default function UserPromptTextarea({
           <PromptInputSubmit
             className="rounded-full"
             status={status}
-            disabled={disabled}
+            disabled={disabled || !value.trim()}
           />
         </div>
       </div>
