@@ -1,19 +1,28 @@
 import { request } from "@/lib/request";
 import z from "zod";
-
-export const PageSchema = z.object({
-  size: z.number(),
-  cursor: z.number().optional()
-});
-export type Page = z.infer<typeof PageSchema>;
+import { PageSchema } from "./schema";
+import { avaliableModelName } from "@/store/initMessage";
 
 export const RequestSchema = z.object({
   conversationId: z.string(),
   page: PageSchema,
 });
+// src/apis/requests/conversation/detail.ts:12
+export const BotStateSchema = z.object({
+  model: z.enum(avaliableModelName),
+  bot_id: z.string(),
+  bot_name: z.string(),
+});
 
 export const ExtSchema = z.object({
-  botState: z.string(),
+  botState: z.string().transform((i) => {
+    if (i.length < 10) return;
+    const target = JSON.parse(i);
+    const res = BotStateSchema.safeParse(target);
+    if (res.success) {
+      return res.data;
+    }
+  }),
   brief: z.string(),
   suggest: z.string(),
   think: z.string(),
@@ -37,13 +46,13 @@ export const MessageListSchema = z.object({
     return value === 2 ? "user" : "assistant";
   }),
 });
-export type MessageList = z.infer<typeof MessageListSchema>;
+export type MessageItem = z.infer<typeof MessageListSchema>;
 
 export const DataSchema = z.object({
   hasMore: z.boolean(),
   messageList: z.array(MessageListSchema).nullable(),
   regenList: z.array(MessageListSchema).nullable(),
-  cursor: z.number()
+  cursor: z.string(),
 });
 
 export function getConversationDetail(data: z.infer<typeof RequestSchema>) {

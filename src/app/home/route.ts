@@ -13,8 +13,6 @@ const homepage = createRoute({
   component: lazyRouteComponent(() => import("./HomePage.tsx")),
 });
 
-const homeRouteTree = homeRoute.addChildren([
-  homepage,
-]);
+const homeRouteTree = homeRoute.addChildren([homepage]);
 
 export default homeRouteTree;

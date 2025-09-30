@@ -6,23 +6,34 @@ import type {
 } from "axios";
 import axios from "axios";
 import z from "zod";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import { env } from "@/env";
 
 // 基础配置
-const BASE_URL = env.VITE_API_BASE_URL;
+export let BASE_URL = env.VITE_API_BASE_URL;
+declare global {
+  interface Window {
+    setBase(base: string): void;
+  }
+}
+window.setBase = (base: string) => {
+  BASE_URL = base;
+  httpClient = createAxiosInstance();
+};
 const DEFAULT_TIMEOUT = 120000;
-const TOKEN_KEY = "token";
+export const TOKEN_KEY = "token";
 export const tokenStore = {
   get: () => {
+    const token = localStorage.getItem(TOKEN_KEY);
     if (import.meta.env.MODE === "test") {
       return "xh-polaris";
     }
-    const token = localStorage.getItem(TOKEN_KEY);
-    return token ? `Bearer ${token}` : void 0;
+    return token;
   },
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
-  remove: () => localStorage.removeItem(TOKEN_KEY),
+  remove: () => {
+    localStorage.removeItem(TOKEN_KEY);
+  },
 };
 export const GlobalHeader = {
   get: () => {
@@ -48,7 +59,6 @@ function sleep(time: number) {
 
 // 创建axios实例
 function createAxiosInstance(): AxiosInstance {
-  console.log(BASE_URL);
   const instance = axios.create({
     baseURL: BASE_URL,
     timeout: DEFAULT_TIMEOUT,
@@ -120,7 +130,7 @@ function createAxiosInstance(): AxiosInstance {
           case 401:
             errorMessage = "未授权，请重新登录";
             tokenStore.remove();
-            window.location.href = "/auth";
+            window.location.href = "/auth/login";
             break;
           case 403:
             errorMessage = "拒绝访问";
@@ -154,7 +164,7 @@ function createAxiosInstance(): AxiosInstance {
 }
 
 // 创建axios客户端
-const httpClient = createAxiosInstance();
+let httpClient = createAxiosInstance();
 
 // 基础请求方法
 export async function request<T extends z.ZodSchema>(

@@ -15,10 +15,16 @@ scan({
 });
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
+
 const router = createRouter({
   routeTree,
   context: {
     ...TanStackQueryProviderContext,
+    // 认证状态现在在 beforeLoad 中实时检查，这里提供一个基础结构
+    auth: {
+      isAuthenticated: false,
+      user: null,
+    },
   },
   defaultPreload: "intent",
   scrollRestoration: true,

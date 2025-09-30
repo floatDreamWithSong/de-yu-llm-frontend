@@ -10,30 +10,35 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useGSAP } from "@gsap/react";
 import { Outlet } from "@tanstack/react-router";
 import gsap from "gsap";
-import { ChevronRight } from "lucide-react";
 import { useRef } from "react";
+import Collapse from "../components/collapse";
 
-const sidebarWidth = "300px";
+const sidebarWidth = "380px";
 
 export default function ChatLayout() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": sidebarWidth,
-          "--sidebar-width-mobile": sidebarWidth,
-        } as React.CSSProperties
-      }
+    <div
+      style={{ backgroundImage: "url(/chat/bg.png)" }}
+      className="w-full h-full bg-cover bg-center bg-no-repeat"
     >
-      <ChatSidebar />
-      <main className=" w-full h-full bg-chat">
-        {/* <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full"> */}
-        <SidebarExpandTrigger />
-        {/* <div id="sidebar-header" /> */}
-        {/* </div> */}
-        <Outlet />
-      </main>
-    </SidebarProvider>
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": sidebarWidth,
+            "--sidebar-width-mobile": sidebarWidth,
+          } as React.CSSProperties
+        }
+      >
+        <ChatSidebar />
+        <main className=" w-full h-full bg-transparent">
+          {/* <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full"> */}
+          <SidebarExpandTrigger />
+          {/* <div id="sidebar-header" /> */}
+          {/* </div> */}
+          <Outlet />
+        </main>
+      </SidebarProvider>
+    </div>
   );
 }
 
@@ -42,6 +47,7 @@ function SidebarExpandTrigger() {
   const isMobile = useIsMobile();
   const ref = useRef<HTMLButtonElement>(null);
   useGSAP(() => {
+    if (!ref.current) return;
     if (state === "expanded" && !isMobile) {
       gsap.set(ref.current, {
         opacity: 0,
@@ -50,18 +56,17 @@ function SidebarExpandTrigger() {
       gsap.to(ref.current, {
         duration: 0.6,
         opacity: 1,
-        x: 0,
         ease: "circ",
         delay: 0.2,
       });
     }
-  }, [state,isMobile]);
+  }, [state, isMobile]);
   return (
     (state === "collapsed" || isMobile) && (
       <SidebarTrigger
         variant={"outline"}
-        icon={<ChevronRight className="size-5" />}
-        className="transition-none opacity-0 absolute z-50 size-10 left-0 -translate-x-full top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2"
+        icon={<Collapse />}
+        className="transition-none opacity-0 absolute z-50 size-10 left-4 top-4 rounded-full bg-white border-2"
         ref={ref}
         iconClassName="size-6"
       />

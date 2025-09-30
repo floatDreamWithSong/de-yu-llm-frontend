@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { codeInspectorPlugin } from "code-inspector-plugin";
+import removeConsole from "vite-plugin-remove-console";
 
 import { resolve } from "node:path";
 
@@ -95,6 +96,7 @@ export default defineConfig({
     }),
     viteReact(),
     tailwindcss(),
+    removeConsole()
   ],
   // test: {
   //   globals: true,

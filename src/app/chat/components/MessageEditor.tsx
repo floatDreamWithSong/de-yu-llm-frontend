@@ -6,7 +6,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useCallback, useImperativeHandle, useRef, useState } from "react";
+import { useImperativeHandle, useRef, useState } from "react";
 
 export type MessageEditorRef = {
   setTextContent: (textContent: string) => void;
@@ -27,11 +27,8 @@ export default function MessageEditor({
   onExit: () => void;
   className?: string;
 }) {
-  const [value, setValueCore] = useState("");
-  const setValue = useCallback((value: string) => {
-    console.log("setValue", value);
-    setValueCore(value);
-  }, []);
+  const [value, setValue] = useState("");
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   useImperativeHandle(ref, () => ({
     setTextContent: (textContent: string) => {

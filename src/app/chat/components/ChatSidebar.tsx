@@ -1,13 +1,10 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  BotIcon,
   Edit,
   LoaderCircle,
   LogOut,
   MessageCircleMoreIcon,
   MoreHorizontal,
-  SearchIcon,
-  Settings,
   Trash2,
 } from "lucide-react";
 
@@ -19,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -48,27 +44,31 @@ import {
 import groupConversationsByDate from "@/utils/date-group";
 import { renameConversation } from "@/apis/requests/conversation/rename";
 import { useCallback, useEffect, useRef, useState } from "react";
-import ClientQueryKeys from "@/apis/requests/queryKeys";
+import ClientQueryKeys from "@/apis/queryKeys";
 import { queryHistory } from "@/apis/requests/conversation/query";
 import { deleteConversation } from "@/apis/requests/conversation/delete";
 import { cn } from "@/lib/utils";
 import { useInitMessageStore } from "@/store/initMessage";
+import { userInfoStore } from "@/store/user";
+import { TOKEN_KEY } from "@/lib/request";
+import Collapse from "./collapse";
+import { Separator } from "@radix-ui/react-select";
 
 export default function ChatSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
-  const matchRouteId = location.pathname.startsWith("/chat/agent")
-    ? "agent"
-    : location.pathname.startsWith("/chat/database")
-      ? "database"
-      : "chat";
+  // const matchRouteId = location.pathname.startsWith("/chat/agent")
+  //   ? "agent"
+  //   : location.pathname.startsWith("/chat/database")
+  //     ? "database"
+  //     : "chat";
   const [renamingItemId, setRenamingItemId] = useState("");
   const [tempTitle, setTempTitle] = useState("");
   const [seacherQueryKey, setSearchQueryKey] = useState("");
   const queryClient = useQueryClient();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { reset } = useInitMessageStore();
+  const reset = useInitMessageStore((s) => s.reset);
   const {
     data: conversationHistory,
     isLoading,
@@ -76,11 +76,11 @@ export default function ChatSidebar() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<
-    { conversations: Conversation[]; cursor: number; hasMore: boolean },
+    { conversations: Conversation[]; cursor: string; hasMore: boolean },
     Error,
     Conversation[],
     [string, string],
-    number | null
+    string | null
   >({
     queryKey: [
       ClientQueryKeys.consversation.conversationHistory,
@@ -90,7 +90,7 @@ export default function ChatSidebar() {
       const cursor = pageParam ?? undefined;
       if (!seacherQueryKey) {
         return getConversationHistoryList({
-          page: { size: 5, cursor },
+          page: { size: 15, cursor },
         });
       }
       return queryHistory({
@@ -282,66 +282,36 @@ export default function ChatSidebar() {
   }
   return (
     <Sidebar
-      className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow"
-      variant="inset"
+      className="px-10 py-20 ease-out duration-400 style__scoller"
+      variant="floating"
     >
-      <SidebarHeader className="space-y-4">
-        <div className="flex items-center justify-around px-2 gap-2">
+      <SidebarHeader className="space-y-4 relative">
+        <img
+          src="/chat/bot.png"
+          alt="bot"
+          className="absolute left-2 h-[5.6rem] top-0 -translate-y-7/12"
+        />
+        <div className="flex items-center justify-around px-2 gap-2 pt-10">
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="logo" />
             <h2 className="text-primary font-semibold text-2xl">
-              启创·<span className="text-xl">InnoSpark</span>
+              张江高科 <strong>·</strong> 高科芯
             </h2>
           </div>
           {state === "expanded" && (
-            <SidebarTrigger
-              className="self-end"
-              icon={<img src="/collapse.svg" alt="collapse" />}
-            />
+            <SidebarTrigger className="self-end" icon={<Collapse />} />
           )}
         </div>
         <div className="px-3 space-y-4 flex flex-col my-6">
           <Button
-            className={cn([
-              "rounded-full text-lg ",
-              matchRouteId !== "chat" ? "bg-gray-100 text-[#545469]" : "",
-            ])}
+            className={cn(["rounded-full text-lg"])}
             size={"lg"}
-            variant={"secondary"}
+            variant={"default"}
             onClick={() => {
               navigate({ to: "/chat" });
             }}
           >
-            <MessageCircleMoreIcon className="stroke-2 size-5" />
+            <MessageCircleMoreIcon className="stroke-2 size-6" />
             开始对话
-          </Button>
-          <Button
-            className={cn([
-              "rounded-full text-lg ",
-              matchRouteId !== "agent" ? "bg-gray-100 text-[#545469]" : "",
-            ])}
-            size={"lg"}
-            variant={"secondary"}
-            onClick={() => {
-              navigate({ to: "/chat/agent" });
-            }}
-          >
-            <BotIcon className="stroke-2 size-5" />
-            智能助手
-          </Button>
-          <Button
-            className={cn([
-              "rounded-full text-lg ",
-              matchRouteId !== "database" ? "bg-gray-100 text-[#545469]" : "",
-            ])}
-            size={"lg"}
-            variant={"secondary"}
-            onClick={() => {
-              navigate({ to: "/chat/database" });
-            }}
-          >
-            <MessageCircleMoreIcon className="stroke-2 size-5" />
-            <div className="mr-4">知识库</div>
           </Button>
         </div>
       </SidebarHeader>
@@ -455,34 +425,41 @@ export default function ChatSidebar() {
           value={seacherQueryKey}
           onChange={handleChangeSearchKey}
           placeholder="搜索..."
-          className="p-5 pr-10 rounded-full"
+          className="p-5 pr-14 rounded-full border-2 border-primary"
         />
-        <SearchIcon className="size-4 absolute right-4 top-1/2 -translate-y-1/2" />
+        <img
+          className="size-13 absolute right-0 top-1/2 translate-x-1 -translate-y-1/2"
+          src="/chat/search.png"
+          alt="搜索"
+        />
       </div>
       <Separator />
       <SidebarFooter className="flex flex-row justify-between items-center p-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Settings className="size-6" />
+              <img
+                className="rounded-full"
+                src="/default-user.png"
+                alt="avatar"
+                width={40}
+                height={40}
+              />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="ml-2">
-            {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
-            <DropdownMenuSeparator /> */}
-            <DropdownMenuItem>
+          <DropdownMenuContent align="center" className="ml-2">
+            <DropdownMenuItem
+              onClick={() => {
+                userInfoStore.setState({ token: "", expire: -1, userId: "" });
+                localStorage.setItem(TOKEN_KEY, "");
+                navigate({ to: "/auth/login", search: { redirect: "/chat" } });
+              }}
+            >
               <LogOut className="size-4" />
               退出登录
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <img
-          className="rounded-full"
-          src="/default-user.png"
-          alt="avatar"
-          width={40}
-          height={40}
-        />
       </SidebarFooter>
     </Sidebar>
   );

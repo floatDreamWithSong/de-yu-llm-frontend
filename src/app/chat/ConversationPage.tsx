@@ -1,5 +1,5 @@
 "use client";
-import UserPromptTextarea, {} from "@/app/chat/components/UserPromptTextarea";
+import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
 import { Actions } from "@/components/ai-elements/actions";
 import { Action } from "@/components/ai-elements/actions";
 import {
@@ -7,11 +7,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageAvatar,
-  MessageContent,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   Reasoning,
   ReasoningContent,
@@ -35,11 +31,20 @@ import MessageEditor, {
   type MessageEditorRef,
 } from "./components/MessageEditor";
 import { useDebounceEffect } from "ahooks";
+import {
+  Branch,
+  BranchMessages,
+  BranchPrevious,
+  BranchPage,
+  BranchNext,
+  BranchSelector,
+} from "@/components/ai-elements/branch";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
   const { initMessage, hasProcessed, markAsProcessed, clearInitMessage } =
     useInitMessageStore();
+  const hasInitMessageSubmitted = useRef(false)
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
   const previousMessageIdRef = useRef<string | null>(null);
@@ -53,20 +58,21 @@ export default function ConversationPage() {
     abortRequest,
     handleFeedback,
     rollbackMessagesTo,
+    selectBranchIdRef,
     fetchEarlier,
+    lastAssistantMessageBranch,
     hasMoreEarlier,
     isFetchingEarlier,
   } = useStreamCompletion(conversationId as string);
 
   useEffect(() => {
     if (initMessage && !hasProcessed) {
+      hasInitMessageSubmitted.current = true
       markAsProcessed();
-      console.log("发送消息", initMessage, hasProcessed);
       const message = initMessage;
       clearInitMessage();
-      sendMessage(message);
-      setTimeout(() => {
-        console.log("post 发送消息", initMessage, hasProcessed);
+      sendMessage(message,void 0,()=>{
+        hasInitMessageSubmitted.current = false
       });
       // 发送消息后清除初始消息
     }
@@ -78,17 +84,20 @@ export default function ConversationPage() {
     sendMessage,
   ]);
   const handleRegenerate = () => {
-    const messageId = messages.find(
+    const lastUserMessage = messages.find(
       (message) => message.id === lastUserMessageId.current,
     );
-    if (!messageId) return;
-    const message = messageId.content;
+    if (!lastUserMessage) return;
+    const message = lastUserMessage.content;
     if (message && status === "ready") {
-      rollbackMessagesTo(messageId.id);
+      rollbackMessagesTo(
+        lastUserMessage.id,
+        lastAssistantMessageBranch.length === 0,
+      );
       setTimeout(() => {
         sendMessage(message, {
           completionsOption: { isRegen: true },
-          replyId: messageId.id,
+          replyId: lastUserMessage.id,
         });
       }, 0);
     }
@@ -96,7 +105,6 @@ export default function ConversationPage() {
 
   const handleEditUserMessage = (message: string) => {
     // 将消息绑定到输入框中
-    console.log("handleEditUserMessage", message);
     setIsReplace(true);
     // 使用 setTimeout 确保组件已经渲染
     setTimeout(() => {
@@ -124,8 +132,13 @@ export default function ConversationPage() {
           message,
           {
             completionsOption: {
-              useDeepThink: true,
-              isReplace: isReplace,
+              isReplace,
+              selectedRegenId: lastAssistantMessageBranch.length
+                ? (selectBranchIdRef.current ??
+                  lastAssistantMessageBranch[
+                    lastAssistantMessageBranch.length - 1
+                  ].id)
+                : undefined,
             },
           },
           onSuccess,
@@ -148,7 +161,6 @@ export default function ConversationPage() {
       const observer = new IntersectionObserver(
         (entries) => {
           const first = entries[0];
-          console.log(first.isIntersecting, hasMoreEarlier);
           if (first.isIntersecting && hasMoreEarlier && !isFetchingEarlier) {
             document
               .querySelector("#list-container")
@@ -174,19 +186,15 @@ export default function ConversationPage() {
       if (!previousMessageIdRef.current) {
         previousMessageIdRef.current = currentId;
       }
-      console.log("现在最新的消息", currentId);
       const previousId = previousMessageIdRef.current;
       if (previousId === currentId) {
         return;
       }
-      console.log("之前的消息", previousId);
       const previousNode = document.getElementById(previousId);
-      console.log(previousNode);
       if (!previousNode) {
         return;
       }
       const scrooler = document.querySelector("#list-container")?.children[0];
-      console.log("移动到", previousNode?.offsetTop);
       scrooler?.scrollTo(0, previousNode?.offsetTop);
       previousMessageIdRef.current = currentId;
     }
@@ -194,7 +202,7 @@ export default function ConversationPage() {
   return (
     <div className="max-w-[1000px] mx-auto p-6 relative size-full rounded-lg">
       <div className="flex flex-col h-full">
-        <Conversation id="list-container">
+        <Conversation id="list-container" className="style__scoller-none">
           <ConversationContent className="relative">
             {!initMessage && !hasProcessed ? (
               isFetchingEarlier ? (
@@ -248,95 +256,137 @@ export default function ConversationPage() {
                 ) : (
                   <div className="flex gap-3">
                     <div>
-                      <MessageAvatar
-                        src="/logo.svg"
-                        className="order-1"
-                        name="启创"
-                      />
+                      <div className="size-10 order-1 rounded-full overflow-hidden">
+                        <img src="/logo.jpg" alt="张江高科·高科芯" />
+                      </div>
                     </div>
                     <div className="flex flex-col bg-white style__shallow-shadow rounded-3xl">
                       <MessageContent>
-                        {message.think && (
-                          <Reasoning
-                            defaultOpen={!message.isCompleteThink}
-                            className=""
-                            isStreaming={status === "streaming"}
-                          >
-                            <ReasoningTrigger
-                              isCompleted={message.isCompleteThink}
-                            />
-                            <ReasoningContent className="text-[#80808f]">
-                              {message.think}
-                            </ReasoningContent>
-                          </Reasoning>
-                        )}
-                        {!!message.content && (
-                          <Response>{message.content}</Response>
-                        )}
-                        {message.isStreaming &&
-                          !message.think &&
-                          !message.content && (
-                            <LoaderCircle className="size-4 animate-spin" />
-                          )}
-                        {!message.isStreaming &&
-                          lastAssistantMessageId.current === message.id && (
-                            <Actions className="mt-2">
-                              <Action
-                                label="Copy"
-                                onClick={() => handleCopy(message.content)}
-                              >
-                                <Copy className="size-4" />
-                              </Action>
-                              <Action
-                                label="Regenerate"
-                                onClick={handleRegenerate}
-                              >
-                                <RefreshCcw className="size-4" />
-                              </Action>
-                              {message.feedback === 1 ? (
-                                <Action
-                                  onClick={handleFeedback.bind(null, {
-                                    action: 0,
-                                    messageId: message.id,
-                                  })}
-                                  label="Like"
-                                >
-                                  <ThumbsUpIcon className="size-4 fill-primary" />
-                                </Action>
-                              ) : message.feedback === 2 ? (
-                                <Action
-                                  onClick={handleFeedback.bind(null, {
-                                    action: 0,
-                                    messageId: message.id,
-                                  })}
-                                  label="DisLike"
-                                >
-                                  <ThumbsDownIcon className="size-4 fill-primary" />
-                                </Action>
-                              ) : (
-                                <>
-                                  <Action
-                                    onClick={handleFeedback.bind(null, {
-                                      action: 1,
-                                      messageId: message.id,
-                                    })}
-                                    label="Like"
-                                  >
-                                    <ThumbsUpIcon className="size-4" />
-                                  </Action>
-                                  <Action
-                                    onClick={handleFeedback.bind(null, {
-                                      action: 2,
-                                      messageId: message.id,
-                                    })}
-                                    label="Dislike"
-                                  >
-                                    <ThumbsDownIcon className="size-4" />
-                                  </Action>
-                                </>
-                              )}
-                            </Actions>
-                          )}
+                        <Branch
+                          onBranchChange={(index) => {
+                            selectBranchIdRef.current =
+                              lastAssistantMessageBranch[index].id;
+                          }}
+                        >
+                          <BranchMessages>
+                            {(message.id === lastAssistantMessageId.current
+                              ? lastAssistantMessageBranch.length
+                                ? message.isStreaming
+                                  ? [message]
+                                  : lastAssistantMessageBranch
+                                : [message]
+                              : [message]
+                            ).map((_message, _, messageArray) => {
+                              const forRegenList = messageArray.length > 1;
+                              const regenerateable =
+                                _message.id ===
+                                  lastAssistantMessageId.current ||
+                                messageArray.length > 1;
+                              return (
+                                <div key={_message.id}>
+                                  <div>
+                                    {_message.think && (
+                                      <Reasoning
+                                        defaultOpen={!_message.isCompleteThink}
+                                        className=""
+                                        isStreaming={status === "streaming"}
+                                      >
+                                        <ReasoningTrigger
+                                          isCompleted={_message.isCompleteThink}
+                                        />
+                                        <ReasoningContent className="text-[#80808f]">
+                                          {_message.think}
+                                        </ReasoningContent>
+                                      </Reasoning>
+                                    )}
+                                    {!!_message.content && (
+                                      <Response>{_message.content}</Response>
+                                    )}
+                                    {_message.isStreaming &&
+                                      !_message.think &&
+                                      !_message.content && (
+                                        <LoaderCircle className="size-4 animate-spin" />
+                                      )}
+                                  </div>
+
+                                  {!message.isStreaming && (
+                                    <Actions className="mt-2">
+                                      <Action
+                                        label="Copy"
+                                        onClick={() =>
+                                          handleCopy(_message.content)
+                                        }
+                                      >
+                                        <Copy className="size-4" />
+                                      </Action>
+                                      {regenerateable && (
+                                        <Action
+                                          label="Regenerate"
+                                          onClick={handleRegenerate}
+                                        >
+                                          <RefreshCcw className="size-4" />
+                                        </Action>
+                                      )}
+                                      {_message.feedback === 1 ? (
+                                        <Action
+                                          onClick={handleFeedback.bind(null, {
+                                            action: 0,
+                                            messageId: _message.id,
+                                            forRegenList,
+                                          })}
+                                          label="Like"
+                                        >
+                                          <ThumbsUpIcon className="size-4 fill-primary" />
+                                        </Action>
+                                      ) : _message.feedback === 2 ? (
+                                        <Action
+                                          onClick={handleFeedback.bind(null, {
+                                            action: 0,
+                                            messageId: _message.id,
+                                            forRegenList,
+                                          })}
+                                          label="DisLike"
+                                        >
+                                          <ThumbsDownIcon className="size-4 fill-primary" />
+                                        </Action>
+                                      ) : (
+                                        <>
+                                          <Action
+                                            onClick={handleFeedback.bind(null, {
+                                              action: 1,
+                                              messageId: _message.id,
+                                              forRegenList,
+                                            })}
+                                            label="Like"
+                                          >
+                                            <ThumbsUpIcon className="size-4" />
+                                          </Action>
+                                          <Action
+                                            onClick={handleFeedback.bind(null, {
+                                              action: 2,
+                                              messageId: _message.id,
+                                              forRegenList,
+                                            })}
+                                            label="Dislike"
+                                          >
+                                            <ThumbsDownIcon className="size-4" />
+                                          </Action>
+                                        </>
+                                      )}
+                                      {messageArray.length > 1 && (
+                                        <BranchSelector from="assistant">
+                                          <BranchPrevious />
+                                          <BranchPage />
+                                          <BranchNext />
+                                        </BranchSelector>
+                                      )}
+                                    </Actions>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </BranchMessages>
+                        </Branch>
                       </MessageContent>
                     </div>
                   </div>
@@ -350,7 +400,7 @@ export default function ConversationPage() {
           className="mx-auto sticky bottom-4"
           onSubmit={handleSubmit}
           onAbort={abortRequest}
-          status={status}
+          status={hasInitMessageSubmitted.current ? "submitted": status}
         />
       </div>
     </div>

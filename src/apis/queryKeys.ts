@@ -1,7 +1,7 @@
 const ClientQueryKeys = {
   consversation: {
     conversationHistory: "conversationHistory",
-    conversationDetail: "conversationDetail"
+    conversationDetail: "conversationDetail",
   },
 };
 export default ClientQueryKeys;
