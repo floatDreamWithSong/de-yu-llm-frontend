@@ -60,7 +60,8 @@ export default function UserPromptTextarea({
   return (
     <PromptInput
       onKeyDown={(e) => {
-        if (e.key === "Enter" && e.ctrlKey && status === "ready" && !disabled) {
+        if (e.key === "Enter" && !e.ctrlKey && status === "ready" && !disabled) {
+          e.preventDefault()
           const textContent = value;
           onSubmit?.(textContent, () => {
             setValue("");
@@ -117,7 +118,7 @@ export default function UserPromptTextarea({
           onInput={handleInput}
           onPaste={handlePaste}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.ctrlKey) {
+            if (e.key === "Enter" && e.ctrlKey) {
               e.preventDefault();
               // 避免浏览器插入 <br>，改为纯文本换行
               document.execCommand("insertText", false, "\n");
