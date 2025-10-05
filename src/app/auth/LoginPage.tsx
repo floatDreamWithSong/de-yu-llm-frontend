@@ -130,9 +130,14 @@ export default function LoginPage() {
             </Form>
             <div className="row-span-1 text-center">
               <Button variant={"link"}>
-                <Link search={{
-                  redirect: '/chat'
-                }} to="/auth/register">注册</Link>
+                <Link
+                  search={{
+                    redirect: "/chat",
+                  }}
+                  to="/auth/register"
+                >
+                  注册
+                </Link>
               </Button>
             </div>
             {/* <div className="[&>button]:rounded-full flex justify-between px-4 items-end h-full">

@@ -17,7 +17,6 @@ const CodeEditorBar = ({
   codeType,
   ...rest
 }: Props & Partial<SseEditorCode>) => {
-
   /* ---------- 2. 渲染 ---------- */
   return (
     <Tabs

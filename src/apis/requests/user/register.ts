@@ -4,8 +4,8 @@ import { AuthInfoSchema, CredentialsSchema } from "./schema";
 
 export const RegisterSchema = AuthInfoSchema.extend({
   verify: z.string(),
-  password: z.string()
-})
+  password: z.string(),
+});
 
 export const registerByPhone = (data: z.infer<typeof RegisterSchema>) => {
   return request({

@@ -18,9 +18,7 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
-import {
-  useStreamCompletion,
-} from "@/hooks/use-stream-completion";
+import { useStreamCompletion } from "@/hooks/use-stream-completion";
 import { toast } from "sonner";
 import { useInitMessageStore } from "@/store/initMessage";
 import { useParams } from "@tanstack/react-router";

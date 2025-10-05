@@ -13,7 +13,7 @@ export const ExtSchema = z.object({
   suggest: z.string(),
   think: z.string(),
   cite: z.array(SseSearchCiteSchema).nullable(),
-  code: z.array(SseEditorCodeSchema).nullable()
+  code: z.array(SseEditorCodeSchema).nullable(),
 });
 export type Ext = z.infer<typeof ExtSchema>;
 
@@ -40,7 +40,7 @@ export const DataSchema = z.object({
   hasMore: z.boolean(),
   messageList: z.array(MessageListSchema).nullable(),
   regenList: z.array(MessageListSchema).nullable(),
-  cursor: z.string()
+  cursor: z.string(),
 });
 
 export function getConversationDetail(data: z.infer<typeof RequestSchema>) {

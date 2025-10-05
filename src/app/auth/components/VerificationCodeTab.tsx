@@ -38,11 +38,13 @@ const FormSchema = z.object({
 
 export default function VerificationCodeTab({
   onBack,
-  type
-}: { onBack: () => void, type: 'login'|'register' }) {
+  type,
+}: { onBack: () => void; type: "login" | "register" }) {
   const { phone, password } = useContext(AuthContext);
   const navigate = useNavigate();
-  const search = useSearch({ from: type==='login'?"/auth/login":'/auth/register' });
+  const search = useSearch({
+    from: type === "login" ? "/auth/login" : "/auth/register",
+  });
   const [countDown, setCountDown] = useState<number>(60);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -61,8 +63,8 @@ export default function VerificationCodeTab({
     mutationFn: loginByPhoneVerify,
   });
   const registerMutation = useMutation({
-    mutationFn: registerByPhone
-  })
+    mutationFn: registerByPhone,
+  });
   const sendCodeMutation = useMutation({
     mutationFn: sendVerificationCode,
   });
@@ -86,31 +88,31 @@ export default function VerificationCodeTab({
     );
   }, [sendCodeMutation.mutate, phone, form.setError]);
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    if(type==='login')
-    loginMutation.mutate(
-      {
-        verify: data.pin,
-        authId: phone,
-        authType: "phone-verify",
-      },
-      {
-        onError() {
-          form.setError("pin", {
-            message: "验证码错误",
-          });
+    if (type === "login")
+      loginMutation.mutate(
+        {
+          verify: data.pin,
+          authId: phone,
+          authType: "phone-verify",
         },
-        onSuccess(data) {
-          toast.success('登录成功')
-          tokenStore.set(data.token)
-          // 获取 redirect 参数，如果没有则默认跳转到 /chat
-          const redirectUrl = search.redirect || "/chat";
-          navigate({
-            to: redirectUrl,
-          });
+        {
+          onError() {
+            form.setError("pin", {
+              message: "验证码错误",
+            });
+          },
+          onSuccess(data) {
+            toast.success("登录成功");
+            tokenStore.set(data.token);
+            // 获取 redirect 参数，如果没有则默认跳转到 /chat
+            const redirectUrl = search.redirect || "/chat";
+            navigate({
+              to: redirectUrl,
+            });
+          },
         },
-      },
-    );
-    else 
+      );
+    else
       registerMutation.mutate(
         {
           verify: data.pin,
@@ -125,8 +127,8 @@ export default function VerificationCodeTab({
             });
           },
           onSuccess(data) {
-            toast.success('注册成功')
-            tokenStore.set(data.token)
+            toast.success("注册成功");
+            tokenStore.set(data.token);
             // 获取 redirect 参数，如果没有则默认跳转到 /chat
             const redirectUrl = search.redirect || "/chat";
             navigate({

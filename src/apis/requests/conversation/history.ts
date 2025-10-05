@@ -3,7 +3,7 @@ import z from "zod";
 import { PageSchema } from "./schema";
 
 const RequestSchema = z.object({
-  page: PageSchema
+  page: PageSchema,
 });
 export const ConversationSchema = z.object({
   conversationId: z.string(),
@@ -14,7 +14,7 @@ export const ConversationSchema = z.object({
 const ResponseSchema = z.object({
   conversations: z.array(ConversationSchema),
   cursor: z.string(),
-  hasMore: z.boolean()
+  hasMore: z.boolean(),
 });
 
 export type Conversation = z.infer<typeof ConversationSchema>;

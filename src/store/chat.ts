@@ -2,7 +2,6 @@ import { create } from "zustand";
 import type { Request as CompletionRequest } from "@/apis/requests/conversation/completion";
 
 export interface ChatState {
-
   // 完成配置
   completionConfig: Pick<
     CompletionRequest,
@@ -15,7 +14,7 @@ export interface ChatState {
   setCompletionConfig: (
     config: Partial<
       Pick<CompletionRequest, "model" | "botId" | "completionsOption">
-    >
+    >,
   ) => void;
 }
 
@@ -36,15 +35,14 @@ const defaultConfig: Pick<
 };
 
 export const useChatStore = create<ChatState>((set, get) => ({
-
   completionConfig: defaultConfig,
 
   toggleDeepThink: () => {
     const currentState = get();
-    const newDeepThinkState = !currentState.completionConfig.completionsOption.useDeepThink;
+    const newDeepThinkState =
+      !currentState.completionConfig.completionsOption.useDeepThink;
 
     set({
-
       completionConfig: {
         ...currentState.completionConfig,
         model: newDeepThinkState ? "InnoSpark-R" : "InnoSpark",
@@ -69,8 +67,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       },
     });
   },
-
-
 
   setCompletionConfig: (config) => {
     set((state) => ({

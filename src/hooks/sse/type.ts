@@ -1,4 +1,7 @@
-import type { SseEditorCode, SseSearchCite } from "@/apis/requests/conversation/schema";
+import type {
+  SseEditorCode,
+  SseSearchCite,
+} from "@/apis/requests/conversation/schema";
 
 // 后端 SSE 单帧 payload
 export interface SseChat {
@@ -29,7 +32,6 @@ export interface SseModel {
   botName: string;
 }
 
-
 interface Chunk<E extends string, D> {
   id: number;
   event: E;
@@ -40,17 +42,15 @@ export type StreamChunk =
   | Chunk<"model", SseModel>
   | Chunk<"chat", SseChat>
   | Chunk<"end", unknown>
-  | Chunk<'searchStart', unknown>
-  | Chunk<'searchFind', number>
-  | Chunk<'searchChoice', number>
-  | Chunk<'searchCite', SseSearchCite>
-  | Chunk<'searchEnd', unknown>
+  | Chunk<"searchStart", unknown>
+  | Chunk<"searchFind", number>
+  | Chunk<"searchChoice", number>
+  | Chunk<"searchCite", SseSearchCite>
+  | Chunk<"searchEnd", unknown>;
 
 export interface TextContent {
   text?: string;
   think?: string;
-  codeType?: SseEditorCode['codeType']
-  code?: string
+  codeType?: SseEditorCode["codeType"];
+  code?: string;
 }
-
-

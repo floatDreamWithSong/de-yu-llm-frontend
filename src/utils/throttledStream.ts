@@ -44,7 +44,7 @@ function splitByNewline(text: string): string[] {
 // 把限速逻辑封装成"节流流"
 export function throttledStream(
   rs: ReadableStream<Uint8Array>,
-  interval: number
+  interval: number,
 ): ReadableStream<Uint8Array> {
   return new ReadableStream({
     async start(ctrl) {
