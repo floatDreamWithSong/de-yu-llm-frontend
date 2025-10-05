@@ -29,7 +29,7 @@ export const tokenStore = {
     if (import.meta.env.MODE === "test") {
       return "xh-polaris";
     }
-    return token ? `Bearer ${token}` : void 0;
+    return token;
   },
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
   remove: () => {
@@ -109,7 +109,7 @@ function createAxiosInstance(): AxiosInstance {
         // 特殊处理认证失败
         if (payload.code === 401) {
           tokenStore.remove();
-          window.location.href = "/auth";
+          window.location.href = "/auth/login";
         }
         const errmsg = payload.msg || "请求失败";
         toast.error(errmsg);

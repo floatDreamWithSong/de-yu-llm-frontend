@@ -1,9 +1,6 @@
 "use client";
 import AuthButton from "@/app/auth/components/AuthButton";
 import { AuthInput } from "@/app/auth/components/AuthInput";
-import AppleCompany from "@/components/icons/AppleCompany";
-import Sina from "@/components/icons/Sina";
-import WeChat from "@/components/icons/WeChat";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
@@ -25,7 +22,8 @@ import AuthWrapper from "@/app/auth/components/AuthWrapper";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { sendVerificationCode } from "@/apis/requests/user/code";
-const iconSize = 26;
+import { Button } from "@/components/ui/button";
+// const iconSize = 26;
 
 const formSchema = z.object({
   phone: mobileSchema,
@@ -55,7 +53,7 @@ export default function LoginPage() {
     sendCodeMutation.mutate(
       {
         authId: data.phone,
-        authType: "phone",
+        authType: "phone-verify",
       },
       {
         onError() {
@@ -72,14 +70,14 @@ export default function LoginPage() {
     <>
       {!isVerificationStage ? (
         <AuthWrapper>
-          <div className="grid grid-rows-3 h-full items-center gap-y-10">
+          <div className="grid grid-rows-4 h-full items-center gap-y-10">
             <h3 className="text-2xl font-bold row-span-1 w-full text-center">
               验证登录
             </h3>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(handleSubmit)}
-                className="row-span-1 w-full space-y-6"
+                className="row-span-2 w-full space-y-6"
               >
                 <FormField
                   control={form.control}
@@ -130,7 +128,14 @@ export default function LoginPage() {
                 </div>
               </form>
             </Form>
-            <div className="[&>button]:rounded-full flex justify-between px-4 items-end h-full">
+            <div className="row-span-1 text-center">
+              <Button variant={"link"}>
+                <Link search={{
+                  redirect: '/chat'
+                }} to="/auth/register">注册</Link>
+              </Button>
+            </div>
+            {/* <div className="[&>button]:rounded-full flex justify-between px-4 items-end h-full">
               <Outline>
                 <AppleCompany size={iconSize} />
               </Outline>
@@ -140,23 +145,23 @@ export default function LoginPage() {
               <Outline>
                 <Sina size={iconSize} />
               </Outline>
-            </div>
+            </div> */}
           </div>
         </AuthWrapper>
       ) : (
-        <VerificationCodeTab onBack={handleSwitchBack} />
+        <VerificationCodeTab type="login" onBack={handleSwitchBack} />
       )}
     </>
   );
 }
 
-const Outline = ({ children, ...props }: React.ComponentProps<"button">) => {
-  return (
-    <button
-      {...props}
-      className="p-5 cursor-pointer border border-[#c1c1c9] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
-    >
-      {children}
-    </button>
-  );
-};
+// const Outline = ({ children, ...props }: React.ComponentProps<"button">) => {
+//   return (
+//     <button
+//       {...props}
+//       className="p-5 cursor-pointer border border-[#c1c1c9] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
+//     >
+//       {children}
+//     </button>
+//   );
+// };

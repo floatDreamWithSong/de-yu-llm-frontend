@@ -9,18 +9,23 @@ import {
 export const AuthContext = createContext<{
   phone: string;
   verificationCode: string;
+  password: string;
   setPhone: Dispatch<SetStateAction<string>>;
   setverificationCode: Dispatch<SetStateAction<string>>;
+  setPassword: Dispatch<SetStateAction<string>>;
 }>({
   phone: "",
   verificationCode: "",
+  password: "",
   setPhone: () => {},
   setverificationCode: () => {},
+  setPassword: () => {},
 });
 
 export default function AuthLayout() {
   const [phone, setPhone] = useState("");
   const [verificationCode, setverificationCode] = useState("");
+  const [password, setPassword] = useState("");
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative grid grid-cols-2"
@@ -41,8 +46,10 @@ export default function AuthLayout() {
           value={{
             phone,
             verificationCode,
+            password,
             setPhone,
             setverificationCode,
+            setPassword,
           }}
         >
           <Outlet />

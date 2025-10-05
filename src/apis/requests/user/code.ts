@@ -4,7 +4,7 @@ import { request } from "@/lib/request";
 
 export const sendVerificationCode = (data: z.infer<typeof AuthInfoSchema>) =>
   request({
-    url: "/auth/verifyCode",
+    url: "/system/send_verify_code",
     method: "POST",
     data,
     dataValidator: AuthInfoSchema,

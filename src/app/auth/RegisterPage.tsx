@@ -1,9 +1,176 @@
+"use client";
+import AuthButton from "@/app/auth/components/AuthButton";
+import { AuthInput } from "@/app/auth/components/AuthInput";
+import { Checkbox } from "@/components/ui/checkbox";
+
+import { Label } from "@/components/ui/label";
+import { Link } from "@tanstack/react-router";
+import { useCallback, useContext, useState } from "react";
+import { AuthContext } from "@/app/auth/layouts/AuthLayout";
+import z from "zod";
+import { mobileSchema } from "@/utils/schema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import VerificationCodeTab from "@/app/auth/components/VerificationCodeTab";
 import AuthWrapper from "@/app/auth/components/AuthWrapper";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { sendVerificationCode } from "@/apis/requests/user/code";
+import { Button } from "@/components/ui/button";
+
+const formSchema = z.object({
+  phone: mobileSchema,
+  password: z
+    .string()
+    .min(6, "密码至少6位")
+    .max(20, "密码最多20位")
+    .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, "密码必须包含字母和数字"),
+});
 
 export default function RegisterPage() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      phone: "",
+      password: "",
+    },
+  });
+  const [isChecked, setIsChecked] = useState(false);
+  const [isVerificationStage, setVerificationStage] = useState(false);
+
+  const handleSwitchBack = useCallback(() => {
+    setVerificationStage(false);
+  }, []);
+
+  const authContext = useContext(AuthContext);
+  const sendCodeMutation = useMutation({
+    mutationFn: sendVerificationCode,
+  });
+
+  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    if (!isChecked) {
+      toast("请勾选使用协议与隐私协议");
+      return;
+    }
+    authContext.setPhone(data.phone);
+    authContext.setPassword(data.password);
+    sendCodeMutation.mutate(
+      {
+        authId: data.phone,
+        authType: "phone-verify",
+      },
+      {
+        onError() {
+          toast.error("验证码发送失败");
+        },
+        onSuccess() {
+          setVerificationStage(true);
+          toast("验证码已发送");
+        },
+      },
+    );
+  };
+
   return (
-    <AuthWrapper>
-      <div>2</div>
-    </AuthWrapper>
+    <>
+      {!isVerificationStage ? (
+        <AuthWrapper>
+          <div className="grid grid-rows-4 h-full items-center gap-y-10">
+            <h3 className="text-2xl font-bold row-span-1 w-full text-center">
+              注册账号
+            </h3>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="row-span-2 w-full space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <AuthInput phone {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <AuthInput password {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <AuthButton disabled={sendCodeMutation.isPending} type="submit">
+                  下一步
+                </AuthButton>
+                <div
+                  className="justify-center flex items-center gap-2"
+                  style={{
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  <Checkbox
+                    checked={isChecked}
+                    className="border-primary"
+                    onCheckedChange={(checked) =>
+                      setIsChecked(
+                        checked === "indeterminate" ? false : checked,
+                      )
+                    }
+                  />
+                  <Label className="gap-0.5">
+                    已阅读并同意 启创 的
+                    <Link
+                      to="."
+                      className="text-black font-bold underline-offset-4 hover:underline"
+                    >
+                      使用协议
+                    </Link>
+                    和
+                    <Link
+                      to="."
+                      className="text-black font-bold underline-offset-4 hover:underline"
+                    >
+                      隐私协议
+                    </Link>
+                  </Label>
+                </div>
+              </form>
+            </Form>
+            <div className="row-span-1 text-center">
+              <Button variant={"link"}>
+                <Link
+                  search={{
+                    redirect: "/chat",
+                  }}
+                  to="/auth/login"
+                >
+                  登录
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </AuthWrapper>
+      ) : (
+        <VerificationCodeTab type="register" onBack={handleSwitchBack} />
+      )}
+    </>
   );
 }
