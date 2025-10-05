@@ -107,7 +107,7 @@ function createAxiosInstance(): AxiosInstance {
       // 检查业务状态码
       if (payload.code !== 0 && payload.code !== 200) {
         // 特殊处理认证失败
-        if (payload.code === 401) {
+        if (payload.code === 1000) {
           tokenStore.remove();
           window.location.href = "/auth/login";
         }
