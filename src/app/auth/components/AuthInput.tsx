@@ -54,6 +54,7 @@ function AuthInput({
           <Button
             variant="link"
             size="icon"
+            type="button"
             onClick={() => {
               console.log(showPassword);
               setShowPassword(!showPassword);

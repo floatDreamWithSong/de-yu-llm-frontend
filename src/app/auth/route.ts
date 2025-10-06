@@ -1,9 +1,10 @@
 import { createRoute } from "@tanstack/react-router";
 import { rootRoute } from "@/route";
 import { lazy } from "react";
+import SetNewUserPasswordPage from "./SetNewUserPasswordPage";
 const AuthLayout = lazy(() => import("./layouts/AuthLayout"));
 const LoginPage = lazy(() => import("./LoginPage"));
-const RegisterPage = lazy(() => import("./RegisterPage"));
+const PhonePasswordLoginPage = lazy(() => import("./PhonePasswordLoginPage"));
 
 // Auth routes
 const authRoute = createRoute({
@@ -21,15 +22,24 @@ const loginRoute = createRoute({
   component: LoginPage,
 });
 
-const registerRoute = createRoute({
+const phonePasswordLoginRoute = createRoute({
   getParentRoute: () => authRoute,
-  path: "/register",
+  path: "/login/password",
   validateSearch: (search) => ({
     redirect: (search.redirect as string) || "/chat",
   }),
-  component: RegisterPage,
+  component: PhonePasswordLoginPage,
 });
 
-const authRouteTree = authRoute.addChildren([loginRoute, registerRoute]);
+const setNewUserPasswordRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: "/login/password/set",
+  validateSearch: (search) => ({
+    redirect: (search.redirect as string) || "/chat",
+  }),
+  component: SetNewUserPasswordPage,
+});
+
+const authRouteTree = authRoute.addChildren([loginRoute, phonePasswordLoginRoute, setNewUserPasswordRoute]);
 
 export default authRouteTree;

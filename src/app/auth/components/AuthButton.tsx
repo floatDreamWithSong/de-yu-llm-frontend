@@ -15,7 +15,7 @@ export default function AuthButton({
   return (
     <Button
       className={cn(
-        "bg-primary w-full rounded-full p-6 text-lg [:disabled]:bg-[#d4d5ff]",
+        "w-full rounded-full p-6 text-lg [:disabled]:bg-[#d4d5ff]",
         className,
       )}
       variant={variant}

@@ -53,6 +53,7 @@ import { queryHistory } from "@/apis/requests/conversation/query";
 import { deleteConversation } from "@/apis/requests/conversation/delete";
 import { cn } from "@/lib/utils";
 import { useInitMessageStore } from "@/store/initMessage";
+import { tokenStore } from "@/lib/request";
 
 export default function ChatSidebar() {
   const { state } = useSidebar();
@@ -470,7 +471,10 @@ export default function ChatSidebar() {
           <DropdownMenuContent className="ml-2">
             {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              tokenStore.remove();
+              navigate({ to: "/auth/login", search: { redirect: "/chat" } });
+            }}>
               <LogOut className="size-4" />
               退出登录
             </DropdownMenuItem>

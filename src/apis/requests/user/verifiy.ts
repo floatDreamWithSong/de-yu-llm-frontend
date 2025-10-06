@@ -6,12 +6,14 @@ export const RequestSchema = AuthInfoSchema.extend({
   verify: z.string(),
 });
 
-export const loginByPhoneVerify = (data: z.infer<typeof RequestSchema>) => {
+export const RequestVerify = (data: z.infer<typeof RequestSchema>) => {
   return request({
     url: "/basic_user/login",
     method: "POST",
     data,
     dataValidator: RequestSchema,
-    responseValidator: CredentialsSchema,
+    responseValidator: CredentialsSchema.extend({
+      new: z.boolean(),
+    }),
   });
 };

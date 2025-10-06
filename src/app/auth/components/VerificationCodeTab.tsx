@@ -21,10 +21,9 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../layouts/AuthLayout";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { loginByPhoneVerify } from "@/apis/requests/user/verifiy";
+import { RequestVerify } from "@/apis/requests/user/verifiy";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { sendVerificationCode } from "@/apis/requests/user/code";
-import { registerByPhone } from "@/apis/requests/user/register";
 import { tokenStore } from "@/lib/request";
 
 const FormSchema = z.object({
@@ -38,12 +37,11 @@ const FormSchema = z.object({
 
 export default function VerificationCodeTab({
   onBack,
-  type,
-}: { onBack: () => void; type: "login" | "register" }) {
-  const { phone, password } = useContext(AuthContext);
+}: { onBack: () => void }) {
+  const { phone } = useContext(AuthContext);
   const navigate = useNavigate();
   const search = useSearch({
-    from: type === "login" ? "/auth/login" : "/auth/register",
+    from: "/auth/login",
   });
   const [countDown, setCountDown] = useState<number>(60);
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -60,10 +58,7 @@ export default function VerificationCodeTab({
     return () => clearTimeout(timeout);
   }, [countDown]);
   const loginMutation = useMutation({
-    mutationFn: loginByPhoneVerify,
-  });
-  const registerMutation = useMutation({
-    mutationFn: registerByPhone,
+    mutationFn: RequestVerify,
   });
   const sendCodeMutation = useMutation({
     mutationFn: sendVerificationCode,
@@ -88,55 +83,40 @@ export default function VerificationCodeTab({
     );
   }, [sendCodeMutation.mutate, phone, form.setError]);
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (type === "login")
-      loginMutation.mutate(
-        {
-          verify: data.pin,
-          authId: phone,
-          authType: "phone-verify",
+    loginMutation.mutate(
+      {
+        verify: data.pin,
+        authId: phone,
+        authType: "phone-verify",
+      },
+      {
+        onError() {
+          form.setError("pin", {
+            message: "验证码错误",
+          });
         },
-        {
-          onError() {
-            form.setError("pin", {
-              message: "验证码错误",
-            });
-          },
-          onSuccess(data) {
-            toast.success("登录成功");
-            tokenStore.set(data.token);
-            // 获取 redirect 参数，如果没有则默认跳转到 /chat
-            const redirectUrl = search.redirect || "/chat";
+        onSuccess(data) {
+          toast.success("登录成功");
+          tokenStore.set(data.token);
+          // 获取 redirect 参数，如果没有则默认跳转到 /chat
+          const redirectUrl = search.redirect || "/chat";
+          if (data.new) {
+            // 提醒需要设置密码
+            toast.success("请设置密码");
             navigate({
-              to: redirectUrl,
+              to: "/auth/login/password/set",
+              search: {
+                redirect: redirectUrl,
+              },
             });
-          },
+            return;
+          }
+          navigate({
+            to: redirectUrl,
+          });
         },
-      );
-    else
-      registerMutation.mutate(
-        {
-          verify: data.pin,
-          authId: phone,
-          password,
-          authType: "phone-verify",
-        },
-        {
-          onError() {
-            form.setError("pin", {
-              message: "验证码错误",
-            });
-          },
-          onSuccess(data) {
-            toast.success("注册成功");
-            tokenStore.set(data.token);
-            // 获取 redirect 参数，如果没有则默认跳转到 /chat
-            const redirectUrl = search.redirect || "/chat";
-            navigate({
-              to: redirectUrl,
-            });
-          },
-        },
-      );
+      },
+    );
   }
 
   return (

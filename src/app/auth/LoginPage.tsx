@@ -22,7 +22,6 @@ import AuthWrapper from "@/app/auth/components/AuthWrapper";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { sendVerificationCode } from "@/apis/requests/user/code";
-import { Button } from "@/components/ui/button";
 // const iconSize = 26;
 
 const formSchema = z.object({
@@ -46,7 +45,7 @@ export default function LoginPage() {
   });
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
     if (!isChecked) {
-      toast("请勾选使用协议与隐私协议");
+      toast.info("请勾选使用协议与隐私协议");
       return;
     }
     authContext.setPhone(data.phone);
@@ -70,14 +69,14 @@ export default function LoginPage() {
     <>
       {!isVerificationStage ? (
         <AuthWrapper>
-          <div className="grid grid-rows-4 h-full items-center gap-y-10">
-            <h3 className="text-2xl font-bold row-span-1 w-full text-center">
+          <div className="flex flex-col h-full items-center">
+            <h3 className="text-2xl font-bold w-full h-fit my-10 text-center">
               验证登录
             </h3>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(handleSubmit)}
-                className="row-span-2 w-full space-y-6"
+                className="w-full space-y-6 flex-1 flex flex-col justify-center"
               >
                 <FormField
                   control={form.control}
@@ -91,11 +90,8 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <AuthButton disabled={sendCodeMutation.isPending} type="submit">
-                  下一步
-                </AuthButton>
                 <div
-                  className="justify-center flex items-center gap-2"
+                  className="justify-center flex items-center gap-2 pb-6"
                   style={{
                     letterSpacing: "0.5px",
                   }}
@@ -126,20 +122,21 @@ export default function LoginPage() {
                     </Link>
                   </Label>
                 </div>
+                <AuthButton disabled={sendCodeMutation.isPending} type="submit">
+                  下一步
+                </AuthButton>
+                <AuthButton variant={"secondary"} asChild>
+                  <Link
+                    search={{
+                      redirect: "/chat",
+                    }}
+                    to="/auth/login/password"
+                  >
+                    密码登录
+                  </Link>
+                </AuthButton>
               </form>
             </Form>
-            <div className="row-span-1 text-center">
-              <Button variant={"link"}>
-                <Link
-                  search={{
-                    redirect: "/chat",
-                  }}
-                  to="/auth/register"
-                >
-                  注册
-                </Link>
-              </Button>
-            </div>
             {/* <div className="[&>button]:rounded-full flex justify-between px-4 items-end h-full">
               <Outline>
                 <AppleCompany size={iconSize} />
@@ -154,7 +151,7 @@ export default function LoginPage() {
           </div>
         </AuthWrapper>
       ) : (
-        <VerificationCodeTab type="login" onBack={handleSwitchBack} />
+        <VerificationCodeTab onBack={handleSwitchBack} />
       )}
     </>
   );
