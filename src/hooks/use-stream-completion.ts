@@ -427,6 +427,9 @@ export function useStreamCompletion(conversationId: string) {
           selectBranchIdRef.current = null;
         }
         while (true) {
+          if (abortControllerRef.current?.signal.aborted) {
+            break;
+          }
           const { done, value } = await reader.read();
           if (done) break;
 

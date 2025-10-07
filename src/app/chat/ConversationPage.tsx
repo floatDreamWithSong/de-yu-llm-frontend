@@ -48,6 +48,11 @@ import { cn } from "@/lib/utils";
 import CiteBar from "./components/CiteBar";
 import MessageCiteButton from "./components/MessageCiteButton";
 import CodeEditorBar from "./components/CodeEditorBar";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({ strict: false });
@@ -219,13 +224,31 @@ export default function ConversationPage() {
       previousMessageIdRef.current = currentId;
     }
   }, [messages]);
+
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const sideBarRef = useRef<any>(null);
+  useEffect(()=>{
+    if(isOpenCodeEditor) {
+      sideBarRef.current.resize(50);
+    } else if(isOpenCite) {
+      sideBarRef.current.resize(20);
+    } else {
+      sideBarRef.current.resize(0);
+    }
+  },[isOpenCite, isOpenCodeEditor])
   return (
-    <div className="size-full flex overflow-x-hidden relative">
-      <div
+    <ResizablePanelGroup
+      direction="horizontal"
+      className={cn([
+        "rounded-lg border md:min-w-[450px]",
+        "size-full flex overflow-x-hidden relative",
+      ])}
+    >
+      <ResizablePanel
         className={cn([
           " mx-auto py-6 size-full duration-300 transition-all",
-          !!isOpenCite && "lg:pr-80",
-          isOpenCodeEditor && "lg:pr-240",
+          // !!isOpenCite && "lg:pr-80",
+          // isOpenCodeEditor && "lg:pr-240",
         ])}
       >
         <div className="max-w-[1000px] mx-auto px-4 flex flex-col h-full transition-none">
@@ -465,25 +488,32 @@ export default function ConversationPage() {
             status={status}
           />
         </div>
-      </div>
-      <CiteBar
-        onClose={() => setIsOpenCite("")}
-        className={cn([
-          "bg-chat h-full w-80 style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform absolute right-0",
-          !isOpenCite && "translate-x-full",
-        ])}
-        uiCites={uiCites}
-      />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={0} maxSize={60} ref={sideBarRef}>
+        {isOpenCite && (
+          <CiteBar
+            onClose={() => setIsOpenCite("")}
+            className={cn([
+              "bg-chat h-full style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
+              // !isOpenCite && "translate-x-full",
+            ])}
+            uiCites={uiCites}
+          />
+        )}
 
-      <CodeEditorBar
-        code={codeMes?.code}
-        codeType={codeMes?.codeType}
-        onClose={() => setIsOpenCodeEditor("")}
-        className={cn([
-          "bg-chat h-full w-240 style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform absolute right-0",
-          !isOpenCodeEditor && "translate-x-full",
-        ])}
-      />
-    </div>
+        {isOpenCodeEditor && (
+          <CodeEditorBar
+            code={codeMes?.code}
+            codeType={codeMes?.codeType}
+            onClose={() => setIsOpenCodeEditor("")}
+            className={cn([
+              "bg-chat h-full w-full style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
+              // !isOpenCodeEditor && "translate-x-full",
+            ])}
+          />
+        )}
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
