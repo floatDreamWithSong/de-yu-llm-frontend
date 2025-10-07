@@ -5,6 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 
+import { loader } from '@monaco-editor/react';
+
+loader.config({
+  paths: {
+    vs: "https://registry.npmmirror.com/monaco-editor/0.52.2/files/min/vs",
+  },
+});
+
 type Props = Omit<React.ComponentProps<"div">, "dir"> & {
   onClose: () => unknown;
 };
