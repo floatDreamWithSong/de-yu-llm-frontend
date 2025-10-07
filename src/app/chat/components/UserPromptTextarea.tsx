@@ -170,7 +170,7 @@ export default function UserPromptTextarea({
           <PromptInputSubmit
             className="rounded-full"
             status={status}
-            disabled={disabled || !value.trim()}
+            disabled={disabled || (status ==='ready' &&  !value.trim())}
           />
         </div>
       </div>
