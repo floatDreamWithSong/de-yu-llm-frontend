@@ -397,7 +397,7 @@ export function useStreamCompletion(conversationId: string) {
         if (!response.body) {
           throw new Error("Empty Body!");
         }
-        const reader = throttledStream(response.body, 50)?.getReader();
+        const reader = throttledStream(response.body, 50, abortControllerRef)?.getReader();
         if (!reader) {
           throw new Error("无法读取响应流");
         }
@@ -427,9 +427,6 @@ export function useStreamCompletion(conversationId: string) {
           selectBranchIdRef.current = null;
         }
         while (true) {
-          if (abortControllerRef.current?.signal.aborted) {
-            break;
-          }
           const { done, value } = await reader.read();
           if (done) break;
 

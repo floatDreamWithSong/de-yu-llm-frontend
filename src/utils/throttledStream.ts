@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+
 interface DelayKeyMeta {
   key: string;
   delay?: number;
@@ -45,6 +47,7 @@ function splitByNewline(text: string): string[] {
 export function throttledStream(
   rs: ReadableStream<Uint8Array>,
   interval: number,
+  abortController: RefObject<AbortController | null>,
 ): ReadableStream<Uint8Array> {
   return new ReadableStream({
     async start(ctrl) {
@@ -53,6 +56,9 @@ export function throttledStream(
       let buffer = ""; // 用于存储未完整分割的文本
 
       while (true) {
+        if (abortController.current?.signal.aborted) {
+          break;
+        }
         const { done, value } = await reader.read();
         if (done) {
           // 处理剩余的缓冲区内容
