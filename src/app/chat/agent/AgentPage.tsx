@@ -35,7 +35,7 @@ const AgentPage = () => {
     },
     staleTime: 60 * 1000,
     getNextPageParam: (lastPage) =>
-      lastPage.hasMore ? lastPage.nextcursor : undefined,
+      lastPage.hasMore ? lastPage.nextCursor : undefined,
   });
   const bottomRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
