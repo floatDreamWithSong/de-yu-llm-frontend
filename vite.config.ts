@@ -105,6 +105,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
+      "@imgs": resolve(__dirname, "./src/assets/imgs"),
     },
   },
   build: {

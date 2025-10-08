@@ -5,6 +5,11 @@ import authenticatedRoute from "../_authenticated/route";
 const ChatPage = lazy(() => import("./ChatPage"));
 const ChatLayout = lazy(() => import("./layouts/ChatLayout"));
 const ConversationPage = lazy(() => import("./ConversationPage"));
+const validateSearch = (search: {
+  think?: boolean;
+  botId?: string;
+  webSearch?: boolean;
+}) => search;
 
 const chatRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
@@ -15,12 +20,14 @@ const chatRoute = createRoute({
 const chatIndexRoute = createRoute({
   getParentRoute: () => chatRoute,
   path: "/",
+  validateSearch,
   component: ChatPage,
 });
 
 const conversationRoute = createRoute({
   getParentRoute: () => chatRoute,
   path: "/$conversationId",
+  validateSearch,
   component: ConversationPage,
 });
 
@@ -28,6 +35,13 @@ const agenrRoute = createRoute({
   path: "/agent",
   getParentRoute: () => chatRoute,
   component: lazyRouteComponent(() => import("./agent/AgentPage")),
+});
+
+const agentChatRoute = createRoute({
+  getParentRoute: () => chatRoute,
+  path: "/agent/chat/$agentId",
+  component: lazyRouteComponent(()=>import("./agent/AgentChatPage")),
+  validateSearch,
 });
 
 const databaseRoute = createRoute({
@@ -41,6 +55,7 @@ const chatRouteTree = chatRoute.addChildren([
   conversationRoute,
   agenrRoute,
   databaseRoute,
+  agentChatRoute,
 ]);
 
 export default chatRouteTree;

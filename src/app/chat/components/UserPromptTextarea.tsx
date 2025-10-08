@@ -3,14 +3,17 @@ import {
   PromptInputButton,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
+import { useBotInfo, useBotBasicInfo } from "@/hooks/agent/use-bot";
+import { isBuiltInAgent } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { useChatStore } from "@/store/chat";
+import { Icon } from "@radix-ui/react-select";
+import { useNavigate } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import {
   Atom,
+  Bot,
   CodeXml,
   Earth,
-  // FolderOpen,
   MicIcon,
   Paperclip,
   PencilLine,
@@ -24,22 +27,22 @@ export default function UserPromptTextarea({
   onAbort,
   disabled = false,
   status,
+  botId,
+  think,
+  webSearch,
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
   onSubmit: (value: string, onSuccess?: () => void) => void;
   onAbort: () => void;
+  initialBotId?: string;
   disabled?: boolean;
   status: ChatStatus;
+  botId?: string;
+  think?: boolean;
+  webSearch?: boolean;
 }) {
   const [value, setValue] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
-
-  const {
-    botId,
-    completionsOption: { useDeepThink: isDeepThink, webSearch: isWebSearch },
-  } = useChatStore((s) => s.completionConfig);
-  const toggleDeepThink = useChatStore((s) => s.toggleDeepThink);
-  const toggleWebSearch = useChatStore((s) => s.toggleWebSearch);
-  const setCompletionConfig = useChatStore((s) => s.setCompletionConfig);
+  const navigator = useNavigate();
 
   const handleInput = useCallback(
     (e: React.FormEvent<HTMLSpanElement>) => {
@@ -80,6 +83,9 @@ export default function UserPromptTextarea({
       onAbort();
     }
   };
+  const showBot = !isBuiltInAgent(botId);
+  const botInfo = useBotInfo({ botId: botId });
+  const botBasicInfo = useBotBasicInfo(botId);
   return (
     <PromptInput
       onKeyDown={(e) => {
@@ -110,8 +116,20 @@ export default function UserPromptTextarea({
           spanRef.current?.focus();
         }}
       >
-        <div className="inline m-2 mt-0 ">
-          <PencilLine className="size-4 inline stoke-3 stroke-primary -translate-y-0.5" />
+        <div className="inline mx-2 mt-0 float-left">
+          {showBot ? (
+            !botInfo.isFetching &&
+            !botInfo.isError && (
+              <>
+                <Icon className="size-5 -mt-1 inline stoke-3 stroke-primary mx-1"  asChild>
+                  <img src={botBasicInfo.iconUrl} alt="bot" />
+                </Icon>
+                <span className="text-primary align-bottom font-semibold">{botBasicInfo.name}</span>
+              </>
+            )
+          ) : (
+            <PencilLine className="size-5 -mt-1 inline stoke-3 stroke-primary" />
+          )}
         </div>
         <span
           ref={spanRef}
@@ -119,43 +137,68 @@ export default function UserPromptTextarea({
           onInput={handleInput}
           onPaste={handlePaste}
           className={cn(
-            "outline-none border-none",
+            "outline-none border-none align-bottom",
             (status !== "ready" || disabled) && "opacity-50 cursor-not-allowed",
           )}
           suppressContentEditableWarning
         />
-        {!value && <span className="text-gray-500">继续提问</span>}
+        {!value && <span className="text-gray-500 align-bottom">继续提问</span>}
       </div>
       <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
         <div>
           <PromptInputButton
-            onClick={toggleDeepThink}
-            variant={isDeepThink ? "default" : "outline"}
+            onClick={() => {
+              navigator({
+                to: ".",
+                search: {
+                  botId,
+                  webSearch,
+                  think: think ? void 0 : true,
+                },
+              });
+            }}
+            variant={think ? "default" : "outline"}
             className="rounded-full"
           >
             <Atom size={16} />
             <span>深度思考</span>
           </PromptInputButton>
           <PromptInputButton
-            onClick={toggleWebSearch}
-            variant={isWebSearch ? "default" : "outline"}
+            onClick={() => {
+              navigator({
+                to: ".",
+                search: {
+                  botId,
+                  think,
+                  webSearch: webSearch ? void 0 : true,
+                },
+              });
+            }}
+            variant={webSearch ? "default" : "outline"}
             className="rounded-full"
           >
             <Earth size={16} />
             <span>联网搜索</span>
           </PromptInputButton>
-          <PromptInputButton
-            onClick={() =>
-              setCompletionConfig({
-                botId: botId === "code-gen" ? "default" : "code-gen",
-              })
-            }
-            variant={botId === "code-gen" ? "default" : "outline"}
-            className="rounded-full"
-          >
-            <CodeXml size={16} />
-            <span>代码生成</span>
-          </PromptInputButton>
+          {isBuiltInAgent(botId) && (
+            <PromptInputButton
+              onClick={() =>
+                navigator({
+                  to: ".",
+                  search: {
+                    think,
+                    webSearch,
+                    botId: botId === "code-gen" ? void 0 : "code-gen",
+                  },
+                })
+              }
+              variant={botId === "code-gen" ? "default" : "outline"}
+              className="rounded-full"
+            >
+              <CodeXml size={16} />
+              <span>代码生成</span>
+            </PromptInputButton>
+          )}
           <PromptInputButton variant={"outline"} className="rounded-full">
             <Paperclip size={16} />
           </PromptInputButton>
@@ -170,7 +213,7 @@ export default function UserPromptTextarea({
           <PromptInputSubmit
             className="rounded-full"
             status={status}
-            disabled={disabled || (status ==='ready' &&  !value.trim())}
+            disabled={disabled || (status === "ready" && !value.trim())}
           />
         </div>
       </div>

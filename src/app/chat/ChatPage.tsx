@@ -4,7 +4,7 @@ import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
 import { useInitMessageStore } from "@/store/initMessage";
 import { useGSAP } from "@gsap/react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
@@ -12,11 +12,15 @@ import { useCallback, useRef, useState } from "react";
 gsap.registerPlugin(SplitText);
 
 export default function ChatPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate({
+    from: "/chat",
+  });
+  const search = useSearch({
+    from: "/_authenticated/chat/",
+  });
   const [status, setStatus] = useState<ChatStatus>("ready");
   const signal = useRef<AbortController | null>(null);
   const setInitMessage = useInitMessageStore((s) => s.setInitMessage);
-
   const abortRequest = useCallback(() => {
     if (signal.current) {
       setStatus("ready");
@@ -66,6 +70,7 @@ export default function ChatPage() {
         onSuccess?.();
         navigate({
           to: "/chat/$conversationId",
+          search,
           params: { conversationId: conversation.conversationId },
         });
       } catch (error) {
@@ -100,6 +105,7 @@ export default function ChatPage() {
         onSubmit={handleSubmit}
         onAbort={abortRequest}
         status={status}
+        {...search}
       />
       <div />
     </div>

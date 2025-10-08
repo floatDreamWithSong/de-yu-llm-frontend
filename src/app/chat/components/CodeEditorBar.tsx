@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 
-import { loader } from '@monaco-editor/react';
+import { loader } from "@monaco-editor/react";
 
 loader.config({
   paths: {
@@ -61,7 +61,6 @@ const CodeEditorBar = ({
   const handleEditorChange = (value: string | undefined) => {
     if (value === undefined) return;
     setLocalCode(value);
-    console.log("最新代码:", value);
   };
   return (
     <Tabs

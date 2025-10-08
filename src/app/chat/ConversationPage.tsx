@@ -21,7 +21,7 @@ import { Response } from "@/components/ai-elements/response";
 import { useStreamCompletion } from "@/hooks/use-stream-completion";
 import { toast } from "sonner";
 import { useInitMessageStore } from "@/store/initMessage";
-import { useParams } from "@tanstack/react-router";
+import { useParams, useSearch } from "@tanstack/react-router";
 import {
   Copy,
   LoaderCircle,
@@ -53,14 +53,20 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useBotBasicInfo } from "@/hooks/agent/use-bot";
 
 export default function ConversationPage() {
-  const { conversationId } = useParams({ strict: false });
+  const { conversationId } = useParams({
+    from: "/_authenticated/chat/$conversationId",
+  });
   const { initMessage, hasProcessed, markAsProcessed, clearInitMessage } =
     useInitMessageStore();
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
   const previousMessageIdRef = useRef<string | null>(null);
+  const search = useSearch({
+    from: "/_authenticated/chat/$conversationId",
+  });
   const [uiCites, setUiCites] = useState<SseSearchCite[]>([]);
   const {
     status,
@@ -80,8 +86,14 @@ export default function ConversationPage() {
     setIsOpenCite,
     isOpenCodeEditor,
     setIsOpenCodeEditor,
-  } = useStreamCompletion(conversationId as string);
-  const getTargetMes = (id: string) => {
+  } = useStreamCompletion(conversationId, {
+    botId: search.botId,
+    completionsOption: {
+      useDeepThink: search.think,
+      webSearch: search.webSearch,
+    },
+  });
+  const getargetMes = (id: string) => {
     if (!id) {
       return;
     }
@@ -91,7 +103,7 @@ export default function ConversationPage() {
     }
     return res;
   };
-  const codeMes = getTargetMes(isOpenCodeEditor);
+  const codeMes = getargetMes(isOpenCodeEditor);
 
   useEffect(() => {
     if (initMessage && !hasProcessed) {
@@ -121,7 +133,12 @@ export default function ConversationPage() {
       );
       setTimeout(() => {
         sendMessage(message, {
-          completionsOption: { isRegen: true },
+          botId: search.botId,
+          completionsOption: {
+            useDeepThink: search.think,
+            webSearch: search.webSearch,
+            isRegen: true,
+          },
           replyId: lastUserMessage.id,
         });
       }, 0);
@@ -156,7 +173,10 @@ export default function ConversationPage() {
         sendMessage(
           message,
           {
+            botId: search.botId,
             completionsOption: {
+              useDeepThink: search.think,
+              webSearch: search.webSearch,
               isReplace,
               selectedRegenId: lastAssistantMessageBranch.length
                 ? (selectBranchIdRef.current ??
@@ -227,15 +247,16 @@ export default function ConversationPage() {
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const sideBarRef = useRef<any>(null);
-  useEffect(()=>{
-    if(isOpenCodeEditor) {
+  useEffect(() => {
+    if (isOpenCodeEditor) {
       sideBarRef.current.resize(50);
-    } else if(isOpenCite) {
+    } else if (isOpenCite) {
       sideBarRef.current.resize(20);
     } else {
       sideBarRef.current.resize(0);
     }
-  },[isOpenCite, isOpenCodeEditor])
+  }, [isOpenCite, isOpenCodeEditor]);
+  const basicInfo = useBotBasicInfo(search.botId)
   return (
     <ResizablePanelGroup
       direction="horizontal"
@@ -307,7 +328,7 @@ export default function ConversationPage() {
                     <div className="flex gap-3">
                       <div>
                         <MessageAvatar
-                          src="/logo.svg"
+                          src={basicInfo.iconUrl}
                           className="order-1"
                           name="启创"
                         />
@@ -486,6 +507,7 @@ export default function ConversationPage() {
             onSubmit={handleSubmit}
             onAbort={abortRequest}
             status={status}
+            {...search}
           />
         </div>
       </ResizablePanel>
@@ -496,7 +518,6 @@ export default function ConversationPage() {
             onClose={() => setIsOpenCite("")}
             className={cn([
               "bg-chat h-full style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
-              // !isOpenCite && "translate-x-full",
             ])}
             uiCites={uiCites}
           />
@@ -509,7 +530,6 @@ export default function ConversationPage() {
             onClose={() => setIsOpenCodeEditor("")}
             className={cn([
               "bg-chat h-full w-full style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
-              // !isOpenCodeEditor && "translate-x-full",
             ])}
           />
         )}
