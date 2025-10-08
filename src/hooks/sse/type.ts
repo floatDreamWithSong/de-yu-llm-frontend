@@ -28,8 +28,8 @@ export interface SseMeta {
 }
 export interface SseModel {
   model: string;
-  botId: string;
-  botName: string;
+  bot_id: string;
+  bot_name: string;
 }
 
 interface Chunk<E extends string, D> {

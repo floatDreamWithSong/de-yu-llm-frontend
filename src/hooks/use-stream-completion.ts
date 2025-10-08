@@ -43,6 +43,7 @@ export interface ChatMessage {
   searchRes?: SseSearchCite[];
   codeType?: SseEditorCode["codeType"];
   code?: string;
+  botState?: SseModel
 }
 export type FeedbackProps = {
   messageId: string;
@@ -136,8 +137,16 @@ export function useStreamCompletion(
         conversationId,
       ],
     });
+    setIsOpenCiteCore("");
+    setIsOpenCodeEditorCore("");
   }, [conversationId, queryClient]);
-
+  const parseBotState = (str: string) => {
+    try {
+      return JSON.parse(str) as SseModel;
+    } catch {
+      return ;
+    }
+  };
   const {
     hasNextPage: hasMoreEarlier,
     fetchNextPage: fetchEarlier,
@@ -195,6 +204,7 @@ export function useStreamCompletion(
           searchRes: message.ext.cite ?? undefined,
           codeType: message.ext.code?.[0].codeType,
           code: message.ext.code?.[0].code,
+          botState: parseBotState(message.ext.botState),
         }))
         .reverse();
 
@@ -218,6 +228,7 @@ export function useStreamCompletion(
               searchRes: message.ext.cite ?? undefined,
               codeType: message.ext.code?.[0].codeType,
               code: message.ext.code?.[0].code,
+              botState: parseBotState(message.ext.botState),
             }))
             .reverse() ?? [],
       };
@@ -412,8 +423,8 @@ export function useStreamCompletion(
       };
       if (requestData.completionsOption.useDeepThink)
         requestData.model = "InnoSpark-R";
-      if(requestData.botId){
-        requestData.botId = formatBotId(requestData.botId).normal
+      if (requestData.botId) {
+        requestData.botId = formatBotId(requestData.botId).normal;
       }
       console.log(requestData);
       try {

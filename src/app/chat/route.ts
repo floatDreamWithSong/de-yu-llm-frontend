@@ -33,6 +33,7 @@ const conversationRoute = createRoute({
 
 const agenrRoute = createRoute({
   path: "/agent",
+  validateSearch: (search: { page?: number; size?: number }) => search,
   getParentRoute: () => chatRoute,
   component: lazyRouteComponent(() => import("./agent/AgentPage")),
 });
@@ -40,7 +41,7 @@ const agenrRoute = createRoute({
 const agentChatRoute = createRoute({
   getParentRoute: () => chatRoute,
   path: "/agent/chat/$agentId",
-  component: lazyRouteComponent(()=>import("./agent/AgentChatPage")),
+  component: lazyRouteComponent(() => import("./agent/AgentChatPage")),
   validateSearch,
 });
 
