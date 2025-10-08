@@ -18,6 +18,7 @@ export const getAgentList = (data: z.infer<typeof RequestSchema>) => {
     responseValidator: z.object({
       hasMore: z.boolean(),
       intelligences: z.array(agentListItemSchema),
+      nextcursor: z.string(),
     }),
   });
 };

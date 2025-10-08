@@ -21,6 +21,9 @@ import { useGSAP } from "@gsap/react";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import { useCallback, useRef, useState } from "react";
+import gsap from "gsap";
+import SplitText from "gsap/SplitText";
+gsap.registerPlugin(SplitText);
 
 export default function AgentChatPage() {
   const navigate = useNavigate({
@@ -42,8 +45,6 @@ export default function AgentChatPage() {
       signal.current = null;
     }
   }, []);
-
-  useGSAP(() => {}, []);
 
   const handleSubmit = async (message: string, onSuccess?: () => void) => {
     if (message.trim() && status === "ready") {
@@ -76,6 +77,35 @@ export default function AgentChatPage() {
     }
   };
   const botInfo = useBotInfo({ botId: agentId });
+  useGSAP(() => {
+    if (botInfo.isSuccess && !botInfo.isFetching) {
+      const modelTitle = new SplitText("#agent-prologue", {
+        type: "chars",
+      });
+      const timeline = gsap.timeline();
+      timeline.from(modelTitle.chars, {
+        duration: 0.6,
+        opacity: 0,
+        x: 20,
+        ease: "power2.out",
+        stagger: 0.01,
+      });
+
+      const suggestionsRef = document.querySelectorAll(".agent-suggestion");
+      if (suggestionsRef.length > 0) {
+        const suggestions = suggestionsRef;
+        timeline.from(suggestions, {
+          opacity: 0,
+          y: 10,
+          x: 10,
+          scale: 0.9,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "power3.out",
+        });
+      }
+    }
+  }, [botInfo.isSuccess, botInfo.isFetching]);
   return (
     <ResizablePanelGroup
       direction="horizontal"
@@ -102,11 +132,21 @@ export default function AgentChatPage() {
                     </div>
                     <div>
                       <MessageContent className="group-[.is-assistant]:bg-white m-2 style__shallow-shadow rounded-3xl">
-                        {botInfo.data?.onboardingInfo.prologue}
+                        <div id="agent-prologue">
+                          {botInfo.data?.onboardingInfo.prologue}
+                        </div>
                       </MessageContent>
-                      <Suggestions className="p-2 flex flex-col">
-                        <Suggestion onClick={()=>handleSubmit("你好")} suggestion="你好" />
-                        <Suggestion suggestion="你好" />
+                      <Suggestions className="p-2 flex flex-col items-start">
+                        {botInfo.data.onboardingInfo.suggestedQuestions.map(
+                          (question) => (
+                            <Suggestion
+                              className="agent-suggestion transition-colors"
+                              key={question}
+                              onClick={() => handleSubmit(question)}
+                              suggestion={question}
+                            />
+                          ),
+                        )}
                       </Suggestions>
                     </div>
                   </div>

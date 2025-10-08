@@ -17,6 +17,7 @@ export const PromptInfoSchema = z.object({
 export const OnboardingInfoSchema = z.object({
   prologue: z.string(),
   suggestedQuestionsShowMode: z.number(),
+  suggestedQuestions: z.array(z.string()),
 });
 export const ShortMemoryPolicySchema = z.object({
   historyRound: z.number(),
