@@ -11,7 +11,6 @@ import { useNavigate } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import {
   Atom,
-  Bot,
   CodeXml,
   Earth,
   MicIcon,
