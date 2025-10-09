@@ -4,19 +4,19 @@ interface DelayKeyMeta {
 }
 const delatTargetArr: DelayKeyMeta[] = [
   {
-    key: "searchStart",
+    key: "event: searchStart",
     delay: 800,
   },
   {
-    key: "searchFind",
+    key: "event: searchFind",
     delay: 800,
   },
   {
-    key: "searchChoice",
+    key: "event: searchChoice",
     delay: 800,
   },
   {
-    key: "searchCite",
+    key: "event: searchCite",
     delay: 0,
   },
 ];

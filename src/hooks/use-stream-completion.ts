@@ -11,7 +11,7 @@ import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { throttledStream } from "@/utils/throttledStream";
+import { sleep } from "@/utils/throttledStream";
 import type {
   SseChat,
   SseMeta,
@@ -43,7 +43,7 @@ export interface ChatMessage {
   searchRes?: SseSearchCite[];
   codeType?: SseEditorCode["codeType"];
   code?: string;
-  botState?: SseModel
+  botState?: SseModel;
 }
 export type FeedbackProps = {
   messageId: string;
@@ -144,7 +144,7 @@ export function useStreamCompletion(
     try {
       return JSON.parse(str) as SseModel;
     } catch {
-      return ;
+      return;
     }
   };
   const {
@@ -449,11 +449,7 @@ export function useStreamCompletion(
         if (!response.body) {
           throw new Error("Empty Body!");
         }
-        const reader = throttledStream(
-          response.body,
-          50,
-          newAbortController
-        )?.getReader();
+        const reader = response.body.getReader();
         if (!reader) {
           throw new Error("无法读取响应流");
         }
@@ -551,14 +547,18 @@ export function useStreamCompletion(
                 } else if (currentType === "model") {
                   const data = _data as SseModel;
                   console.log("model:", data);
+                } else if (currentType === "searchStart") {
+                  await sleep(800);
                 } else if (currentType === "searchFind") {
                   modifyMessage(aiMessageId, {
                     totalSearch: _data as number,
                   });
+                  await sleep(800);
                 } else if (currentType === "searchChoice") {
                   modifyMessage(aiMessageId, {
                     choiceSearch: _data as number,
                   });
+                  await sleep(800);
                 } else if (currentType === "searchCite") {
                   setMessages((prev) =>
                     prev.map((msg) => {
