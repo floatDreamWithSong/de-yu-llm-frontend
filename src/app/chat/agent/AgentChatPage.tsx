@@ -120,7 +120,7 @@ export default function AgentChatPage() {
         className={cn([" mx-auto py-6 size-full duration-300 transition-all"])}
       >
         <div className="max-w-[1000px] mx-auto px-4 flex flex-col h-full transition-none">
-          <Conversation id="list-container" className="style__scoller-none">
+          <Conversation id="list-container" className="style__scroller-none">
             {botInfo.isSuccess && !botInfo.isFetching && (
               <ConversationContent className="relative">
                 <Message from={"assistant"}>

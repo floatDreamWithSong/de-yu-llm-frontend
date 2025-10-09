@@ -283,7 +283,7 @@ export default function ChatSidebar() {
   }
   return (
     <Sidebar
-      className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow style__scoller"
+      className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow style__scroller"
       variant="inset"
     >
       <SidebarHeader className="space-y-4">

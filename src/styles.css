@@ -42,6 +42,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-chat: var(--chat);
+  --color-home-mid: var(--home-mid);
   --animate-shiny-text: shiny-text 8s infinite;
   @keyframes shiny-text {
     0%,
@@ -107,6 +108,7 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.623 0.214 259.815);
+  --home-mid: #E1ECFE;
 }
 
 /* .dark {
@@ -168,7 +170,7 @@ code {
 }
 
 /* WebKit 滚动条样式（Chrome、Edge、Safari 等） */
-.style__scoller {
+.style__scroller {
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -184,7 +186,7 @@ code {
     background-clip: padding-box;
   }
 }
-.style__scoller-none {
+.style__scroller-none {
   ::-webkit-scrollbar {
     width: 0px;
     height: 0px;

@@ -273,7 +273,7 @@ export default function ConversationPage() {
         ])}
       >
         <div className="max-w-[1000px] mx-auto px-4 flex flex-col h-full transition-none">
-          <Conversation id="list-container" className="style__scoller-none">
+          <Conversation id="list-container" className="style__scroller-none">
             <ConversationContent className="relative">
               {!initMessage && !hasProcessed ? (
                 isFetchingEarlier ? (
@@ -517,7 +517,7 @@ export default function ConversationPage() {
           <CiteBar
             onClose={() => setIsOpenCite("")}
             className={cn([
-              "bg-chat h-full style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
+              "bg-chat h-full style__scroller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
             ])}
             uiCites={uiCites}
           />
@@ -529,7 +529,7 @@ export default function ConversationPage() {
             codeType={codeMes?.codeType}
             onClose={() => setIsOpenCodeEditor("")}
             className={cn([
-              "bg-chat h-full w-full style__scoller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
+              "bg-chat h-full w-full style__scroller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
             ])}
           />
         )}

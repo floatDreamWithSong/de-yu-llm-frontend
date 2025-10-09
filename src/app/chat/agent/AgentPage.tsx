@@ -105,7 +105,7 @@ const AgentPage = () => {
     });
   };
   return (
-    <div className="overflow-auto h-screen style__scoller-none relative">
+    <div className="overflow-auto h-screen style__scroller-none relative">
       <section
         style={{
           backgroundImage: `url(${agentPageBg})`,
