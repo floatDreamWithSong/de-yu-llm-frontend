@@ -21,7 +21,7 @@ import { Response } from "@/components/ai-elements/response";
 import { useStreamCompletion } from "@/hooks/use-stream-completion";
 import { toast } from "sonner";
 import { useInitMessageStore } from "@/store/initMessage";
-import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
+import { useParams, useSearch } from "@tanstack/react-router";
 import {
   Copy,
   LoaderCircle,
@@ -30,7 +30,7 @@ import {
   ThumbsDownIcon,
   ThumbsUpIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MessageEditor, {
   type MessageEditorRef,
 } from "./components/MessageEditor";
@@ -54,7 +54,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useBotBasicInfo } from "@/hooks/agent/use-bot";
-import { isBuiltInAgent } from "@/lib/constants";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({
@@ -121,31 +120,6 @@ export default function ConversationPage() {
     clearInitMessage,
     sendMessage,
   ]);
-  const tanstackNavigator = useNavigate({
-    from: '/chat/$conversationId'
-  });
-  const previousBotId = useMemo(
-    () => messages.find((i) => {
-      console.log(i.botState)
-      if(!i.botState) return false;
-      if(isBuiltInAgent(i.botState.bot_id)) return false;
-      return true;
-    })?.botState?.bot_id,
-    [messages],
-  )
-  console.log(previousBotId, messages);
-  if (previousBotId) {
-    tanstackNavigator({
-      to: ".",
-      search:{
-        ...search,
-        botId: previousBotId
-      },
-      params: {
-        conversationId: conversationId,
-      },
-    });
-  }
   const handleRegenerate = () => {
     const lastUserMessage = messages.find(
       (message) => message.id === lastUserMessageId.current,

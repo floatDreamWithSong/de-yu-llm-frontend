@@ -330,7 +330,7 @@ export default function ChatSidebar() {
             <BotIcon className="stroke-2 size-5" />
             智能助手
           </Button>
-          <Button
+          {/* <Button
             className={cn([
               "rounded-full text-lg ",
               matchRouteId !== "database" ? "bg-gray-100 text-[#545469]" : "",
@@ -343,7 +343,7 @@ export default function ChatSidebar() {
           >
             <MessageCircleMoreIcon className="stroke-2 size-5" />
             <div className="mr-4">知识库</div>
-          </Button>
+          </Button> */}
         </div>
       </SidebarHeader>
       <SidebarContent className="px-3" ref={scrollContainerRef}>
@@ -386,6 +386,10 @@ export default function ChatSidebar() {
                             <Link
                               onClick={reset}
                               to={`/chat/$conversationId`}
+                              search={{
+                                botId:
+                                  item.botId.length === 0 ? void 0 : item.botId,
+                              }}
                               params={{ conversationId: item.conversationId }}
                             >
                               <span>{item.brief}</span>
@@ -471,10 +475,12 @@ export default function ChatSidebar() {
           <DropdownMenuContent className="ml-2">
             {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
-            <DropdownMenuItem onClick={() => {
-              tokenStore.remove();
-              navigate({ to: "/auth/login", search: { redirect: "/chat" } });
-            }}>
+            <DropdownMenuItem
+              onClick={() => {
+                tokenStore.remove();
+                navigate({ to: "/auth/login", search: { redirect: "/chat" } });
+              }}
+            >
               <LogOut className="size-4" />
               退出登录
             </DropdownMenuItem>

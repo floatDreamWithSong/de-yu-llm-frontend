@@ -8,6 +8,7 @@ const RequestSchema = z.object({
 export const ConversationSchema = z.object({
   conversationId: z.string(),
   brief: z.string(),
+  botId: z.string(),
   createTime: z.number(),
   updateTime: z.number(),
 });

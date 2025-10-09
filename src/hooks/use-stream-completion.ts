@@ -140,13 +140,13 @@ export function useStreamCompletion(
     setIsOpenCiteCore("");
     setIsOpenCodeEditorCore("");
   }, [conversationId, queryClient]);
-  const parseBotState = (str: string) => {
-    try {
-      return JSON.parse(str) as SseModel;
-    } catch {
-      return;
-    }
-  };
+  // const parseBotState = (str: string) => {
+  //   try {
+  //     return JSON.parse(str) as SseModel;
+  //   } catch {
+  //     return;
+  //   }
+  // };
   const {
     hasNextPage: hasMoreEarlier,
     fetchNextPage: fetchEarlier,
@@ -204,7 +204,7 @@ export function useStreamCompletion(
           searchRes: message.ext.cite ?? undefined,
           codeType: message.ext.code?.[0].codeType,
           code: message.ext.code?.[0].code,
-          botState: parseBotState(message.ext.botState),
+          // botState: parseBotState(message.ext.botState),
         }))
         .reverse();
 
@@ -228,7 +228,7 @@ export function useStreamCompletion(
               searchRes: message.ext.cite ?? undefined,
               codeType: message.ext.code?.[0].codeType,
               code: message.ext.code?.[0].code,
-              botState: parseBotState(message.ext.botState),
+              // botState: parseBotState(message.ext.botState),
             }))
             .reverse() ?? [],
       };
