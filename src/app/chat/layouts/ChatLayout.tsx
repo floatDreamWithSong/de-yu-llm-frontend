@@ -3,15 +3,9 @@
 import ChatSidebar from "@/app/chat/components/ChatSidebar";
 import {
   SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useGSAP } from "@gsap/react";
+
 import { Outlet } from "@tanstack/react-router";
-import gsap from "gsap";
-import { ChevronRight } from "lucide-react";
-import { useRef } from "react";
 
 const sidebarWidth = "300px";
 
@@ -27,45 +21,8 @@ export default function ChatLayout() {
     >
       <ChatSidebar />
       <main className=" w-full h-full bg-chat">
-        {/* <div className="z-50 safe-area-top min-h-10 flex items-center sticky top-0 w-full"> */}
-        <SidebarExpandTrigger />
-        {/* <div id="sidebar-header" /> */}
-        {/* </div> */}
         <Outlet />
       </main>
     </SidebarProvider>
-  );
-}
-
-function SidebarExpandTrigger() {
-  const { state } = useSidebar();
-  const isMobile = useIsMobile();
-  const ref = useRef<HTMLButtonElement>(null);
-  useGSAP(() => {
-    if (!ref.current) return;
-    if (state === "expanded" && !isMobile) {
-      gsap.set(ref.current, {
-        opacity: 0,
-      });
-    } else {
-      gsap.to(ref.current, {
-        duration: 0.6,
-        opacity: 1,
-        x: 0,
-        ease: "circ",
-        delay: 0.2,
-      });
-    }
-  }, [state, isMobile]);
-  return (
-    (state === "collapsed" || isMobile) && (
-      <SidebarTrigger
-        variant={"outline"}
-        icon={<ChevronRight className="size-5" />}
-        className="transition-none opacity-0 absolute z-50 size-10 left-0 -translate-x-full top-1/2 -translate-y-1/2 rounded-r-full bg-white border-2 container"
-        ref={ref}
-        iconClassName="size-6"
-      />
-    )
   );
 }

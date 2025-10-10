@@ -54,9 +54,12 @@ import { deleteConversation } from "@/apis/requests/conversation/delete";
 import { cn } from "@/lib/utils";
 import { useInitMessageStore } from "@/store/initMessage";
 import { tokenStore } from "@/lib/request";
+import { Avatar } from "@/components/ui/avatar";
 
 export default function ChatSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpen, 
+    // openMobile, setOpenMobile
+   } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
   const matchRouteId = location.pathname.startsWith("/chat/agent")
@@ -281,54 +284,84 @@ export default function ChatSidebar() {
   function handleDeleteConversation(id: string) {
     deleteMutation.mutate({ conversationId: id });
   }
+  const isExpanded = state === "expanded";
+  const iconMode = !isExpanded && !isMobile;
+  if(isMobile && !open){
+    console.log('open')
+    setOpen(true)
+  }
   return (
     <Sidebar
-      className="px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow style__scroller"
+      className={cn([
+        "px-2 pb-0 pt-10 ease-out duration-400 style__shallow-shadow style__scroller",
+        isMobile && "z-10",
+      ])}
       variant="inset"
+      collapsible={"icon"}
     >
       <SidebarHeader className="space-y-4">
-        <div className="flex items-center justify-around px-2 gap-2">
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="logo" />
-            <h2 className="text-primary font-semibold text-2xl">
-              启创·<span className="text-xl">InnoSpark</span>
-            </h2>
+        <div className="flex items-center px-2 gap-2">
+          <div className="flex flex-row overflow-clip">
+            <Avatar className="p-0.5 transition-transform cursor-pointer translate-x-1 ">
+              <img
+                src="/logo.svg"
+                alt="logo"
+                className=""
+                onMouseUp={() => {
+                  iconMode && setOpen(true);
+                }}
+              />
+            </Avatar>
+            {!iconMode && (
+              <h2
+                className={cn([
+                  "text-primary font-semibold text-2xl ml-2 text-nowrap",
+                  iconMode
+                    ? "opacity-0 pointer-events-none"
+                    : "ease-out duration-300  delay-200",
+                ])}
+              >
+                启创·<span className="text-xl">InnoSpark</span>
+              </h2>
+            )}
           </div>
-          {state === "expanded" && (
-            <SidebarTrigger
-              className="self-end"
-              icon={<img src="/collapse.svg" alt="collapse" />}
-            />
-          )}
+
+          <SidebarTrigger
+            className={cn([
+              "self-end",
+              iconMode ? "opacity-0 transition-none" : "delay-300",
+            ])}
+            icon={<img src="/collapse.svg" alt="collapse" />}
+          />
         </div>
         <div className="px-3 space-y-4 flex flex-col my-6">
           <Button
             className={cn([
-              "rounded-full text-lg ",
+              "rounded-full text-lg gap-0",
               matchRouteId !== "chat" ? "bg-gray-100 text-[#545469]" : "",
             ])}
-            size={"lg"}
+            size={iconMode ? "icon" : "lg"}
             variant={"secondary"}
             onClick={() => {
               navigate({ to: "/chat" });
             }}
           >
             <MessageCircleMoreIcon className="stroke-2 size-5" />
-            开始对话
+            {!iconMode && <span className={"ml-2"}>开始对话</span>}
           </Button>
           <Button
             className={cn([
-              "rounded-full text-lg ",
+              "rounded-full text-lg overflow-clip gap-0",
               matchRouteId !== "agent" ? "bg-gray-100 text-[#545469]" : "",
             ])}
-            size={"lg"}
+            size={iconMode ? "icon" : "lg"}
             variant={"secondary"}
             onClick={() => {
               navigate({ to: "/chat/agent" });
             }}
           >
             <BotIcon className="stroke-2 size-5" />
-            智能助手
+            {!iconMode && <span className={"ml-2"}>智能助手</span>}
           </Button>
           {/* <Button
             className={cn([
@@ -342,17 +375,25 @@ export default function ChatSidebar() {
             }}
           >
             <MessageCircleMoreIcon className="stroke-2 size-5" />
-            <div className="mr-4">知识库</div>
+            {!iconMode && <div className="mr-4">知识库</div>}
           </Button> */}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-3" ref={scrollContainerRef}>
+      <SidebarContent
+        className={cn([
+          " ease-out px-3",
+          iconMode
+            ? "opacity-0 -translate-x-full duration-0"
+            : "open:opacity-100 delay-200 duration-400",
+        ])}
+        ref={scrollContainerRef}
+      >
         {isLoading ? (
           <div className="w-full justify-center flex">
             <LoaderCircle className="animate-spin duration-500 stroke-primary" />
           </div>
         ) : (
-          <>
+          <div>
             {groupConversationsByDate(conversationHistory ?? []).map((item) => (
               <SidebarGroup key={item.label}>
                 <SidebarGroupLabel>{item.label}</SidebarGroupLabel>
@@ -390,7 +431,9 @@ export default function ChatSidebar() {
                                 botId:
                                   item.botId.length === 0 ? void 0 : item.botId,
                               }}
-                              params={{ conversationId: item.conversationId }}
+                              params={{
+                                conversationId: item.conversationId,
+                              }}
                             >
                               <span>{item.brief}</span>
                             </Link>
@@ -452,10 +495,18 @@ export default function ChatSidebar() {
             >
               已经到底了
             </div>
-          </>
+          </div>
         )}
       </SidebarContent>
-      <div className="relative mx-3 my-6">
+      <div
+        className={cn([
+          "relative mx-3 my-6",
+          iconMode
+            ? "opacity-0 -translate-x-full duration-0"
+            : "open:opacity-100 delay-200 duration-400",
+          " ease-out",
+        ])}
+      >
         <Input
           value={seacherQueryKey}
           onChange={handleChangeSearchKey}
@@ -465,7 +516,12 @@ export default function ChatSidebar() {
         <SearchIcon className="size-4 absolute right-4 top-1/2 -translate-y-1/2" />
       </div>
       <Separator />
-      <SidebarFooter className="flex flex-row justify-between items-center p-6">
+      <SidebarFooter
+        className={cn([
+          "flex justify-between items-center p-6 flex-row",
+          iconMode && "flex-col-reverse",
+        ])}
+      >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
@@ -486,13 +542,9 @@ export default function ChatSidebar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <img
-          className="rounded-full"
-          src="/default-user.png"
-          alt="avatar"
-          width={40}
-          height={40}
-        />
+        <Avatar>
+          <img src="/default-user.png" alt="avatar" />
+        </Avatar>
       </SidebarFooter>
     </Sidebar>
   );
