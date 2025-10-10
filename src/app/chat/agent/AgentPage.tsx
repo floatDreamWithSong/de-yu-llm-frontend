@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Icon } from "@radix-ui/react-select";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import agentPageBg from "@/assets/imgs/agent-page.png";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
@@ -30,7 +30,37 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useTitleAni } from "@/hooks/use-title-ani";
+/**
+ * 语文
+数学
+政治
+英语
+生物
+化学
+物理
+历史
+地理
+技能素养
+学习辅导
+教师支持
+ */
+const agentTypeList = [
+  "语文",
+  "数学",
+  "政治",
+  "英语",
+  "生物",
+  "化学",
+  "物理",
+  "历史",
+  "地理",
+  "技能素养",
+  "学习辅导",
+  "教师支持",
+];
 const AgentPage = () => {
   // const agentListQuery = useInfiniteQuery({
   //   initialPageParam: void 0 as string | undefined,
@@ -62,15 +92,14 @@ const AgentPage = () => {
     getNextPageParam: (lastPage) =>
       lastPage.hasMore ? lastPage.nextCursor : undefined,
   });
-  const [checkedType, setCheckedType] = useState("");
+  const { page = 1, size = 32, botType = "" } = useSearch({
+    from: "/_authenticated/chat/agent",
+  });
   const agentListData =
     agentListQuery.data?.pages
       .flatMap((page) => page.intelligences)
-      .filter((item) => checkedType === "" || item.type === checkedType) ?? [];
+      .filter((item) => botType === "" || item.type === botType) ?? [];
   const total = agentListData.length;
-  const { page = 1, size = 30 } = useSearch({
-    from: "/_authenticated/chat/agent",
-  });
   const maxPagge = Math.ceil(total / size);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -89,10 +118,10 @@ const AgentPage = () => {
       observer.disconnect();
     };
   }, [agentListQuery.fetchNextPage]);
-  const avaliableType = agentListQuery.data?.pages
-    .flatMap((page) => page.intelligences)
-    .map((item) => item.type);
-  const filteredTypes = Array.from(new Set(avaliableType));
+  // const avaliableType = agentListQuery.data?.pages
+  //   .flatMap((page) => page.intelligences)
+  //   .map((item) => item.type);
+  // const filteredTypes = Array.from(new Set(avaliableType));
   const navigate = useNavigate();
   // const setCompletionConfig = useChatStore((s) => s.setCompletionConfig);
   const handleCardClick = (botId: string) => {
@@ -104,6 +133,34 @@ const AgentPage = () => {
       },
     });
   };
+  const agentSlice = useMemo(
+    () => agentListData.slice((page - 1) * size, page * size),
+    [page, size, agentListData],
+  );
+  useGSAP(() => {
+    if (!agentSlice.length) return;
+    gsap.killTweensOf(".agent-slice-card");
+    gsap.from(".agent-slice-card", {
+      opacity: 0,
+      translateY: 20,
+      duration: 0.3,
+      stagger: 0.02,
+      ease: 'power3.inOut'
+    });
+  }, [agentSlice]);
+  useGSAP(() => {
+    gsap.killTweensOf(".agent-page-type-list-btn");
+    gsap.from(".agent-page-type-list-btn", {
+      opacity: 0,
+      translateX: 20,
+      scale: 0.8,
+      duration: 0.3,
+      stagger: 0.03,
+      delay: 0.1,
+      ease: 'power3.inOut'
+    });
+  }, []);
+  useTitleAni({ title: ".agent-page-title", subtitle: ".agent-page-subtitle" });
   return (
     <div className="overflow-auto h-screen style__scroller-none relative">
       <section
@@ -115,116 +172,125 @@ const AgentPage = () => {
         }}
         className="h-64 w-full flex flex-col items-center justify-center "
       >
-        <h1 className="text-4xl font-bold text-primary mb-2">
+        <h1 className="agent-page-title text-4xl font-bold text-primary mb-2">
           InnoSpark · 智能助手
         </h1>
-        <h2 className="text-lg text-muted-foreground">
+        <h2 className="agent-page-subtitle text-lg text-muted-foreground">
           选择适合您需求的智能助手功能，提升工作与学习效率
         </h2>
       </section>
-      <section className="flex gap-2 px-6 pt-6">
-        <Button
-          variant={checkedType === "" ? "default" : "secondary"}
-          size={"sm"}
-          onClick={() => setCheckedType("")}
-        >
-          全部
-        </Button>
-        {filteredTypes.map((type) => (
+      <div className="w-full flex flex-col items-center max-w-400 mx-auto @container">
+        <section className="flex flex-wrap gap-2 px-6 pt-6 overflow-x-scroll w-full justify-center">
           <Button
-            variant={checkedType === type ? "default" : "secondary"}
-            key={type}
+            variant={botType === "" ? "default" : "secondary"}
             size={"sm"}
-            onClick={() => setCheckedType(type)}
+            className="agent-page-type-list-btn transition-colors"
+            onClick={() => navigate({to:'/chat/agent',search:{page: 1, size}})}
           >
-            {type}
+            全部
           </Button>
-        ))}
-      </section>
-      <section className="px-6 pt-6 flex flex-wrap gap-4">
-        {agentListData.slice((page - 1) * size, page * size).map((item) => (
-          <Card
-            key={item.id}
-            onClick={() => handleCardClick(item.id)}
-            className="w-80 aspect-video gap-2 py-4 cursor-pointer hover:scale-102 transition-transform duration-300"
-          >
-            <CardHeader className="flex items-center">
-              <Icon className="size-10 flex items-center justify-center bg-secondary rounded-md">
-                <img src={item.iconUrl} alt={item.name} />
-              </Icon>
-              <CardTitle className="text-xl">{item.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="overflow-hidden text-ellipsis line-clamp-4">
-                {item.description}
-              </CardDescription>
-            </CardContent>
-          </Card>
-        ))}
-        {(!agentListQuery.isSuccess || agentListData.length === 0) && (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Icon>
-                  <img className="grayscale" src="/logo.svg" alt="innospark" />
+          {agentTypeList.map((type) => (
+            <Button
+              variant={botType === type ? "default" : "secondary"}
+              key={type}
+              size={"sm"}
+              className="hover:scale-105 agent-page-type-list-btn transition-colors"
+              onClick={() => navigate({to:'/chat/agent',search:{page: 1, size, botType: type}})}
+            >
+              {type}
+            </Button>
+          ))}
+        </section>
+        <section className="relative px-6 pt-6 grid gap-4 grid-cols-1 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
+          {agentSlice.map((item) => (
+            <Card
+              key={item.id}
+              onClick={() => handleCardClick(item.id)}
+              className="agent-slice-card transition-colors w-full gap-2 py-4 cursor-pointer hover:bg-secondary/50 duration-300"
+            >
+              <CardHeader className="flex items-center">
+                <Icon className="size-10 flex items-center justify-center bg-secondary rounded-md">
+                  <img src={item.iconUrl} alt={item.name} />
                 </Icon>
-              </EmptyMedia>
-              <EmptyTitle>暂无数据</EmptyTitle>
-              <EmptyDescription>这里空空如也~</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
-      </section>
+                <CardTitle className="text-xl">{item.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="overflow-hidden text-ellipsis line-clamp-4">
+                  {item.description}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          ))}
+          {(!agentListQuery.isSuccess || agentListData.length === 0) && (
+            <Empty className="col-span-4">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Icon>
+                    <img
+                      className="grayscale"
+                      src="/logo.svg"
+                      alt="innospark"
+                    />
+                  </Icon>
+                </EmptyMedia>
+                <EmptyTitle>暂无数据</EmptyTitle>
+                <EmptyDescription>这里空空如也~</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </section>
+      </div>
       <Pagination className="my-8 justify-end -ml-6">
-        <PaginationContent>
-          {page > 1 && (
+        {maxPagge > 1 && (
+          <PaginationContent>
+            {page > 1 && (
+              <PaginationItem>
+                <Link to="/chat/agent" search={{ page: page - 1, size }}>
+                  <PaginationPrevious>
+                    <ChevronLeftIcon />
+                  </PaginationPrevious>
+                </Link>
+              </PaginationItem>
+            )}
+            {page > 2 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            {page > 1 && (
+              <PaginationItem>
+                <Link to="/chat/agent" search={{ page: page - 1, size }}>
+                  <PaginationLink>{page - 1}</PaginationLink>
+                </Link>
+              </PaginationItem>
+            )}
             <PaginationItem>
-              <Link to="/chat/agent" search={{ page: page - 1, size }}>
-                <PaginationPrevious>
-                  <ChevronLeftIcon />
-                </PaginationPrevious>
-              </Link>
+              <PaginationLink isActive>{page}</PaginationLink>
             </PaginationItem>
-          )}
-          {page > 2 && (
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-          )}
-          {page > 1 && (
-            <PaginationItem>
-              <Link to="/chat/agent" search={{ page: page - 1, size }}>
-                <PaginationLink>{page - 1}</PaginationLink>
-              </Link>
-            </PaginationItem>
-          )}
-          <PaginationItem>
-            <PaginationLink isActive>{page}</PaginationLink>
-          </PaginationItem>
-          {page + 1 <= maxPagge && (
-            <PaginationItem>
-              <Link to="/chat/agent" search={{ page: page + 1, size }}>
-                <PaginationLink>{page + 1}</PaginationLink>
-              </Link>
-            </PaginationItem>
-          )}
-          {page + 2 < maxPagge && (
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-          )}
-          {page + 1 <= maxPagge && (
-            <PaginationItem>
-              <Link to="/chat/agent" search={{ page: page + 1, size }}>
-                <PaginationNext>
-                  <ChevronRightIcon />
-                </PaginationNext>
-              </Link>
-            </PaginationItem>
-          )}
-        </PaginationContent>
+            {page + 1 <= maxPagge && (
+              <PaginationItem>
+                <Link to="/chat/agent" search={{ page: page + 1, size }}>
+                  <PaginationLink>{page + 1}</PaginationLink>
+                </Link>
+              </PaginationItem>
+            )}
+            {page + 2 < maxPagge && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            {page + 1 <= maxPagge && (
+              <PaginationItem>
+                <Link to="/chat/agent" search={{ page: page + 1, size }}>
+                  <PaginationNext>
+                    <ChevronRightIcon />
+                  </PaginationNext>
+                </Link>
+              </PaginationItem>
+            )}
+          </PaginationContent>
+        )}
       </Pagination>
-
 
       {/* <div
           ref={bottomRef}

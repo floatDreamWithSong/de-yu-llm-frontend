@@ -2,14 +2,13 @@
 
 import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
+import { useTitleAni } from "@/hooks/use-title-ani";
 import { useInitMessageStore } from "@/store/initMessage";
-import { useGSAP } from "@gsap/react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
-import gsap from "gsap";
-import SplitText from "gsap/SplitText";
+
 import { useCallback, useRef, useState } from "react";
-gsap.registerPlugin(SplitText);
+
 
 export default function ChatPage() {
   const navigate = useNavigate({
@@ -29,30 +28,7 @@ export default function ChatPage() {
     }
   }, []);
 
-  useGSAP(() => {
-    const modelTitle = new SplitText(".model-title", {
-      type: "chars",
-    });
-    gsap.from(modelTitle.chars, {
-      duration: 0.8,
-      opacity: 0,
-      x: 40,
-      ease: "power3.out",
-      stagger: 0.01,
-      delay: 0.2,
-    });
-    const modelSubtitle = new SplitText(".model-subtitle", {
-      type: "chars",
-    });
-    gsap.from(modelSubtitle.chars, {
-      duration: 0.3,
-      opacity: 0,
-      y: 10,
-      ease: "power3.out",
-      stagger: 0.01,
-      delay: 0.6,
-    });
-  }, []);
+  useTitleAni({title: ".model-title", subtitle: ".model-subtitle"})
 
   const handleSubmit = async (message: string, onSuccess?: () => void) => {
     if (message.trim() && status === "ready") {
