@@ -4,6 +4,7 @@ import {
   NavigationMenuItem,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { tokenStore } from "@/lib/request";
 import { Link, Outlet } from "@tanstack/react-router";
 
 const navLinks = [
@@ -43,7 +44,6 @@ const navLinks = [
   },
 ];
 const HomeLayout = () => {
-
   return (
     <div id="smooth-wrapper" className="h-screen">
       <NavigationMenu className="w-full flex justify-around h-16 sticky top-0 left-0 z-50 bg-chat">
@@ -61,20 +61,33 @@ const HomeLayout = () => {
           {navLinks.map((link, ind) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: 链接固定
             <NavigationMenuItem key={ind}>
-              <Button variant="link" className="w-full text-base text-foreground hover:text-primary">
+              <Button
+                variant="link"
+                className="w-full text-base text-foreground hover:text-primary"
+              >
                 {link.to}
               </Button>
             </NavigationMenuItem>
           ))}
           <NavigationMenuItem className="ml-6">
-            <Link to="/auth/login" search={{ redirect: "/" }}>
-              <Button
-                variant="default"
-                className="w-full text-base rounded-full px-6"
-              >
-                登录
-              </Button>
-            </Link>
+            {tokenStore.get() ? (
+              <img
+                className="rounded-full"
+                src="/default-user.png"
+                alt="avatar"
+                width={40}
+                height={40}
+              />
+            ) : (
+              <Link to="/auth/login" search={{ redirect: "/" }}>
+                <Button
+                  variant="default"
+                  className="w-full text-base rounded-full px-6"
+                >
+                  登录
+                </Button>
+              </Link>
+            )}
           </NavigationMenuItem>
           {/* <NavigationMenuItem>
         <NavigationMenuTrigger>Item One</NavigationMenuTrigger>

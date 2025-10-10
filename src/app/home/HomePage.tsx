@@ -141,9 +141,10 @@ const HomePage = () => {
     });
 
     timeline.from("#btn-group", {
-      duration: 0.3,
+      duration: 0.5,
       opacity: 0,
       translateY: 10,
+      delay: -0.4,
       ease: "power3.out",
     });
   }, []);
