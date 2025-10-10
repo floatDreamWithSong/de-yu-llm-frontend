@@ -16,7 +16,7 @@ export const useBotInfo = (props: { botId?: string }) => {
     },
     select: (e) => e?.info,
     enabled: enabledQuery,
-    staleTime: 10_000,
+    staleTime: Number.POSITIVE_INFINITY,
   });
 };
 

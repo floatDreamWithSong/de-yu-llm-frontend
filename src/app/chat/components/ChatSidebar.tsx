@@ -337,7 +337,7 @@ export default function ChatSidebar() {
         <div className="px-3 space-y-4 flex flex-col my-6">
           <Button
             className={cn([
-              "rounded-full text-lg gap-0",
+              "rounded-full text-lg gap-0 overflow-clip",
               matchRouteId !== "chat" ? "bg-gray-100 text-[#545469]" : "",
             ])}
             size={iconMode ? "icon" : "lg"}

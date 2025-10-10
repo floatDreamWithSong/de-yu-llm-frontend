@@ -3,6 +3,11 @@ import {
   PromptInputButton,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useBotInfo, useBotBasicInfo } from "@/hooks/agent/use-bot";
 import { isBuiltInAgent } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -85,6 +90,8 @@ export default function UserPromptTextarea({
   const showBot = !isBuiltInAgent(botId);
   const botInfo = useBotInfo({ botId: botId });
   const botBasicInfo = useBotBasicInfo(botId);
+  const thinkAble =
+    isBuiltInAgent(botId) || botInfo.data?.modelInfo.modelId !== "80000";
   return (
     <PromptInput
       onKeyDown={(e) => {
@@ -120,10 +127,15 @@ export default function UserPromptTextarea({
             !botInfo.isFetching &&
             !botInfo.isError && (
               <>
-                <Icon className="size-5 -mt-1 inline stoke-3 stroke-primary mx-1"  asChild>
+                <Icon
+                  className="size-5 -mt-1 inline stoke-3 stroke-primary mx-1"
+                  asChild
+                >
                   <img src={botBasicInfo.iconUrl} alt="bot" />
                 </Icon>
-                <span className="text-primary align-bottom font-semibold">{botBasicInfo.name}</span>
+                <span className="text-primary align-bottom font-semibold">
+                  {botBasicInfo.name}
+                </span>
               </>
             )
           ) : (
@@ -145,23 +157,41 @@ export default function UserPromptTextarea({
       </div>
       <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
         <div>
-          <PromptInputButton
-            onClick={() => {
-              navigator({
-                to: ".",
-                search: {
-                  botId,
-                  webSearch,
-                  think: think ? void 0 : true,
-                },
-              });
-            }}
-            variant={think ? "default" : "outline"}
-            className="rounded-full"
-          >
-            <Atom size={16} />
-            <span>深度思考</span>
-          </PromptInputButton>
+          {thinkAble ? (
+            <PromptInputButton
+              onClick={() => {
+                navigator({
+                  to: ".",
+                  search: {
+                    botId,
+                    webSearch,
+                    think: think ? void 0 : true,
+                  },
+                });
+              }}
+              variant={think ? "default" : "outline"}
+              className="rounded-full"
+            >
+              <Atom size={16} />
+              <span>深度思考</span>
+            </PromptInputButton>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger>
+                <PromptInputButton
+                  disabled={true}
+                  variant={"outline"}
+                  className="rounded-full"
+                >
+                  <Atom size={16} />
+                  <span>深度思考</span>
+                </PromptInputButton>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>该智能体模型不可深度思考</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
           <PromptInputButton
             onClick={() => {
               navigator({
