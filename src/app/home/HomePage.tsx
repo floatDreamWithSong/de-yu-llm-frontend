@@ -179,14 +179,14 @@ const HomePage = () => {
               <Link to="/chat">
                 <Button
                   variant={"default"}
-                  className="rounded-full text-lg px-12 py-6"
+                  className="rounded-full text-lg px-16 py-7"
                 >
                   开始对话
                 </Button>
               </Link>
               <Button
                 variant={"outline"}
-                className="rounded-full text-lg px-12 py-6"
+                className="rounded-full text-lg px-16 py-7"
                 size={"lg"}
               >
                 <a
