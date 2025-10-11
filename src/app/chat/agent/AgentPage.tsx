@@ -161,7 +161,7 @@ const AgentPage = () => {
   }, []);
   useTitleAni({ title: ".agent-page-title", subtitle: ".agent-page-subtitle" });
   return (
-    <div className="overflow-auto h-screen style__scroller-none relative">
+    <div className="overflow-auto h-full style__scroller-none relative">
       <section
         style={{
           backgroundImage: `url(${agentPageBg})`,
