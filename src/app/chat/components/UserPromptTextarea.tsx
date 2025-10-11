@@ -3,6 +3,7 @@ import {
   PromptInputButton,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   Tooltip,
   TooltipContent,
@@ -47,7 +48,7 @@ export default function UserPromptTextarea({
   const [value, setValue] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
   const navigator = useNavigate();
-
+  const { isMobile } = useSidebar();
   const handleInput = useCallback(
     (e: React.FormEvent<HTMLSpanElement>) => {
       if (status !== "ready" || disabled) return;
@@ -108,7 +109,7 @@ export default function UserPromptTextarea({
       onSubmit={handleSubmit}
       className={cn(
         "relative flex flex-col divide-none p-2 border-4 mb-4",
-        "shadow-none border-primary/30 style__shallow-shadow max-w-[1000px] aspect-[4/1]",
+        "shadow-none border-primary/30 style__shallow-shadow max-w-[1000px] aspect-[4/1] min-h-32",
         className,
       )}
     >
@@ -173,7 +174,9 @@ export default function UserPromptTextarea({
               className="rounded-full"
             >
               <Atom size={16} />
-              <span>深度思考</span>
+              {
+                !isMobile && <span>深度思考</span>
+              }
             </PromptInputButton>
           ) : (
             <Tooltip>
@@ -184,7 +187,9 @@ export default function UserPromptTextarea({
                   className="rounded-full"
                 >
                   <Atom size={16} />
-                  <span>深度思考</span>
+                  {
+                    !isMobile && <span>深度思考</span>
+                  }
                 </PromptInputButton>
               </TooltipTrigger>
               <TooltipContent>
@@ -207,7 +212,9 @@ export default function UserPromptTextarea({
             className="rounded-full"
           >
             <Earth size={16} />
-            <span>联网搜索</span>
+            {
+              !isMobile && <span>联网搜索</span>
+            }
           </PromptInputButton>
           {isBuiltInAgent(botId) && (
             <PromptInputButton
@@ -225,7 +232,9 @@ export default function UserPromptTextarea({
               className="rounded-full"
             >
               <CodeXml size={16} />
-              <span>代码生成</span>
+              {
+                !isMobile && <span>代码生成</span>
+              }
             </PromptInputButton>
           )}
           <PromptInputButton variant={"outline"} className="rounded-full">

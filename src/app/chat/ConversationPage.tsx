@@ -56,6 +56,7 @@ import {
 import { useBotBasicInfo } from "@/hooks/agent/use-bot";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import "./styles/suggestion.scss";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({
@@ -249,6 +250,7 @@ export default function ConversationPage() {
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const sideBarRef = useRef<any>(null);
+  const { isMobile } = useSidebar();
   useEffect(() => {
     if (isOpenCodeEditor) {
       sideBarRef.current.resize(50);
@@ -532,25 +534,32 @@ export default function ConversationPage() {
           />
         </div>
       </ResizablePanel>
-      <ResizableHandle />
+      <ResizableHandle
+        className={cn([
+          isOpenCite || isOpenCodeEditor ? "" : "hidden",
+          isMobile && "absolute",
+        ])}
+      />
       <ResizablePanel defaultSize={0} maxSize={60} ref={sideBarRef}>
         {isOpenCite && (
           <CiteBar
             onClose={() => setIsOpenCite("")}
             className={cn([
               "bg-chat h-full style__scroller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
+              isMobile && "absolute w-screen",
             ])}
             uiCites={uiCites}
-          />
-        )}
+            />
+          )}
 
         {isOpenCodeEditor && (
           <CodeEditorBar
-            code={codeMes?.code}
-            codeType={codeMes?.codeType}
-            onClose={() => setIsOpenCodeEditor("")}
+          code={codeMes?.code}
+          codeType={codeMes?.codeType}
+          onClose={() => setIsOpenCodeEditor("")}
             className={cn([
               "bg-chat h-full w-full style__scroller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
+              isMobile && "absolute w-screen",
             ])}
           />
         )}
