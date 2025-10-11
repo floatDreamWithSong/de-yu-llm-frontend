@@ -150,7 +150,7 @@ export const Response = memo(
                     <div
                       onMouseUp={() => window.open(cite.url)}
                       key={cite.index}
-                      className="hover:bg-secondary rounded-xl text-[0.85rem] cursor-pointer transition-colors duration-300"
+                      className="hover:bg-secondary rounded-xl text-[0.85rem] p-2 cursor-pointer transition-colors duration-300"
                     >
                       <div className="flex items-center">
                         <div className="p-1">
