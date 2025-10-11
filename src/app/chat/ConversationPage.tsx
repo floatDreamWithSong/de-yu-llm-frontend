@@ -54,6 +54,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useBotBasicInfo } from "@/hooks/agent/use-bot";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
+import "./styles/suggestion.scss";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({
@@ -330,7 +332,7 @@ export default function ConversationPage() {
                         <MessageAvatar
                           src={basicInfo.iconUrl}
                           className="order-1"
-                          name="启创"
+                          name={basicInfo.name}
                         />
                       </div>
                       <div>
@@ -489,6 +491,25 @@ export default function ConversationPage() {
                                       </Actions>
                                     )}
                                   </MessageContent>
+                                  {!_message.isStreaming && regenerateable && (
+                                    <Suggestions className="p-2 flex flex-col items-start">
+                                      {_message.suggestions?.map(
+                                        (suggest, ind) => (
+                                          <Suggestion
+                                            className="agent-chat-suggestion"
+                                            key={suggest}
+                                            onClick={() =>
+                                              handleSubmit(suggest)
+                                            }
+                                            suggestion={suggest}
+                                            style={{
+                                              animationDelay: `${ind * 0.1}s`,
+                                            }}
+                                          />
+                                        ),
+                                      )}
+                                    </Suggestions>
+                                  )}
                                 </div>
                               );
                             })}

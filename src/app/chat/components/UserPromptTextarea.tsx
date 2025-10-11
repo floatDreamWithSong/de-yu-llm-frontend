@@ -177,7 +177,7 @@ export default function UserPromptTextarea({
             </PromptInputButton>
           ) : (
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <PromptInputButton
                   disabled={true}
                   variant={"outline"}

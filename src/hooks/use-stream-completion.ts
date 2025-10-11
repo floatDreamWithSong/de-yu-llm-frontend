@@ -44,6 +44,7 @@ export interface ChatMessage {
   codeType?: SseEditorCode["codeType"];
   code?: string;
   botState?: SseModel;
+  suggestions?: string[];
 }
 export type FeedbackProps = {
   messageId: string;
@@ -61,7 +62,7 @@ const defaultConfig: CompletionRequestType = {
   botId: "default",
   completionsOption: {
     isRegen: false,
-    withSuggest: false,
+    withSuggest: true,
     isReplace: false,
     useDeepThink: false,
     stream: true,
@@ -355,15 +356,26 @@ export function useStreamCompletion(
   const accumulativeMessage = useCallback((id: string, opt: TextContent) => {
     setMessages((prev) =>
       prev.map((msg) => {
-        return msg.id === id
-          ? {
-              ...msg,
-              content: (msg.content ?? "") + (opt.text ?? ""),
-              think: (msg.think ?? "") + (opt.think ?? ""),
-              codeType: opt.codeType,
-              code: (msg.code ?? "") + (opt.code ?? ""),
-            }
-          : msg;
+        if (msg.id !== id) return msg;
+        const data = {
+          ...msg,
+        };
+        if (opt.text) {
+          data.content = (msg.content ?? "") + opt.text;
+        }
+        if (opt.think) {
+          data.think = (msg.think ?? "") + opt.think;
+        }
+        if (opt.codeType) {
+          data.codeType = opt.codeType;
+        }
+        if (opt.code) {
+          data.code = (msg.code ?? "") + opt.code;
+        }
+        if (opt.suggest) {
+          data.suggestions = [...(msg.suggestions ?? []), opt.suggest];
+        }
+        return data;
       })
     );
   }, []);
@@ -517,6 +529,11 @@ export function useStreamCompletion(
                   }
                   if (content.think) {
                     accumulativeMessage(aiMessageId, { think: content.think });
+                  }
+                  if (content.suggest) {
+                    accumulativeMessage(aiMessageId, {
+                      suggest: content.suggest,
+                    });
                   }
                   if (content.codeType) {
                     setIsOpenCodeEditor(aiMessageId);
