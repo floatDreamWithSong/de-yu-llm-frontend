@@ -1,16 +1,19 @@
 import { rootRoute } from "@/route";
-import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
+import { createRoute } from "@tanstack/react-router";
+import HomePage from "./HomePage.tsx";
+import HomeLayout from "./layout/HomeLayout.tsx";
 
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/home",
-  component: lazyRouteComponent(() => import("./layout/HomeLayout.tsx")),
+  component: HomeLayout
+  
 });
 
 const homepage = createRoute({
   getParentRoute: () => homeRoute,
   path: "/",
-  component: lazyRouteComponent(() => import("./HomePage.tsx")),
+  component: HomePage
 });
 
 const homeRouteTree = homeRoute.addChildren([homepage]);
