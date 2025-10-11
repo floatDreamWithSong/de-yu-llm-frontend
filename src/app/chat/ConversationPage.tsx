@@ -269,7 +269,7 @@ export default function ConversationPage() {
     >
       <ResizablePanel
         className={cn([
-          " mx-auto py-6 size-full duration-300 transition-all",
+          " mx-auto pb-6 size-full duration-300 transition-all",
           // !!isOpenCite && "lg:pr-80",
           // isOpenCodeEditor && "lg:pr-240",
         ])}
