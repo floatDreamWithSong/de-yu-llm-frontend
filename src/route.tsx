@@ -2,6 +2,7 @@ import {
   createRootRouteWithContext,
   createRoute,
   Outlet,
+  redirect,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import authRouteTree from "./app/auth/route";
@@ -33,10 +34,7 @@ export const rootRoute = createRootRouteWithContext<MyRouterContext>()({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => {
-    window.location.href = "/home";
-    return null;
-  },
+  beforeLoad: () => redirect({ to: "/home" }),
 });
 
 export const routeTree = rootRoute.addChildren([
