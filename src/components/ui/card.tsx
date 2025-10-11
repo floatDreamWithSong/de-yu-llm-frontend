@@ -1,6 +1,7 @@
 import type * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { createLink } from "@tanstack/react-router"
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -81,6 +82,8 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+const LinkCard = createLink(Card)
+
 export {
   Card,
   CardHeader,
@@ -89,4 +92,5 @@ export {
   CardAction,
   CardDescription,
   CardContent,
+  LinkCard
 }

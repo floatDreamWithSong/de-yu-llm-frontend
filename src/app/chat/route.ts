@@ -1,10 +1,9 @@
 import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { lazy } from "react";
 import authenticatedRoute from "../_authenticated/route";
 
-const ChatPage = lazy(() => import("./ChatPage"));
-const ChatLayout = lazy(() => import("./layouts/ChatLayout"));
-const ConversationPage = lazy(() => import("./ConversationPage"));
+const ChatLayout = lazyRouteComponent(() => import('./layouts/ChatLayout'))
+const ChatPage = lazyRouteComponent(() => import('./ChatPage'))
+const ConversationPage = lazyRouteComponent(() => import('./ConversationPage'))
 const validateSearch = (search: {
   think?: boolean;
   botId?: string;

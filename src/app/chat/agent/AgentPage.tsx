@@ -1,18 +1,22 @@
 import ClientQueryKeys from "@/apis/queryKeys";
 import { getAgentList } from "@/apis/requests/agent/list";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  LinkCard,
 } from "@/components/ui/card";
 import { Icon } from "@radix-ui/react-select";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef } from "react";
 import agentPageBg from "@/assets/imgs/agent-page.png";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import {
+  Link,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 import {
   Empty,
   EmptyDescription,
@@ -92,7 +96,11 @@ const AgentPage = () => {
     getNextPageParam: (lastPage) =>
       lastPage.hasMore ? lastPage.nextCursor : undefined,
   });
-  const { page = 1, size = 32, botType = "" } = useSearch({
+  const {
+    page = 1,
+    size = 32,
+    botType = "",
+  } = useSearch({
     from: "/_authenticated/chat/agent",
   });
   const agentListData =
@@ -124,15 +132,6 @@ const AgentPage = () => {
   // const filteredTypes = Array.from(new Set(avaliableType));
   const navigate = useNavigate();
   // const setCompletionConfig = useChatStore((s) => s.setCompletionConfig);
-  const handleCardClick = (botId: string) => {
-    console.log(botId);
-    navigate({
-      to: "/chat/agent/chat/$agentId",
-      params: {
-        agentId: botId,
-      },
-    });
-  };
   const agentSlice = useMemo(
     () => agentListData.slice((page - 1) * size, page * size),
     [page, size, agentListData],
@@ -145,7 +144,7 @@ const AgentPage = () => {
       translateY: 20,
       duration: 0.3,
       stagger: 0.02,
-      ease: 'power3.inOut'
+      ease: "power3.inOut",
     });
   }, [agentSlice]);
   useGSAP(() => {
@@ -157,7 +156,7 @@ const AgentPage = () => {
       duration: 0.3,
       stagger: 0.03,
       delay: 0.1,
-      ease: 'power3.inOut'
+      ease: "power3.inOut",
     });
   }, []);
   useTitleAni({ title: ".agent-page-title", subtitle: ".agent-page-subtitle" });
@@ -180,12 +179,14 @@ const AgentPage = () => {
         </h2>
       </section>
       <div className="w-full flex flex-col items-center max-w-400 mx-auto @container">
-        <section className="flex flex-wrap gap-2 px-6 pt-6 overflow-x-scroll w-full justify-center">
+        <section className="flex flex-wrap gap-2 px-6 pt-6 pb-2 overflow-x-scroll w-full justify-center">
           <Button
             variant={botType === "" ? "default" : "secondary"}
             size={"sm"}
             className="agent-page-type-list-btn transition-colors"
-            onClick={() => navigate({to:'/chat/agent',search:{page: 1, size}})}
+            onClick={() =>
+              navigate({ to: "/chat/agent", search: { page: 1, size } })
+            }
           >
             全部
           </Button>
@@ -195,17 +196,25 @@ const AgentPage = () => {
               key={type}
               size={"sm"}
               className="hover:scale-105 agent-page-type-list-btn transition-colors"
-              onClick={() => navigate({to:'/chat/agent',search:{page: 1, size, botType: type}})}
+              onClick={() =>
+                navigate({
+                  to: "/chat/agent",
+                  search: { page: 1, size, botType: type },
+                })
+              }
             >
               {type}
             </Button>
           ))}
         </section>
-        <section className="relative px-6 pt-6 grid gap-4 grid-cols-1 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
+        <section className="relative mt-2 px-6 pt-6 grid gap-4 grid-cols-1 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
           {agentSlice.map((item) => (
-            <Card
+            <LinkCard
+              to="/chat/agent/chat/$agentId"
+              params={{
+                agentId: item.id,
+              }}
               key={item.id}
-              onClick={() => handleCardClick(item.id)}
               className="agent-slice-card transition-colors w-full gap-2 py-4 cursor-pointer hover:bg-secondary/50 duration-300"
             >
               <CardHeader className="flex items-center">
@@ -219,7 +228,7 @@ const AgentPage = () => {
                   {item.description}
                 </CardDescription>
               </CardContent>
-            </Card>
+            </LinkCard>
           ))}
           {(!agentListQuery.isSuccess || agentListData.length === 0) && (
             <Empty className="col-span-4">

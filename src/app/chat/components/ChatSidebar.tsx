@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,9 +57,12 @@ import { tokenStore } from "@/lib/request";
 import { Avatar } from "@/components/ui/avatar";
 
 export default function ChatSidebar() {
-  const { state, isMobile, setOpen, 
+  const {
+    state,
+    isMobile,
+    setOpen,
     // openMobile, setOpenMobile
-   } = useSidebar();
+  } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
   const matchRouteId = location.pathname.startsWith("/chat/agent")
@@ -286,9 +289,9 @@ export default function ChatSidebar() {
   }
   const isExpanded = state === "expanded";
   const iconMode = !isExpanded && !isMobile;
-  if(isMobile && !open){
-    console.log('open')
-    setOpen(true)
+  if (isMobile && !open) {
+    console.log("open");
+    setOpen(true);
   }
   return (
     <Sidebar
@@ -335,34 +338,32 @@ export default function ChatSidebar() {
           />
         </div>
         <div className="px-3 space-y-4 flex flex-col my-6">
-          <Button
+          <LinkButton
+            to="/chat"
             className={cn([
               "rounded-full text-lg gap-0 overflow-clip",
               matchRouteId !== "chat" ? "bg-gray-100 text-[#545469]" : "",
             ])}
             size={iconMode ? "icon" : "lg"}
             variant={"secondary"}
-            onClick={() => {
-              navigate({ to: "/chat" });
-            }}
           >
             <MessageCircleMoreIcon className="stroke-2 size-5" />
             {!iconMode && <span className={"ml-2"}>开始对话</span>}
-          </Button>
-          <Button
+          </LinkButton>
+
+          <LinkButton
+            to="/chat/agent"
             className={cn([
               "rounded-full text-lg overflow-clip gap-0",
               matchRouteId !== "agent" ? "bg-gray-100 text-[#545469]" : "",
             ])}
             size={iconMode ? "icon" : "lg"}
             variant={"secondary"}
-            onClick={() => {
-              navigate({ to: "/chat/agent" });
-            }}
           >
             <BotIcon className="stroke-2 size-5" />
             {!iconMode && <span className={"ml-2"}>智能助手</span>}
-          </Button>
+          </LinkButton>
+
           {/* <Button
             className={cn([
               "rounded-full text-lg ",
@@ -531,15 +532,17 @@ export default function ChatSidebar() {
           <DropdownMenuContent className="ml-2">
             {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
-            <DropdownMenuItem
-              onClick={() => {
-                tokenStore.remove();
-                navigate({ to: "/auth/login", search: { redirect: "/chat" } });
-              }}
+            <Link
+              to="/auth/login"
+              search={{ redirect: "/chat" }}
+              preload="render"
+              onClick={() => tokenStore.remove()}
             >
-              <LogOut className="size-4" />
-              退出登录
-            </DropdownMenuItem>
+              <DropdownMenuItem>
+                <LogOut className="size-4" />
+                退出登录
+              </DropdownMenuItem>
+            </Link>
           </DropdownMenuContent>
         </DropdownMenu>
         <Avatar>

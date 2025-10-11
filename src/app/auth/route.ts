@@ -1,10 +1,9 @@
-import { createRoute } from "@tanstack/react-router";
+import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 import { rootRoute } from "@/route";
-import { lazy } from "react";
 import SetNewUserPasswordPage from "./SetNewUserPasswordPage";
-const AuthLayout = lazy(() => import("./layouts/AuthLayout"));
-const LoginPage = lazy(() => import("./LoginPage"));
-const PhonePasswordLoginPage = lazy(() => import("./PhonePasswordLoginPage"));
+const AuthLayout = lazyRouteComponent(() => import("./layouts/AuthLayout"));
+const LoginPage = lazyRouteComponent(() => import("./LoginPage"));
+const PhonePasswordLoginPage = lazyRouteComponent(() => import("./PhonePasswordLoginPage"));
 
 // Auth routes
 const authRoute = createRoute({
