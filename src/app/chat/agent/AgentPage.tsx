@@ -103,10 +103,11 @@ const AgentPage = () => {
   } = useSearch({
     from: "/_authenticated/chat/agent",
   });
-  const agentListData =
-    agentListQuery.data?.pages
+  const agentListData = useMemo(() => {
+    return agentListQuery.data?.pages
       .flatMap((page) => page.intelligences)
       .filter((item) => botType === "" || item.type === botType) ?? [];
+  }, [agentListQuery.data, botType]);
   const total = agentListData.length;
   const maxPagge = Math.ceil(total / size);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -125,7 +126,7 @@ const AgentPage = () => {
       console.log("disconnect");
       observer.disconnect();
     };
-  }, [agentListQuery.fetchNextPage]);
+  }, [agentListQuery, agentListQuery.fetchNextPage]);
   // const avaliableType = agentListQuery.data?.pages
   //   .flatMap((page) => page.intelligences)
   //   .map((item) => item.type);

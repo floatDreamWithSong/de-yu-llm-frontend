@@ -1,4 +1,9 @@
-import { Link, useLocation, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
 import {
   BotIcon,
   Edit,
@@ -293,10 +298,10 @@ export default function ChatSidebar() {
     console.log("open");
     setOpen(true);
   }
-  
-  const {conversationId: currentConversationId} = useParams({
-    strict: false
-  })
+
+  const { conversationId: currentConversationId } = useParams({
+    strict: false,
+  });
   return (
     <Sidebar
       className={cn([
@@ -314,20 +319,18 @@ export default function ChatSidebar() {
                 src="/logo.svg"
                 alt="logo"
                 className=""
-                onMouseUp={() => {
-                  iconMode && setOpen(true);
-                }}
+                onMouseUp={() => iconMode && setOpen(true)}
               />
             </Avatar>
             <AnimatePresence initial={false}>
               {!iconMode && (
                 <motion.h2
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1, }}
-                  transition={{delay: 0.3}}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
                   className={cn([
                     "text-primary font-semibold text-2xl ml-2 text-nowrap",
-                    iconMode && "hidden"
+                    iconMode && "hidden",
                   ])}
                 >
                   启创·<span className="text-xl">InnoSpark</span>
@@ -431,7 +434,12 @@ export default function ChatSidebar() {
                             className="h-8 px-2"
                           />
                         ) : (
-                          <SidebarMenuButton isActive={currentConversationId === item.conversationId} asChild>
+                          <SidebarMenuButton
+                            isActive={
+                              currentConversationId === item.conversationId
+                            }
+                            asChild
+                          >
                             <Link
                               onClick={reset}
                               to={`/chat/$conversationId`}

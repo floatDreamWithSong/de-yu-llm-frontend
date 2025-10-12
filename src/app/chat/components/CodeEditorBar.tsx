@@ -1,5 +1,5 @@
 import type { SseEditorCode } from "@/apis/requests/conversation/schema";
-import Editor from "@monaco-editor/react";
+import Editor, { type EditorProps } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X } from "lucide-react";
@@ -30,15 +30,14 @@ const useSystemTheme = () => {
   // return theme;
   return "light";
 };
-
+type EditorRef = Parameters<Exclude<EditorProps['onMount'], undefined>>[0] | null;
 const CodeEditorBar = ({
   onClose,
   code = "",
   codeType = "html",
   ...rest
 }: Props & Partial<SseEditorCode>) => {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<EditorRef>(null);
   const theme = useSystemTheme();
   const [localCode, setLocalCode] = useState(code);
 

@@ -91,12 +91,15 @@ export default defineConfig({
     codeInspectorPlugin({
       editor: "cursor",
       bundler: "vite",
-      hotKeys: ['ctrlKey', 'altKey'],
-
+      hotKeys: ["ctrlKey", "altKey"],
     }),
-    viteReact(),
+    viteReact({
+      babel: {
+        plugins: ["babel-plugin-react-compiler"],
+      },
+    }),
     tailwindcss(),
-    removeConsole()
+    removeConsole(),
   ],
   // test: {
   //   globals: true,

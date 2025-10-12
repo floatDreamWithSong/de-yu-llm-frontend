@@ -57,6 +57,7 @@ import { useBotBasicInfo } from "@/hooks/agent/use-bot";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import "./styles/suggestion.scss";
 import { useSidebar } from "@/components/ui/sidebar";
+import type { ImperativePanelHandle } from "react-resizable-panels";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({
@@ -248,16 +249,15 @@ export default function ConversationPage() {
     }
   }, [messages]);
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const sideBarRef = useRef<any>(null);
+  const sideBarRef = useRef<ImperativePanelHandle | null>(null);
   const { isMobile } = useSidebar();
   useEffect(() => {
     if (isOpenCodeEditor) {
-      sideBarRef.current.resize(50);
+      sideBarRef.current?.resize(50);
     } else if (isOpenCite) {
-      sideBarRef.current.resize(20);
+      sideBarRef.current?.resize(20);
     } else {
-      sideBarRef.current.resize(0);
+      sideBarRef.current?.resize(0);
     }
   }, [isOpenCite, isOpenCodeEditor]);
   const basicInfo = useBotBasicInfo(search.botId);
