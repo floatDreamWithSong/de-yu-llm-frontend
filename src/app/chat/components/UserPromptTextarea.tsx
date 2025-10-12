@@ -66,14 +66,14 @@ export default function UserPromptTextarea({
     document.execCommand("insertText", false, text); // 3. 当成文本插入
   };
   // 只在初始渲染时设置内容，之后让用户直接编辑
-  const [isInitialized, setIsInitialized] = useState(false);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
-    if (spanRef.current && !isInitialized) {
+    if (spanRef.current && !isInitializedRef.current) {
       spanRef.current.innerHTML = value;
-      setIsInitialized(true);
+      isInitializedRef.current = true;
     }
-  }, [value, isInitialized]);
+  }, [value]);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (status === "ready" && !disabled) {
