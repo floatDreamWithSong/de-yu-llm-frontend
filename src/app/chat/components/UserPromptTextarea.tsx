@@ -51,13 +51,13 @@ export default function UserPromptTextarea({
   const { isMobile } = useSidebar();
   const handleInput = useCallback(
     (e: React.FormEvent<HTMLSpanElement>) => {
-      if (status !== "ready" || disabled) return;
+      // if (status !== "ready" || disabled) return;
       e.preventDefault();
       const target = e.target as HTMLSpanElement;
       const newValue = target.innerHTML;
       setValue(newValue);
     },
-    [status, disabled],
+    [],
   );
   const handlePaste = (e: React.ClipboardEvent<HTMLSpanElement>) => {
     if (status !== "ready" || disabled) return;
@@ -182,7 +182,6 @@ export default function UserPromptTextarea({
             <Tooltip>
               <TooltipTrigger asChild>
                 <PromptInputButton
-                  disabled={true}
                   variant={"outline"}
                   className="rounded-full"
                 >

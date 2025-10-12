@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate, useParams } from "@tanstack/react-router";
 import {
   BotIcon,
   Edit,
@@ -10,7 +10,7 @@ import {
   Settings,
   Trash2,
 } from "lucide-react";
-
+import { AnimatePresence, motion } from "motion/react";
 import { Button, LinkButton } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -293,6 +293,10 @@ export default function ChatSidebar() {
     console.log("open");
     setOpen(true);
   }
+  
+  const {conversationId: currentConversationId} = useParams({
+    strict: false
+  })
   return (
     <Sidebar
       className={cn([
@@ -315,18 +319,21 @@ export default function ChatSidebar() {
                 }}
               />
             </Avatar>
-            {!iconMode && (
-              <h2
-                className={cn([
-                  "text-primary font-semibold text-2xl ml-2 text-nowrap",
-                  iconMode
-                    ? "opacity-0 pointer-events-none"
-                    : "ease-out duration-300  delay-200",
-                ])}
-              >
-                启创·<span className="text-xl">InnoSpark</span>
-              </h2>
-            )}
+            <AnimatePresence initial={false}>
+              {!iconMode && (
+                <motion.h2
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, }}
+                  transition={{delay: 0.3}}
+                  className={cn([
+                    "text-primary font-semibold text-2xl ml-2 text-nowrap",
+                    iconMode && "hidden"
+                  ])}
+                >
+                  启创·<span className="text-xl">InnoSpark</span>
+                </motion.h2>
+              )}
+            </AnimatePresence>
           </div>
 
           <SidebarTrigger
@@ -424,7 +431,7 @@ export default function ChatSidebar() {
                             className="h-8 px-2"
                           />
                         ) : (
-                          <SidebarMenuButton asChild>
+                          <SidebarMenuButton isActive={currentConversationId === item.conversationId} asChild>
                             <Link
                               onClick={reset}
                               to={`/chat/$conversationId`}

@@ -137,7 +137,7 @@ const HomePage = () => {
       x: 10,
       ease: "power3.out",
       stagger: 0.01,
-      delay: 0.1,
+      delay: 0.2,
     });
 
     timeline.from("#btn-group", {
@@ -165,6 +165,7 @@ const HomePage = () => {
               <img
                 src="/logo.svg"
                 alt="logo"
+                fetchPriority="high"
                 className="size-16 -translate-y-2 mr-4"
               />
               <h1 className="text-5xl align-text-bottom font-bold bg-gradient-to-r pb-2 from-[#594eff] via-[#8667f1] to-[#5a73fd] bg-clip-text text-transparent">

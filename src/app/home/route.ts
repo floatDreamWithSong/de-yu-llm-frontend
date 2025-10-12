@@ -7,7 +7,6 @@ const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/home",
   component: HomeLayout
-  
 });
 
 const homepage = createRoute({

@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { tokenStore } from "@/lib/request";
 import { Link, Outlet } from "@tanstack/react-router";
+import { motion } from "motion/react";
 
 const navLinks = [
   {
@@ -45,18 +46,20 @@ const navLinks = [
 ];
 const HomeLayout = () => {
   return (
-    <div id="smooth-wrapper" className="h-screen">
+    <motion.div id="smooth-wrapper" className="h-screen">
       <NavigationMenu className="w-full flex justify-around h-16 sticky top-0 left-0 z-50 bg-chat">
-        <h1 className="items-center flex justify-center">
-          <img src="/logo.svg" className="h-8 mx-2" alt="logo" />
-          <span className="text-primary font-semibold text-3xl">
-            启创·
-            <span className="text-2xl">
-              InnoSpark
-              {import.meta.env.VITE_ENV === "test" && "（内测版）"}
+        <motion.div dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }} drag="x" dragElastic={0.1} dragMomentum={false}>
+          <h1 className="items-center flex justify-center">
+            <img src="/logo.svg" className="h-8 mx-2" alt="logo" />
+            <span className="text-primary font-semibold text-3xl">
+              启创·
+              <span className="text-2xl">
+                InnoSpark
+                {import.meta.env.VITE_ENV === "test" && "（内测版）"}
+              </span>
             </span>
-          </span>
-        </h1>
+          </h1>
+        </motion.div>
         <NavigationMenuList>
           {navLinks.map((link, ind) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: 链接固定
@@ -98,7 +101,7 @@ const HomeLayout = () => {
         </NavigationMenuList>
       </NavigationMenu>
       <Outlet />
-    </div>
+    </motion.div>
   );
 };
 

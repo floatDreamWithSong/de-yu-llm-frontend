@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ArrowDownIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import type { ComponentProps } from 'react';
 import { useCallback } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
@@ -43,7 +44,9 @@ export const ConversationScrollButton = ({
   }, [scrollToBottom]);
 
   return (
-    !isAtBottom && (
+    <AnimatePresence initial={false}>
+    {!isAtBottom && (
+      <motion.div initial={{scale: 0, opacity: 0}} animate={{scale: 1, opacity: 1}} exit={{scale: 0, opacity: 0}}>
       <Button
         className={cn(
           'absolute bottom-4 left-[50%] translate-x-[-50%] rounded-full',
@@ -57,6 +60,9 @@ export const ConversationScrollButton = ({
       >
         <ArrowDownIcon className="size-4" />
       </Button>
-    )
+    </motion.div>
+    
+  )}
+    </AnimatePresence>
   );
 };
