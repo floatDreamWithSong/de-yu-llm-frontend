@@ -91,7 +91,7 @@ export default defineConfig({
     codeInspectorPlugin({
       editor: "cursor",
       bundler: "vite",
-      hotKeys: ['ctrlKey'],
+      hotKeys: ['ctrlKey', 'altKey'],
 
     }),
     viteReact(),
