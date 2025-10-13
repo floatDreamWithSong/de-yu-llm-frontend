@@ -112,6 +112,9 @@ export default function UserPromptTextarea({
         "shadow-none border-primary/30 style__shallow-shadow max-w-[1000px] aspect-[4/1] min-h-32",
         className,
       )}
+      style={{
+        viewTransitionName: 'user-prompt-input'
+      }}
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
       <div
