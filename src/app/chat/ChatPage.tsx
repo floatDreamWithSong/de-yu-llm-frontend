@@ -61,7 +61,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="grid grid-rows-3 h-full">
+    <div className="grid grid-rows-3 h-full px-8">
       <div className="absolute right-0 top-0 w-1/2 pointer-events-none">
         <img src="/chat-bg.png" alt="" />
       </div>

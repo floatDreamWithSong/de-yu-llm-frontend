@@ -1,9 +1,6 @@
 import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 import authenticatedRoute from "../_authenticated/route";
 
-const ChatLayout = lazyRouteComponent(() => import('./layouts/ChatLayout'))
-const ChatPage = lazyRouteComponent(() => import('./ChatPage'))
-const ConversationPage = lazyRouteComponent(() => import('./ConversationPage'))
 const validateSearch = (search: {
   think?: boolean;
   botId?: string;
@@ -13,21 +10,21 @@ const validateSearch = (search: {
 const chatRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: "/chat",
-  component: ChatLayout,
+  component: lazyRouteComponent(() => import('./layouts/ChatLayout')),
 });
 
 const chatIndexRoute = createRoute({
   getParentRoute: () => chatRoute,
   path: "/",
   validateSearch,
-  component: ChatPage,
+  component: lazyRouteComponent(() => import('./ChatPage')),
 });
 
 const conversationRoute = createRoute({
   getParentRoute: () => chatRoute,
   path: "/$conversationId",
   validateSearch,
-  component: ConversationPage,
+  component: lazyRouteComponent(() => import('./ConversationPage')),
 });
 
 const agenrRoute = createRoute({

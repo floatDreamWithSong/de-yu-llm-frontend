@@ -5,7 +5,7 @@ import HomeLayout from "./layout/HomeLayout.tsx";
 
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/home",
+  id: "_home",
   component: HomeLayout
 });
 

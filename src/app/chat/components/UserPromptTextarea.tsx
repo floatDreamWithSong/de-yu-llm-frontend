@@ -113,7 +113,7 @@ export default function UserPromptTextarea({
         className,
       )}
       style={{
-        viewTransitionName: 'user-prompt-input'
+        viewTransitionName: !isMobile ? 'user-prompt-input' : undefined
       }}
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
