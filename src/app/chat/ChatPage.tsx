@@ -6,9 +6,9 @@ import { useTitleAni } from "@/hooks/use-title-ani";
 import { useInitMessageStore } from "@/store/initMessage";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
+import {motion} from 'motion/react'
 
 import { useCallback, useRef, useState } from "react";
-
 
 export default function ChatPage() {
   const navigate = useNavigate({
@@ -28,7 +28,7 @@ export default function ChatPage() {
     }
   }, []);
 
-  useTitleAni({title: ".model-title", subtitle: ".model-subtitle"})
+  useTitleAni({ title: ".model-title", subtitle: ".model-subtitle" });
 
   const handleSubmit = async (message: string, onSuccess?: () => void) => {
     if (message.trim() && status === "ready") {
@@ -66,14 +66,14 @@ export default function ChatPage() {
         <img src="/chat-bg.png" alt="" />
       </div>
       <div className="my-6 row-span-1 mx-auto self-end space-y-6 text-center">
-        <h1
-          className="model-title text-4xl font-bold text-primary whitespace-pre"
-          style={{
-            letterSpacing: "0.1em",
-          }}
-        >
-          启创·InnoSpark, 做有温度的教育大模型
-        </h1>
+        <div className="flex items-center">
+          <motion.img initial={{opacity: 0, scale: 0}} animate={{opacity: 1, scale: 1}} transition={{
+            delay: 0.3,
+          }} src="/logo.svg" alt="logo" className="h-10 mr-4" />
+          <h1 className="model-title text-4xl font-bold text-primary whitespace-pre">
+            启创·InnoSpark, 做有温度的教育大模型
+          </h1>
+        </div>
         <h2 className="model-subtitle">
           我可以帮助你【设计实验】、【搜索文献】、【分析文档】、【分析数据】，你也可以直接开始和我对话
         </h2>
