@@ -1,4 +1,3 @@
-
 "use client";
 import AuthButton from "@/app/auth/components/AuthButton";
 import { AuthInput } from "@/app/auth/components/AuthInput";
@@ -18,17 +17,19 @@ import { useMutation } from "@tanstack/react-query";
 import { setPassword } from "@/apis/requests/user/set-password";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
-const formSchema = z.object({
-  password: z
-    .string()
-    .min(6, "密码至少6位")
-    .max(20, "密码最多20位")
-    .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, "密码必须包含字母和数字"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "两次输入的密码不一致",
-  path: ["confirmPassword"],
-});
+const formSchema = z
+  .object({
+    password: z
+      .string()
+      .min(6, "密码至少6位")
+      .max(20, "密码最多20位")
+      .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, "密码必须包含字母和数字"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "两次输入的密码不一致",
+    path: ["confirmPassword"],
+  });
 
 export default function SetNewUserPasswordPage() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -48,7 +49,6 @@ export default function SetNewUserPasswordPage() {
   });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    
     setPasswordMutation.mutate(
       {
         newPassword: data.password,
@@ -86,7 +86,11 @@ export default function SetNewUserPasswordPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <AuthInput password {...field} placeholder="请输入初始密码" />
+                    <AuthInput
+                      password
+                      {...field}
+                      placeholder="请输入初始密码"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -98,13 +102,21 @@ export default function SetNewUserPasswordPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <AuthInput password {...field} placeholder="请确认初始密码" />
+                    <AuthInput
+                      password
+                      {...field}
+                      placeholder="请确认初始密码"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <AuthButton className="mt-10" disabled={setPasswordMutation.isPending} type="submit">
+            <AuthButton
+              className="mt-10"
+              disabled={setPasswordMutation.isPending}
+              type="submit"
+            >
               完成设置
             </AuthButton>
           </form>

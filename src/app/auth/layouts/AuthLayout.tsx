@@ -1,26 +1,6 @@
 import { Outlet } from "@tanstack/react-router";
-import {
-  createContext,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
-
-export const AuthContext = createContext<{
-  phone: string;
-  verificationCode: string;
-  password: string;
-  setPhone: Dispatch<SetStateAction<string>>;
-  setverificationCode: Dispatch<SetStateAction<string>>;
-  setPassword: Dispatch<SetStateAction<string>>;
-}>({
-  phone: "",
-  verificationCode: "",
-  password: "",
-  setPhone: () => {},
-  setverificationCode: () => {},
-  setPassword: () => {},
-});
+import { useState } from "react";
+import { AuthContext } from "../context";
 
 export default function AuthLayout() {
   const [phone, setPhone] = useState("");

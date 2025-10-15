@@ -549,14 +549,14 @@ export default function ConversationPage() {
               isMobile && "absolute w-screen",
             ])}
             uiCites={uiCites}
-            />
-          )}
+          />
+        )}
 
         {isOpenCodeEditor && (
           <CodeEditorBar
-          code={codeMes?.code}
-          codeType={codeMes?.codeType}
-          onClose={() => setIsOpenCodeEditor("")}
+            code={codeMes?.code}
+            codeType={codeMes?.codeType}
+            onClose={() => setIsOpenCodeEditor("")}
             className={cn([
               "bg-chat h-full w-full style__scroller-none p-4 flex flex-col border-l-2 border-primary/10 duration-300 transition-transform right-0",
               isMobile && "absolute w-screen",

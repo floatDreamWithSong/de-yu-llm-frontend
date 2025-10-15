@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useContext, useState } from "react";
-import { AuthContext } from "@/app/auth/layouts/AuthLayout";
+import { AuthContext } from "@/app/auth/context";
 import z from "zod";
 import { mobileSchema } from "@/utils/schema";
 import { useForm } from "react-hook-form";

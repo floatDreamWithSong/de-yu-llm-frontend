@@ -6,13 +6,13 @@ import HomeLayout from "./layout/HomeLayout.tsx";
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: "_home",
-  component: HomeLayout
+  component: HomeLayout,
 });
 
 const homepage = createRoute({
   getParentRoute: () => homeRoute,
   path: "/",
-  component: HomePage
+  component: HomePage,
 });
 
 const homeRouteTree = homeRoute.addChildren([homepage]);

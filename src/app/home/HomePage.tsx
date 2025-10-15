@@ -177,7 +177,7 @@ const HomePage = () => {
               致力于打造新一代人工智能技术，为教育行业提供智能化解决方案，助力教育行业数智化转型升级
             </h2>
             <div id="btn-group" className="flex gap-12 justify-center mt-16">
-              <Link to="/chat" >
+              <Link to="/chat">
                 <Button
                   variant={"default"}
                   className="rounded-full text-lg px-16 py-7"

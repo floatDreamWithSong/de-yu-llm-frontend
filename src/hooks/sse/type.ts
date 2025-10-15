@@ -53,5 +53,5 @@ export interface TextContent {
   think?: string;
   codeType?: SseEditorCode["codeType"];
   code?: string;
-  suggest?: string
+  suggest?: string;
 }

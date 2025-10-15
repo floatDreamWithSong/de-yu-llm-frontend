@@ -30,7 +30,9 @@ const useSystemTheme = () => {
   // return theme;
   return "light";
 };
-type EditorRef = Parameters<Exclude<EditorProps['onMount'], undefined>>[0] | null;
+type EditorRef =
+  | Parameters<Exclude<EditorProps["onMount"], undefined>>[0]
+  | null;
 const CodeEditorBar = ({
   onClose,
   code = "",

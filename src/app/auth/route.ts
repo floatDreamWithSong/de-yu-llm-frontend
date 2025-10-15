@@ -3,7 +3,9 @@ import { rootRoute } from "@/route";
 import SetNewUserPasswordPage from "./SetNewUserPasswordPage";
 const AuthLayout = lazyRouteComponent(() => import("./layouts/AuthLayout"));
 const LoginPage = lazyRouteComponent(() => import("./LoginPage"));
-const PhonePasswordLoginPage = lazyRouteComponent(() => import("./PhonePasswordLoginPage"));
+const PhonePasswordLoginPage = lazyRouteComponent(
+  () => import("./PhonePasswordLoginPage"),
+);
 
 // Auth routes
 const authRoute = createRoute({
@@ -39,6 +41,10 @@ const setNewUserPasswordRoute = createRoute({
   component: SetNewUserPasswordPage,
 });
 
-const authRouteTree = authRoute.addChildren([loginRoute, phonePasswordLoginRoute, setNewUserPasswordRoute]);
+const authRouteTree = authRoute.addChildren([
+  loginRoute,
+  phonePasswordLoginRoute,
+  setNewUserPasswordRoute,
+]);
 
 export default authRouteTree;

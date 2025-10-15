@@ -13,8 +13,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "format": "biome format --write",
-    "lint": "biome lint --write",
-    "check": "biome check",
+    "lint": "eslint .",
+    "fix": "eslint . --fix",
     "mock": "node --watch .mock/compeletion.cjs"
   },
   "dependencies": {
@@ -107,7 +107,9 @@
     "cors": "^2.8.5",
     "eslint": "^9.37.0",
     "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-react-refresh": "^0.4.23",
     "express": "^4.18.2",
+    "globals": "^16.4.0",
     "jsdom": "^26.0.0",
     "react-scan": "^0.4.3",
     "sass": "^1.93.2",

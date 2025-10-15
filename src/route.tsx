@@ -1,7 +1,4 @@
-import {
-  createRootRouteWithContext,
-  Outlet,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import authRouteTree from "./app/auth/route";
 import chatRouteTree from "./app/chat/route";

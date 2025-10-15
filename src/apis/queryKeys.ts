@@ -6,6 +6,6 @@ const ClientQueryKeys = {
   agent: {
     agentList: "agentList",
     agentInfo: "agentInfo",
-  }
+  },
 };
 export default ClientQueryKeys;

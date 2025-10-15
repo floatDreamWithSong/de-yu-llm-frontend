@@ -52,8 +52,8 @@ export default function AgentChatPage() {
       try {
         signal.current = new AbortController();
         console.log("创建对话并发送消息:", message);
-        const conversation = await createConversation(signal.current,{
-          botId: agentId
+        const conversation = await createConversation(signal.current, {
+          botId: agentId,
         });
         console.log("对话创建成功:", conversation);
 

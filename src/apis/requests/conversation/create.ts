@@ -2,10 +2,13 @@ import { request } from "@/lib/request";
 import z from "zod";
 
 const RequestSchema = z.object({
-  botId: z.string().optional()
-})
+  botId: z.string().optional(),
+});
 
-export const createConversation = (abort: AbortController, data: z.infer<typeof RequestSchema>) => {
+export const createConversation = (
+  abort: AbortController,
+  data: z.infer<typeof RequestSchema>,
+) => {
   return request({
     url: "/conversation/create",
     method: "POST",

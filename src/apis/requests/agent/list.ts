@@ -5,8 +5,8 @@ import { agentListItemSchema } from "./schema";
 export const RequestSchema = z.object({
   page: z.object({
     size: z.number(),
-    cursor: z.string().optional()
-  })
+    cursor: z.string().optional(),
+  }),
 });
 
 export const getAgentList = (data: z.infer<typeof RequestSchema>) => {

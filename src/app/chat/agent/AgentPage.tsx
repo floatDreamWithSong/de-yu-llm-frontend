@@ -12,11 +12,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef } from "react";
 import agentPageBg from "@/assets/imgs/agent-page.png";
 import { Button } from "@/components/ui/button";
-import {
-  Link,
-  useNavigate,
-  useSearch,
-} from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import {
   Empty,
   EmptyDescription,
@@ -104,9 +100,11 @@ const AgentPage = () => {
     from: "/_authenticated/chat/agent",
   });
   const agentListData = useMemo(() => {
-    return agentListQuery.data?.pages
-      .flatMap((page) => page.intelligences)
-      .filter((item) => botType === "" || item.type === botType) ?? [];
+    return (
+      agentListQuery.data?.pages
+        .flatMap((page) => page.intelligences)
+        .filter((item) => botType === "" || item.type === botType) ?? []
+    );
   }, [agentListQuery.data, botType]);
   const total = agentListData.length;
   const maxPagge = Math.ceil(total / size);

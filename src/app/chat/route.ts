@@ -10,26 +10,30 @@ const validateSearch = (search: {
 const chatRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: "/chat",
-  component: lazyRouteComponent(() => import('./layouts/ChatLayout')),
+  component: lazyRouteComponent(() => import("./layouts/ChatLayout")),
 });
 
 const chatIndexRoute = createRoute({
   getParentRoute: () => chatRoute,
   path: "/",
   validateSearch,
-  component: lazyRouteComponent(() => import('./ChatPage')),
+  component: lazyRouteComponent(() => import("./ChatPage")),
 });
 
 const conversationRoute = createRoute({
   getParentRoute: () => chatRoute,
   path: "/$conversationId",
   validateSearch,
-  component: lazyRouteComponent(() => import('./ConversationPage')),
+  component: lazyRouteComponent(() => import("./ConversationPage")),
 });
 
 const agenrRoute = createRoute({
   path: "/agent",
-  validateSearch: (search: { page?: number; size?: number, botType?: string }) => search,
+  validateSearch: (search: {
+    page?: number;
+    size?: number;
+    botType?: string;
+  }) => search,
   getParentRoute: () => chatRoute,
   component: lazyRouteComponent(() => import("./agent/AgentPage")),
 });

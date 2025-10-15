@@ -49,16 +49,13 @@ export default function UserPromptTextarea({
   const spanRef = useRef<HTMLSpanElement>(null);
   const navigator = useNavigate();
   const { isMobile } = useSidebar();
-  const handleInput = useCallback(
-    (e: React.FormEvent<HTMLSpanElement>) => {
-      // if (status !== "ready" || disabled) return;
-      e.preventDefault();
-      const target = e.target as HTMLSpanElement;
-      const newValue = target.innerHTML;
-      setValue(newValue);
-    },
-    [],
-  );
+  const handleInput = useCallback((e: React.FormEvent<HTMLSpanElement>) => {
+    // if (status !== "ready" || disabled) return;
+    e.preventDefault();
+    const target = e.target as HTMLSpanElement;
+    const newValue = target.innerHTML;
+    setValue(newValue);
+  }, []);
   const handlePaste = (e: React.ClipboardEvent<HTMLSpanElement>) => {
     if (status !== "ready" || disabled) return;
     e.preventDefault(); // 1. 阻止默认粘贴
@@ -113,7 +110,7 @@ export default function UserPromptTextarea({
         className,
       )}
       style={{
-        viewTransitionName: !isMobile ? 'user-prompt-input' : undefined
+        viewTransitionName: !isMobile ? "user-prompt-input" : undefined,
       }}
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
@@ -177,21 +174,14 @@ export default function UserPromptTextarea({
               className="rounded-full"
             >
               <Atom size={16} />
-              {
-                !isMobile && <span>深度思考</span>
-              }
+              {!isMobile && <span>深度思考</span>}
             </PromptInputButton>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <PromptInputButton
-                  variant={"outline"}
-                  className="rounded-full"
-                >
+                <PromptInputButton variant={"outline"} className="rounded-full">
                   <Atom size={16} />
-                  {
-                    !isMobile && <span>深度思考</span>
-                  }
+                  {!isMobile && <span>深度思考</span>}
                 </PromptInputButton>
               </TooltipTrigger>
               <TooltipContent>
@@ -214,9 +204,7 @@ export default function UserPromptTextarea({
             className="rounded-full"
           >
             <Earth size={16} />
-            {
-              !isMobile && <span>联网搜索</span>
-            }
+            {!isMobile && <span>联网搜索</span>}
           </PromptInputButton>
           {isBuiltInAgent(botId) && (
             <PromptInputButton
@@ -234,9 +222,7 @@ export default function UserPromptTextarea({
               className="rounded-full"
             >
               <CodeXml size={16} />
-              {
-                !isMobile && <span>代码生成</span>
-              }
+              {!isMobile && <span>代码生成</span>}
             </PromptInputButton>
           )}
           <PromptInputButton variant={"outline"} className="rounded-full">

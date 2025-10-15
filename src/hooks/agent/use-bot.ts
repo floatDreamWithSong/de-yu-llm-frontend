@@ -39,7 +39,7 @@ export const formatBotId = (botId?: string) => {
   return {
     raw: botId,
     normal: isBuiltInAgent(botId)
-      ? botId ?? "default"
+      ? (botId ?? "default")
       : `intelligence-${botId}`,
   };
 };

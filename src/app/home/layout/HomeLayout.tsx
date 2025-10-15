@@ -48,7 +48,12 @@ const HomeLayout = () => {
   return (
     <motion.div id="smooth-wrapper" className="h-screen">
       <NavigationMenu className="w-full flex justify-around h-16 sticky top-0 left-0 z-50 bg-chat">
-        <motion.div dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }} drag="x" dragElastic={0.1} dragMomentum={false}>
+        <motion.div
+          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          drag="x"
+          dragElastic={0.1}
+          dragMomentum={false}
+        >
           <h1 className="items-center flex justify-center">
             <img src="/logo.svg" className="h-8 mx-2" alt="logo" />
             <span className="text-primary font-semibold text-3xl">

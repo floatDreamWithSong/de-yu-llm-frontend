@@ -3,7 +3,10 @@ import gsap from "gsap";
 import SplitText from "gsap/SplitText";
 gsap.registerPlugin(SplitText);
 
-export const useTitleAni = ({title, subtitle}: {title: string, subtitle: string}) => {
+export const useTitleAni = ({
+  title,
+  subtitle,
+}: { title: string; subtitle: string }) => {
   useGSAP(() => {
     const modelTitle = new SplitText(title, {
       type: "chars",
@@ -28,4 +31,4 @@ export const useTitleAni = ({title, subtitle}: {title: string, subtitle: string}
       delay: 0.6,
     });
   }, []);
-}
+};
