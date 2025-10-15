@@ -1,17 +1,23 @@
 import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 import { rootRoute } from "@/route";
 import SetNewUserPasswordPage from "./SetNewUserPasswordPage";
-const AuthLayout = lazyRouteComponent(() => import("./layouts/AuthLayout"));
-const LoginPage = lazyRouteComponent(() => import("./LoginPage"));
-const PhonePasswordLoginPage = lazyRouteComponent(
-  () => import("./PhonePasswordLoginPage"),
-);
-
 // Auth routes
 const authRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/auth",
-  component: AuthLayout,
+  component: lazyRouteComponent(() => import("./layouts/AuthLayout")),
+});
+
+const thridPartyLoginRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: "/thirdparty-login",
+  component: lazyRouteComponent(() => import("./ThirdPartyLoginPage")),
+  validateSearch: (search: { ticket?: string; thirdparty?: string }) => {
+    return {
+      ticket: search.ticket,
+      thirdparty: search.thirdparty,
+    };
+  },
 });
 
 const loginRoute = createRoute({
@@ -20,7 +26,7 @@ const loginRoute = createRoute({
   validateSearch: (search) => ({
     redirect: (search.redirect as string) || "/chat",
   }),
-  component: LoginPage,
+  component: lazyRouteComponent(() => import("./LoginPage")),
 });
 
 const phonePasswordLoginRoute = createRoute({
@@ -29,7 +35,7 @@ const phonePasswordLoginRoute = createRoute({
   validateSearch: (search) => ({
     redirect: (search.redirect as string) || "/chat",
   }),
-  component: PhonePasswordLoginPage,
+  component: lazyRouteComponent(() => import("./PhonePasswordLoginPage")),
 });
 
 const setNewUserPasswordRoute = createRoute({
@@ -45,6 +51,7 @@ const authRouteTree = authRoute.addChildren([
   loginRoute,
   phonePasswordLoginRoute,
   setNewUserPasswordRoute,
+  thridPartyLoginRoute,
 ]);
 
 export default authRouteTree;
