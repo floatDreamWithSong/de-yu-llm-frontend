@@ -61,11 +61,11 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="grid grid-rows-3 h-full px-8">
+    <div className="max-md:flex max-md:flex-col md:grid md:grid-rows-3 h-full px-8">
       <div className="absolute right-0 top-0 w-1/2 pointer-events-none">
         <img src="/chat-bg.png" alt="" />
       </div>
-      <div className="my-6 row-span-1 mx-auto self-end space-y-6 text-center">
+      <div className="max-md:flex-1 max-md:flex max-md:flex-col max-md:justify-center my-6 row-span-1 mx-auto md:self-end space-y-6 text-center">
         <div className="flex items-center">
           <motion.img
             initial={{ opacity: 0, scale: 0 }}
@@ -77,11 +77,11 @@ export default function ChatPage() {
             alt="logo"
             className="h-10 mr-4"
           />
-          <h1 className="model-title text-4xl font-bold text-primary whitespace-pre">
+          <h1 className="model-title md:text-4xl font-bold text-primary whitespace-pre">
             启创·InnoSpark, 做有温度的教育大模型
           </h1>
         </div>
-        <h2 className="model-subtitle">
+        <h2 className="model-subtitle max-md:text-sm">
           我可以帮助你【设计实验】、【搜索文献】、【分析文档】、【分析数据】，你也可以直接开始和我对话
         </h2>
       </div>
