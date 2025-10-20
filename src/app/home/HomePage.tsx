@@ -159,32 +159,33 @@ const HomePage = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="items-center justify-center flex-1 w-full flex">
-          <div className="space-y-4 text-center">
-            <div className="flex items-center justify-center">
+        <div className="items-center justify-center flex-1 w-full flex px-4">
+          <div className="space-y-4 text-center max-w-6xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4">
               <img
                 src="/logo.svg"
                 alt="logo"
                 fetchPriority="high"
-                className="size-16 -translate-y-2 mr-4"
+                className="size-12 md:size-16 -translate-y-2"
               />
-              <h1 className="text-5xl align-text-bottom font-bold bg-gradient-to-r pb-2 from-[#594eff] via-[#8667f1] to-[#5a73fd] bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl align-text-bottom font-bold bg-gradient-to-r pb-2 from-[#594eff] via-[#8667f1] to-[#5a73fd] bg-clip-text text-transparent">
                 启创·InnoSpark, 做有温度的教育大模型
               </h1>
             </div>
-            <h2 id="subtitle" className="text-foreground/70 text-2xl">
-              InnoSpark
+            <h2 id="subtitle" className="text-foreground/70 text-sm md:text-xl lg:text-2xl leading-relaxed px-4">
+              <span className="font-semibold">InnoSpark</span>
+              <br className="md:hidden" />
               致力于打造新一代人工智能技术，为教育行业提供智能化解决方案，助力教育行业数智化转型升级
             </h2>
-            <div id="btn-group" className="flex gap-12 justify-center mt-16">
-              <Link to="/chat">
+            <div id="btn-group" className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center mt-8 md:mt-16">
                 <Button
                   variant={"default"}
                   className="rounded-full text-lg px-16 py-7"
                 >
+              <Link to="/chat">
                   开始对话
-                </Button>
               </Link>
+                </Button>
               <Button
                 variant={"outline"}
                 className="rounded-full text-lg px-16 py-7"
@@ -201,8 +202,8 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-        <div className="w-full h-96 bg-chat  flex flex-col justify-center items-center gap-8">
-          <h3 className="text-center text-2xl font-semibold text-foreground/80">
+        <div className="w-full min-h-64 md:h-96 bg-chat flex flex-col justify-center items-center gap-4 md:gap-8 px-4">
+          <h3 className="text-center text-xl md:text-2xl font-semibold text-foreground/80">
             多端设备体验
           </h3>
           <div className="flex">
@@ -221,25 +222,26 @@ const HomePage = () => {
               },
             ].map((item) => (
               <div
-                className="text-foreground/55 mx-4 flex justify-center flex-col items-center  w-64 aspect-video rounded-4xl "
-                style={{
-                  boxShadow: "3px 3px 20px #DAE9FF",
-                }}
+                className="lg:shadow-[3px_3px_20px_#DAE9FF] lg:w-64 text-foreground/55 mx-4 flex justify-center flex-col items-center aspect-video rounded-4xl "
                 key={item.text}
               >
-                <img src={item.img} alt={item.text} />
-                <p className="mt-2">{item.text}</p>
+                <img
+                  src={item.img}
+                  alt={item.text}
+                  className="max-w-full max-h-16 md:max-h-20 object-contain"
+                />
+                <p className="mt-2 text-sm md:text-base">{item.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
       {midList.map((item, index) => (
-        <section className="flex relative" key={item.title}>
+        <section className="flex relative overflow-hidden" key={item.title}>
           <img
             src={item.img}
             alt={item.title}
-            className={`w-full ani-img-${index}`}
+            className={`w-full h-auto min-h-[300px] md:h-auto ani-img-${index} object-cover`}
           />
           <div
             className={cn([
@@ -247,15 +249,15 @@ const HomePage = () => {
               (index & 1) === 0 ? "left-0" : "right-0",
             ])}
           >
-            <div>
+            <div className="text-center md:text-left">
               <h3
-                className={`transition-none text-4xl font-semibold ani-title-${index}`}
+                className={`transition-none md:text-4xl font-semibold ani-title-${index}`}
               >
                 {item.title}
               </h3>
               <div className={`space-y-1 py-6 ani-p-${index}`}>
                 {item.description.map((item) => (
-                  <p className="text-foreground/70 text-lg" key={item}>
+                  <p className="text-sm text-foreground/70 md:text-lg" key={item}>
                     {item}
                   </p>
                 ))}
@@ -265,7 +267,7 @@ const HomePage = () => {
                   variant="outline"
                   className={cn([
                     `ani-btn-${index} `,
-                    "transition-colors border-primary text-primary rounded-full bg-transparent hover:bg-primary hover:text-primary-foreground py-5",
+                    "transition-colors border-primary text-primary rounded-full bg-transparent hover:bg-primary hover:text-primary-foreground py-3 md:py-5 px-6 md:px-8 text-sm md:text-base",
                   ])}
                 >
                   <span className="ml-3">立刻体验</span>
@@ -276,7 +278,7 @@ const HomePage = () => {
           </div>
         </section>
       ))}
-      <footer className="grid grid-cols-4 px-24 py-24">
+      <footer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-12 md:py-24">
         <FooterSection
           title="InnoSpark"
           icon="/logo.svg"
