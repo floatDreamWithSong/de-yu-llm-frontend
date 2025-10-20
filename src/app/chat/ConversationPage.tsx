@@ -330,13 +330,15 @@ export default function ConversationPage() {
                     )
                   ) : (
                     <div className="flex gap-3">
-                      <div>
-                        <MessageAvatar
-                          src={basicInfo.iconUrl}
-                          className="order-1"
-                          name={basicInfo.name}
-                        />
-                      </div>
+{
+  !isMobile &&                       <div>
+  <MessageAvatar
+    src={basicInfo.iconUrl}
+    className="order-1"
+    name={basicInfo.name}
+  />
+</div>
+}
                       <div>
                         <Branch
                           className="flex flex-col bg-transparent"
