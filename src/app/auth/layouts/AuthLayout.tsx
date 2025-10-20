@@ -3,10 +3,8 @@ import { useState } from "react";
 import { AuthContext } from "../context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export default function AuthLayout() {
-  const [phone, setPhone] = useState("");
-  const [verificationCode, setverificationCode] = useState("");
-  const [password, setPassword] = useState("");
+function LayoutContent() {
+
   const isMobile = useIsMobile()
   if(isMobile) {
     return <div>
@@ -35,19 +33,28 @@ export default function AuthLayout() {
       </div>
       {/* 右侧内容区域 */}
       <div className="flex items-center">
-        <AuthContext.Provider
-          value={{
-            phone,
-            verificationCode,
-            password,
-            setPhone,
-            setverificationCode,
-            setPassword,
-          }}
-        >
+
           <Outlet />
-        </AuthContext.Provider>
+
       </div>
     </div>
   );
+}
+
+export default function AuthLayout(){
+  const [phone, setPhone] = useState("");
+  const [verificationCode, setverificationCode] = useState("");
+  const [password, setPassword] = useState("");
+  return         <AuthContext.Provider
+  value={{
+    phone,
+    verificationCode,
+    password,
+    setPhone,
+    setverificationCode,
+    setPassword,
+  }}
+>
+  <LayoutContent />
+</AuthContext.Provider>
 }
