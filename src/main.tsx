@@ -45,7 +45,7 @@ if (rootElement && !rootElement.innerHTML) {
     <StrictMode>
       <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
         <RouterProvider router={router} />
-        <Toaster />
+        <Toaster position={"top-center"} />
         <ReactQueryDevtools />
       </TanStackQueryProvider.Provider>
     </StrictMode>,
