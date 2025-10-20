@@ -125,7 +125,7 @@ export const BranchSelector = ({
   return (
     <div
       className={cn(
-        'flex items-center gap-2 self-end px-10',
+        'flex items-center gap-2 px-0 self-center',
         from === 'assistant' ? 'justify-start' : 'justify-end',
         className
       )}
