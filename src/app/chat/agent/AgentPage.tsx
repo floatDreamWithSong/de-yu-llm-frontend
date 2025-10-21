@@ -33,6 +33,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useTitleAni } from "@/hooks/use-title-ani";
+import { cn } from "@/lib/utils";
 /**
  * 语文
 数学
@@ -177,7 +178,7 @@ const AgentPage = () => {
           选择适合您需求的智能助手功能，提升工作与学习效率
         </h2>
       </section>
-      <div className="w-full flex flex-col items-center max-w-400 mx-auto @container">
+      <div className="w-full flex flex-col items-center  mx-auto @container">
         <section className="flex flex-wrap gap-2 px-6 pt-6 pb-2 overflow-x-scroll w-full justify-center">
           <Button
             variant={botType === "" ? "default" : "secondary"}
@@ -206,7 +207,14 @@ const AgentPage = () => {
             </Button>
           ))}
         </section>
-        <section className="relative mt-2 px-6 pt-6 grid gap-4 grid-cols-1 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
+        <section
+          className={cn([
+            "relative mt-2 px-6 pt-6 grid gap-4 grid-cols-1 w-full max-w-400",
+            "@xl:grid-cols-2 @xl:min-w-xl",
+            "@4xl:grid-cols-3 @4xl:min-w-4xl",
+            "@6xl:grid-cols-4 @6xl:min-w-6xl",
+          ])}
+        >
           {agentSlice.map((item) => (
             <LinkCard
               to="/chat/agent/chat/$agentId"
@@ -214,13 +222,13 @@ const AgentPage = () => {
                 agentId: item.id,
               }}
               key={item.id}
-              className="agent-slice-card transition-colors w-full gap-2 py-4 cursor-pointer hover:bg-secondary/50 duration-300"
+              className="agent-slice-card aspect-[2/1] transition-colors gap-2 py-4 cursor-pointer hover:bg-secondary/50 duration-300"
             >
               <CardHeader className="flex items-center">
                 <Icon className="size-10 flex items-center justify-center bg-secondary rounded-md">
                   <img src={item.iconUrl} alt={item.name} />
                 </Icon>
-                <CardTitle className="text-xl">{item.name}</CardTitle>
+                <CardTitle className="text-xl overflow-hidden text-ellipsis line-clamp-1">{item.name}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="overflow-hidden text-ellipsis line-clamp-4">
