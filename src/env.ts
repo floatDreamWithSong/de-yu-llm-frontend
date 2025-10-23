@@ -12,6 +12,7 @@ export const env = createEnv({
     VITE_API_BASE_URL: z.string().url(),
     VITE_BACKEND_ENV_HEAD: z.string(),
     VITE_BACKEND_ENV_VALUE: z.string().optional(),
+    VITE_ASR_WS_URL: z.string().url(),
   },
 
   /**
