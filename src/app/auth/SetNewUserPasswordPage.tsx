@@ -117,7 +117,18 @@ export default function SetNewUserPasswordPage() {
               disabled={setPasswordMutation.isPending}
               type="submit"
             >
-              完成设置
+              设置密码
+            </AuthButton>
+            <AuthButton
+              variant="link"
+              type="button"
+              onClick={() => {
+                navigate({
+                  to: "/chat",
+                });
+              }}
+            >
+              暂不设置
             </AuthButton>
           </form>
         </Form>
