@@ -240,17 +240,16 @@ const AgentPage = () => {
           {(!agentListQuery.isSuccess || agentListData.length === 0) && (
             <Empty className="col-span-4">
               <EmptyHeader>
-                <EmptyMedia variant="icon">
+                <EmptyMedia className="animate-infinite duration-150 animate-bounce" variant="default">
                   <Icon>
                     <img
-                      className="grayscale"
                       src="/logo.svg"
                       alt="innospark"
                     />
                   </Icon>
                 </EmptyMedia>
-                <EmptyTitle>暂无数据</EmptyTitle>
-                <EmptyDescription>这里空空如也~</EmptyDescription>
+                <EmptyTitle>加载中...</EmptyTitle>
+                <EmptyDescription>请稍等，智能助手正在路上</EmptyDescription>
               </EmptyHeader>
             </Empty>
           )}
