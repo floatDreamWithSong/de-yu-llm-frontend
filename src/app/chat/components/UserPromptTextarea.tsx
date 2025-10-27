@@ -25,8 +25,7 @@ import {
 } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type React from "react";
-import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { toast } from "sonner";
+import { useAsrRecognition } from "@/hooks/use-asr-recognition";
 
 export default function UserPromptTextarea({
   className,
@@ -51,27 +50,16 @@ export default function UserPromptTextarea({
   const spanRef = useRef<HTMLSpanElement>(null);
   const navigator = useNavigate();
   const { isMobile } = useSidebar();
-
+  
   // 语音识别功能
-  const { startRecognition, stopRecognition, isRecognizing } = useSpeechRecognition({
-    onIntermediateResult: (text) => {
-      // 实时更新到输入框
-      setValue(text);
-      if (spanRef.current) {
-        spanRef.current.innerHTML = text;
-      }
-    },
-    onFinalResult: (text) => {
-      // 最终矫正结果
-      setValue(text);
-      if (spanRef.current) {
-        spanRef.current.innerHTML = text;
-      }
-    },
-    onError: (error) => {
-      toast.error(`语音识别失败: ${error.message}`);
+  const { status: asrStatus, startRecognition, stopRecognition } = useAsrRecognition({onMessage: (message) => {
+    if (message.is_final) {
+      setValue(message.text);
+    } else {
+      setValue((prev) => prev + message.text);
     }
-  });
+  }});
+
   const handleInput = useCallback((e: React.FormEvent<HTMLSpanElement>) => {
     // if (status !== "ready" || disabled) return;
     e.preventDefault();
@@ -113,6 +101,18 @@ export default function UserPromptTextarea({
   const botBasicInfo = useBotBasicInfo(botId);
   const thinkAble =
     isBuiltInAgent(botId) || botInfo.data?.modelInfo.modelId !== "80000";
+
+  // 处理麦克风按钮点击
+  const handleMicClick = () => {
+    if (status !== "ready" || disabled) return;
+    
+    if (asrStatus === "recognizing") {
+      stopRecognition();
+    }
+    if (asrStatus === "idle") {
+      startRecognition();
+    }
+  };
   return (
     <PromptInput
       onKeyDown={(e) => {
@@ -256,29 +256,19 @@ export default function UserPromptTextarea({
           <Tooltip>
             <TooltipTrigger asChild>
               <PromptInputButton
-                variant={isRecognizing ? "default" : "outline"}
+                onClick={handleMicClick}
+                variant={asrStatus === "recognizing" ? "default" : "outline"}
                 className={cn(
                   "rounded-full border-0 transition-all duration-200",
-                  isRecognizing && "animate-pulse"
+                  asrStatus === "recognizing" && "animate-pulse"
                 )}
-                onClick={async () => {
-                  if (isRecognizing) {
-                    stopRecognition();
-                  } else {
-                    try {
-                      await startRecognition();
-                    } catch (error) {
-                      // 错误已在 Hook 中处理
-                    }
-                  }
-                }}
-                disabled={status !== "ready" || disabled}
+                disabled={status !== "ready" || asrStatus === "pending" || disabled}
               >
                 <MicIcon size={16} />
               </PromptInputButton>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isRecognizing ? "点击停止录音" : "点击开始语音输入"}</p>
+              <p>{asrStatus === "recognizing" ? "点击停止录音" : "点击开始语音输入"}</p>
             </TooltipContent>
           </Tooltip>
           <PromptInputSubmit

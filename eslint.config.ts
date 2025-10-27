@@ -35,6 +35,7 @@ export default defineConfig(
       "src/components/ai-elements",
       "src/components/ui",
       "deyu",
+      "public/**",
     ],
   }
 );
