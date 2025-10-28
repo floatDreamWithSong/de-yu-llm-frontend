@@ -289,7 +289,7 @@ const HomePage = () => {
           links={[
             { text: "AI对话", href: "/chat" },
             { text: "智能助手", href: "/chat/agent" },
-            { text: "行业解决方案" },
+            // { text: "行业解决方案" },
           ]}
         />
         <FooterSection
@@ -297,18 +297,24 @@ const HomePage = () => {
           links={[
             {
               text: "开发文档",
-              href: "https://innospark.aiecnu.cn/innospark/docs/category/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97",
+              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig",
             },
-            { text: "API 参考" },
-            { text: "技术博客" },
+            { text: "API 参考",
+              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/P6onwPbqJi4bZqkZpedcaLkonUc"
+             },
+            // { text: "技术博客" },
           ]}
         />
         <FooterSection
           title="联系我们"
           links={[
-            { text: "商务合作" },
-            { text: "加入我们" },
-            { text: "媒体咨询" },
+            { text: "商务合作",
+              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig"
+             },
+            { text: "加入我们",
+              href: "https://www.aiecnu.cn/contact"
+             },
+            // { text: "媒体咨询" },
           ]}
         />
       </footer>

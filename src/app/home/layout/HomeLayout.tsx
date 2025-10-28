@@ -14,7 +14,7 @@ const navLinks = [
   {
     to: (
       <a
-        href={"https://innospark.aiecnu.cn/innospark/docs"}
+        href={"https://zcnvvrmhxi9w.feishu.cn/wiki/BQRWwAPQ1iJ64Nki1kbcGuUKnqb"}
         target="_blank"
         rel="noreferrer"
       >
@@ -26,7 +26,7 @@ const navLinks = [
     to: (
       <a
         href={
-          "https://innospark.aiecnu.cn/innospark/docs/category/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"
+          "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig"
         }
         target="_blank"
         rel="noreferrer"
@@ -37,13 +37,13 @@ const navLinks = [
   },
   {
     to: (
-      <a href={"https://new-api.aiecnu.net/"} target="_blank" rel="noreferrer">
+      <a href={"https://inno-api.aiecnu.net/"} target="_blank" rel="noreferrer">
         开放平台
       </a>
     ),
   },
   {
-    to: <a href=".">关于我们</a>,
+    to: <a href="https://www.aiecnu.cn/index.html">关于我们</a>,
   },
 ];
 const HomeLayout = () => {
