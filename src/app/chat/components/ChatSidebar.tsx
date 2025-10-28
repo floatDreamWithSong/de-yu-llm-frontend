@@ -15,6 +15,7 @@ import {
   SearchIcon,
   Settings,
   Trash2,
+  User,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -550,6 +551,12 @@ export default function ChatSidebar() {
           <DropdownMenuContent className="ml-2">
             {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
+            <Link to="/chat/account-manage" preload="render">
+              <DropdownMenuItem>
+                <User className="size-4" />
+                账户管理
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuItem onClick={() => setFeedbackDialogOpen(true)}>
               <Mail className="size-4" />
               反馈投诉
@@ -571,7 +578,10 @@ export default function ChatSidebar() {
           <img src="/default-user.png" alt="avatar" />
         </Avatar>
       </SidebarFooter>
-      <FeedbackDialog open={feedbackDialogOpen} onClose={() => setFeedbackDialogOpen(false)} />
+      <FeedbackDialog
+        open={feedbackDialogOpen}
+        onClose={() => setFeedbackDialogOpen(false)}
+      />
     </Sidebar>
   );
 }

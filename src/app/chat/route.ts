@@ -51,12 +51,19 @@ const databaseRoute = createRoute({
   component: lazyRouteComponent(() => import("./database/DatabasePage")),
 });
 
+const accountManageRoute = createRoute({
+  path: "/account-manage",
+  getParentRoute: () => chatRoute,
+  component: lazyRouteComponent(() => import("./styles/AccountManage")),
+});
+
 const chatRouteTree = chatRoute.addChildren([
   chatIndexRoute,
   conversationRoute,
   agenrRoute,
   databaseRoute,
   agentChatRoute,
+  accountManageRoute,
 ]);
 
 export default chatRouteTree;
