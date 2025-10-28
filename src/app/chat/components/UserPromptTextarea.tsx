@@ -53,22 +53,13 @@ export default function UserPromptTextarea({
   
   // 语音识别功能
   const { status: asrStatus, startRecognition, stopRecognition } = useAsrRecognition({onMessage: (message) => {
-    if (message.is_final) {
-      setValue(() => {
-        if(spanRef.current) {
-          spanRef.current.innerHTML = message.text;
-        } 
-        return message.text;
-      });
-    } else {
-      setValue((prev) => {
-        const newValue = prev + message.text;
-        if(spanRef.current) {
-          spanRef.current.innerHTML = newValue;
-        }
-        return newValue;
-      });
-    }
+    if(!message) return;
+    setValue(()=>{
+      if(spanRef.current) {
+        spanRef.current.innerHTML = message;
+      }
+      return message;
+    });
   }});
 
   const handleInput = useCallback((e: React.FormEvent<HTMLSpanElement>) => {

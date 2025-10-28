@@ -1,14 +1,14 @@
 import z from 'zod'
-
+const modeSchema = z.union([z.literal("2pass-offline"), z.literal("2pass-online")])
 const ResponseChunkSchema = z.object({
   is_final: z.boolean(),
-  mode: z.string(),
+  mode: modeSchema,
   text: z.string(),
   wav_name: z.string(),
 })
 const ResponseFinalChunkSchema = z.object({
   is_final: z.literal(true),
-  mode: z.literal("2pass-offline"),
+  mode: modeSchema,
   stamp_sents: z.array(z.object({
     end: z.number(),
     punc: z.string(),

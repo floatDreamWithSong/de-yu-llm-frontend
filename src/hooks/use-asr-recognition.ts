@@ -6,24 +6,98 @@ import { tokenStore } from "@/lib/request";
 
 interface UseAsrRecognitionReturn {
   status: "idle" |'pending'| "recognizing";
-  recognizedText: string;
   startRecognition: () => void;
   stopRecognition: () => void;
   error: string | null;
 }
 
 export function useAsrRecognition({onMessage}:{
-  onMessage: (message: ASRResponse) => void
+  onMessage: (recognizedText: string) => void
 }): UseAsrRecognitionReturn {
   const [status, setStatus] = useState<"idle" |'pending'| "recognizing">("idle");
-  const [recognizedText, setRecognizedText] = useState("");
+  const bufferMapRef = useRef<Map<string, string>>(new Map());
   const [error, setError] = useState<string | null>(null);
-
   const wsRef = useRef<WebSocket | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const processorRef = useRef<AudioWorkletNode | null>(null);
   const isFirstPacketRef = useRef(true);
+  // 录制流拼接相关
+  const recordedChunksRef = useRef<Float32Array[]>([]);
+  // 生成WAV文件并下载
+  const downloadRecordedAudio = useCallback(() => {
+    if (recordedChunksRef.current.length === 0) {
+      console.log("没有录制到音频数据");
+      return;
+    }
+
+    // 计算总长度
+    const totalLength = recordedChunksRef.current.reduce((sum, chunk) => sum + chunk.length, 0);
+    const combinedAudio = new Float32Array(totalLength);
+    
+    // 拼接所有音频块
+    let offset = 0;
+    for (const chunk of recordedChunksRef.current) {
+      combinedAudio.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    // 转换为16位PCM
+    const pcmData = new Int16Array(combinedAudio.length);
+    for (let i = 0; i < combinedAudio.length; i++) {
+      pcmData[i] = Math.max(-32768, Math.min(32767, combinedAudio[i] * 32768));
+    }
+
+    // 创建WAV文件头
+    const sampleRate = 48000;
+    const numChannels = 1;
+    const bitsPerSample = 16;
+    const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+    const blockAlign = numChannels * bitsPerSample / 8;
+    const dataSize = pcmData.length * 2;
+    const fileSize = 44 + dataSize - 8;
+
+    const buffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(buffer);
+
+    // WAV文件头
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, fileSize, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeString(36, 'data');
+    view.setUint32(40, dataSize, true);
+
+    // 写入PCM数据
+    const pcmView = new Int16Array(buffer, 44);
+    pcmView.set(pcmData);
+
+    // 创建Blob并下载
+    const blob = new Blob([buffer], { type: 'audio/wav' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `recording_${new Date().toISOString().replace(/[:.]/g, '-')}.wav`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log(`下载录制音频: ${combinedAudio.length} 样本, 时长: ${(combinedAudio.length / sampleRate).toFixed(2)}秒`);
+  }, []);
 
   // 清理资源
   const cleanup = useCallback(() => {
@@ -44,6 +118,7 @@ export function useAsrRecognition({onMessage}:{
       audioContextRef.current = null;
     }
     isFirstPacketRef.current = true;
+    bufferMapRef.current.clear();
     setStatus("idle");
   }, []);
 
@@ -52,6 +127,9 @@ export function useAsrRecognition({onMessage}:{
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
       return;
     }
+
+    // 录制音频数据用于调试
+    recordedChunksRef.current.push(new Float32Array(audioData));
 
     // 转换为 PCM 16位格式
     const pcmData = new Int16Array(audioData.length);
@@ -73,7 +151,7 @@ export function useAsrRecognition({onMessage}:{
   // 停止录音时发送尾包
   const sendLastPacket = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      const lastPacket = new Uint8Array([1]);
+      const lastPacket = new Uint8Array([255]); // 全为1的字节 (0xFF)
       wsRef.current.send(lastPacket);
     }
   }, []);
@@ -88,7 +166,9 @@ export function useAsrRecognition({onMessage}:{
       console.error("停止语音识别失败:", err);
       setError("停止语音识别失败");
     } finally {
-      cleanup();
+      setTimeout(()=>{
+        cleanup()
+      }, 3000)
     }
   }, [sendLastPacket, cleanup]);
 
@@ -97,8 +177,10 @@ export function useAsrRecognition({onMessage}:{
     setStatus("pending");
     try {
       setError(null);
-      setRecognizedText("");
-
+      bufferMapRef.current.clear();
+      
+      // 重置录制数据
+      recordedChunksRef.current = [];
       // 获取麦克风权限 (48kHz采样率，单声道，600ms包长度)
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -154,14 +236,18 @@ export function useAsrRecognition({onMessage}:{
       ws.onmessage = (event) => {
         try {
           const response: ASRResponse = JSON.parse(event.data);
-          onMessage(response);
           if (response.is_final) {
             // 最终响应，替换全部文本
-            setRecognizedText(response.text);
+            console.log(response.text)
+            onMessage(response.text)
             toast.success("语音识别完成");
           } else {
             // 中间响应，追加文本
-            setRecognizedText(prev => prev + response.text);
+            let text = bufferMapRef.current.get(response.wav_name) ?? ''
+            text += response.text;
+            bufferMapRef.current.set(response.wav_name, text);
+            console.log(text)
+            onMessage(text);
           }
         } catch (err) {
           console.error("解析 ASR 响应失败:", err);
@@ -178,6 +264,13 @@ export function useAsrRecognition({onMessage}:{
 
       ws.onclose = (event) => {
         console.log("WebSocket 连接关闭", event);
+        
+        // 自动下载录制的音频文件用于调试
+        if (recordedChunksRef.current.length > 0 && import.meta.env.DEV) {
+          console.log("WebSocket关闭，自动下载录制音频用于调试");
+          downloadRecordedAudio();
+        }
+        
         cleanup();
       };
 
@@ -200,7 +293,7 @@ export function useAsrRecognition({onMessage}:{
       }
       cleanup();
     }
-  }, [sendAudioData, cleanup, onMessage, stopRecognition]);
+  }, [sendAudioData, cleanup, onMessage, stopRecognition, downloadRecordedAudio]);
 
 
   // 组件卸载时清理资源
@@ -208,7 +301,6 @@ export function useAsrRecognition({onMessage}:{
 
   return {
     status,
-    recognizedText,
     startRecognition,
     stopRecognition,
     error,
