@@ -78,6 +78,20 @@ export function useAsrRecognition({onMessage}:{
     }
   }, []);
 
+  // 停止语音识别
+  const stopRecognition = useCallback(() => {
+    try {
+      // 发送尾包
+      sendLastPacket();
+      toast.success("停止语音识别");
+    } catch (err) {
+      console.error("停止语音识别失败:", err);
+      setError("停止语音识别失败");
+    } finally {
+      cleanup();
+    }
+  }, [sendLastPacket, cleanup]);
+
   // 开始语音识别
   const startRecognition = useCallback(async () => {
     setStatus("pending");
@@ -112,7 +126,13 @@ export function useAsrRecognition({onMessage}:{
       // 监听音频数据
       processor.port.onmessage = (event) => {
         if (event.data.type === 'audioData') {
+          console.log(event.data.volume)
           sendAudioData(event.data.data);
+        } else if (event.data.type === 'autoStop') {
+          // 处理自动停止信号
+          console.log('检测到静音，自动停止语音识别');
+          toast.info('检测到静音，自动停止语音识别');
+          stopRecognition();
         }
       };
 
@@ -180,21 +200,8 @@ export function useAsrRecognition({onMessage}:{
       }
       cleanup();
     }
-  }, [sendAudioData, cleanup, onMessage]);
+  }, [sendAudioData, cleanup, onMessage, stopRecognition]);
 
-  // 停止语音识别
-  const stopRecognition = useCallback(() => {
-    try {
-      // 发送尾包
-      sendLastPacket();
-      toast.success("停止语音识别");
-    } catch (err) {
-      console.error("停止语音识别失败:", err);
-      setError("停止语音识别失败");
-    } finally {
-      cleanup();
-    }
-  }, [sendLastPacket, cleanup]);
 
   // 组件卸载时清理资源
   useEffect(() => cleanup, [cleanup]);

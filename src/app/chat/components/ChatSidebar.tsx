@@ -9,6 +9,7 @@ import {
   Edit,
   LoaderCircle,
   LogOut,
+  Mail,
   MessageCircleMoreIcon,
   MoreHorizontal,
   SearchIcon,
@@ -60,6 +61,7 @@ import { cn } from "@/lib/utils";
 import { useInitMessageStore } from "@/store/initMessage";
 import { tokenStore } from "@/lib/request";
 import { Avatar } from "@/components/ui/avatar";
+import { FeedbackDialog } from "./FeedbackDialog";
 
 export default function ChatSidebar() {
   const {
@@ -78,6 +80,7 @@ export default function ChatSidebar() {
   const [renamingItemId, setRenamingItemId] = useState("");
   const [tempTitle, setTempTitle] = useState("");
   const [seacherQueryKey, setSearchQueryKey] = useState("");
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { reset } = useInitMessageStore();
@@ -547,6 +550,10 @@ export default function ChatSidebar() {
           <DropdownMenuContent className="ml-2">
             {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
             <DropdownMenuSeparator /> */}
+            <DropdownMenuItem onClick={() => setFeedbackDialogOpen(true)}>
+              <Mail className="size-4" />
+              反馈投诉
+            </DropdownMenuItem>
             <Link
               to="/auth/login"
               search={{ redirect: "/chat" }}
@@ -564,6 +571,7 @@ export default function ChatSidebar() {
           <img src="/default-user.png" alt="avatar" />
         </Avatar>
       </SidebarFooter>
+      <FeedbackDialog open={feedbackDialogOpen} onClose={() => setFeedbackDialogOpen(false)} />
     </Sidebar>
   );
 }
