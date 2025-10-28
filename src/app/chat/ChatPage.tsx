@@ -92,7 +92,11 @@ export default function ChatPage() {
         status={status}
         {...search}
       />
-      <div />
+      <div className="flex items-end justify-center p-2 gap-2">
+        <a href=""> 隐私注册</a>
+        <a href=""> 服务政策</a>
+        <a href=""> 联系方式</a>
+        </div>
     </div>
   );
 }
