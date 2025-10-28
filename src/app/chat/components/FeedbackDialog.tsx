@@ -7,39 +7,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 export function FeedbackDialog({
   open,
   onClose,
 }: { open: boolean; onClose: () => void }) {
+  const onSubmit = () => {
+    toast.success("提交成功, 感谢您的反馈！");
+    onClose()
+  };
   return (
     <Dialog open={open}>
       <form>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent showCloseButton={false} className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>反馈投诉</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
+              请填写反馈内容，我们会尽快处理
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
-            <div className="grid gap-3">
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
-            </div>
+            <Textarea placeholder="请填写反馈内容" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              取消
             </Button>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" onClick={onSubmit}>提交</Button>
           </DialogFooter>
         </DialogContent>
       </form>
