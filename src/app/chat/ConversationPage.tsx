@@ -534,6 +534,7 @@ export default function ConversationPage() {
             status={status}
             {...search}
           />
+          <p className="text-sm text-foreground/70 text-center w-full">内容由AI生成，仅供参考</p>
         </div>
       </ResizablePanel>
       <ResizableHandle
