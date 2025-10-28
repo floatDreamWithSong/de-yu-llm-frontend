@@ -83,7 +83,7 @@ const vendorMap = new Map<string, string>([
 
   /* ---------- AI ---------- */
   ["ai", "ai"],
-  ["streamdown", "ai"],
+  ["streamdown", "streamdown"],
 ]);
 // https://vitejs.dev/config/
 export default defineConfig({
