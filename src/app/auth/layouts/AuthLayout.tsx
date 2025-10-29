@@ -1,6 +1,6 @@
 import { Outlet } from "@tanstack/react-router";
 import { useState } from "react";
-import { AuthContext } from "../context";
+import { AuthContext } from "../contexts";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 function LayoutContent() {

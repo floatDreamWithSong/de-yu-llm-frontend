@@ -16,7 +16,7 @@ import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useBotInfo } from "@/app/chat/hooks/use-bot";
 import { cn } from "@/lib/utils";
-import { useInitMessageStore } from "@/app/chat/stores/initMessage";
+import { useInitMessageStore } from "@/app/chat/stores/init-message";
 import { useGSAP } from "@gsap/react";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";

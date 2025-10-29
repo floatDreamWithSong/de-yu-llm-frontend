@@ -59,7 +59,7 @@ import ClientQueryKeys from "@/apis/queryKeys";
 import { queryHistory } from "@/apis/requests/conversation/query";
 import { deleteConversation } from "@/apis/requests/conversation/delete";
 import { cn } from "@/lib/utils";
-import { useInitMessageStore } from "@/app/chat/stores/initMessage";
+import { useInitMessageStore } from "@/app/chat/stores/init-message";
 import { tokenStore } from "@/lib/request";
 import { Avatar } from "@/components/ui/avatar";
 import { FeedbackDialog } from "./FeedbackDialog";

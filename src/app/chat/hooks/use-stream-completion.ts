@@ -6,7 +6,7 @@ import {
 import { feedbackMessage } from "@/apis/requests/conversation/feedback";
 import ClientQueryKeys from "@/apis/queryKeys";
 import { BASE_URL, GlobalHeader, tokenStore } from "@/lib/request";
-import { useInitMessageStore } from "@/app/chat/stores/initMessage";
+import { useInitMessageStore } from "@/app/chat/stores/init-message";
 import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";

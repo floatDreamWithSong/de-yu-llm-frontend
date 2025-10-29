@@ -18,7 +18,7 @@ import AuthWrapper from "./AuthWrapper";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { AuthContext } from "../context";
+import { AuthContext } from "../contexts";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { RequestVerify } from "@/apis/requests/user/verifiy";

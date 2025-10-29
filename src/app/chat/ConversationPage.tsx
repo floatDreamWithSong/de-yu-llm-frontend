@@ -20,7 +20,7 @@ import {
 import { Response } from "@/components/ai-elements/response";
 import { useStreamCompletion } from "@/app/chat/hooks/use-stream-completion";
 import { toast } from "sonner";
-import { useInitMessageStore } from "@/app/chat/stores/initMessage";
+import { useInitMessageStore } from "@/app/chat/stores/init-message";
 import { useParams, useSearch } from "@tanstack/react-router";
 import {
   Copy,
