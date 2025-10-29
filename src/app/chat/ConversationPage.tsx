@@ -18,9 +18,9 @@ import {
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
-import { useStreamCompletion } from "@/hooks/use-stream-completion";
+import { useStreamCompletion } from "@/app/chat/hooks/use-stream-completion";
 import { toast } from "sonner";
-import { useInitMessageStore } from "@/store/initMessage";
+import { useInitMessageStore } from "@/app/chat/stores/initMessage";
 import { useParams, useSearch } from "@tanstack/react-router";
 import {
   Copy,
@@ -53,7 +53,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useBotBasicInfo } from "@/hooks/agent/use-bot";
+import { useBotBasicInfo } from "@/app/chat/hooks/use-bot";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import "./styles/suggestion.scss";
 import { useSidebar } from "@/components/ui/sidebar";

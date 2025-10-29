@@ -9,8 +9,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useBotInfo, useBotBasicInfo } from "@/hooks/agent/use-bot";
-import { isBuiltInAgent } from "@/lib/constants";
+import { useBotInfo, useBotBasicInfo } from "@/app/chat/hooks/use-bot";
+import { isBuiltInAgent } from "@/utils/constants/agent";
 import { cn } from "@/lib/utils";
 import { Icon } from "@radix-ui/react-select";
 import { useNavigate } from "@tanstack/react-router";
@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type React from "react";
-import { useAsrRecognition } from "@/hooks/use-asr-recognition";
+import { useAsrRecognition } from "@/app/chat/hooks/use-asr-recognition";
 
 export default function UserPromptTextarea({
   className,

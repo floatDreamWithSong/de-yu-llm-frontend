@@ -7,7 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "@/app/auth/context";
 import z from "zod";
-import { mobileSchema } from "@/utils/schema";
+import { mobileSchema } from "@/utils/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {

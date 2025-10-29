@@ -1,6 +1,6 @@
 import ClientQueryKeys from "@/apis/queryKeys";
 import { getAgentInfo } from "@/apis/requests/agent/info";
-import { isBuiltInAgent } from "@/lib/constants";
+import { isBuiltInAgent } from "@/utils/constants/agent";
 import { useQuery } from "@tanstack/react-query";
 
 export const useBotInfo = (props: { botId?: string }) => {

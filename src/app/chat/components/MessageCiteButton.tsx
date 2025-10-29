@@ -1,7 +1,7 @@
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { Button } from "@/components/ui/button";
 import { TextAnimate } from "@/components/ui/text-animate";
-import type { ChatMessage } from "@/hooks/use-stream-completion";
+import type { ChatMessage } from "@/app/chat/hooks/use-stream-completion";
 const MessageCiteButton = ({
   message,
   onClick,

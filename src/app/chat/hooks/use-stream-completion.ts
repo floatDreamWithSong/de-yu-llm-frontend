@@ -6,26 +6,26 @@ import {
 import { feedbackMessage } from "@/apis/requests/conversation/feedback";
 import ClientQueryKeys from "@/apis/queryKeys";
 import { BASE_URL, GlobalHeader, tokenStore } from "@/lib/request";
-import { useInitMessageStore } from "@/store/initMessage";
+import { useInitMessageStore } from "@/app/chat/stores/initMessage";
 import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import type { ChatStatus, DeepPartial } from "ai";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { sleep } from "@/utils/throttledStream";
+import { sleep } from "@/utils/sleep";
 import type {
   SseChat,
   SseMeta,
   SseModel,
   StreamChunk,
   TextContent,
-} from "./sse/type";
+} from "@/app/chat/types/sse";
 import type {
   SseEditorCode,
   SseSearchCite,
 } from "@/apis/requests/conversation/schema";
 import { useSidebar } from "@/components/ui/sidebar";
 import { genConversationTitle } from "@/apis/requests/conversation/gen-title";
-import { formatBotId } from "./agent/use-bot";
+import { formatBotId } from "./use-bot";
 
 export interface ChatMessage {
   id: string;

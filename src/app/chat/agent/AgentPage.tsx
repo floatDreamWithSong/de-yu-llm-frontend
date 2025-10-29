@@ -32,7 +32,7 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useTitleAni } from "@/hooks/use-title-ani";
+import { useTitleAni } from "@/app/chat/hooks/use-title-ani";
 import { cn } from "@/lib/utils";
 /**
  * 语文

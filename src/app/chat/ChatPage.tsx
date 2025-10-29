@@ -2,8 +2,8 @@
 
 import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
-import { useTitleAni } from "@/hooks/use-title-ani";
-import { useInitMessageStore } from "@/store/initMessage";
+import { useTitleAni } from "@/app/chat/hooks/use-title-ani";
+import { useInitMessageStore } from "@/app/chat/stores/initMessage";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import { motion } from "motion/react";

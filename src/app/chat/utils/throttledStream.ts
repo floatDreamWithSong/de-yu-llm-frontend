@@ -1,3 +1,5 @@
+import { sleep } from "@/utils/sleep";
+
 interface DelayKeyMeta {
   key: string;
   delay?: number;
@@ -20,8 +22,6 @@ const delatTargetArr: DelayKeyMeta[] = [
     delay: 0,
   },
 ];
-
-export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // 关键字按行延时计算
 

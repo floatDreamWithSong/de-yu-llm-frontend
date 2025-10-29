@@ -52,14 +52,14 @@ import {
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
-import groupConversationsByDate from "@/utils/date-group";
+import groupConversationsByDate from "@/app/chat/utils/date-group";
 import { renameConversation } from "@/apis/requests/conversation/rename";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ClientQueryKeys from "@/apis/queryKeys";
 import { queryHistory } from "@/apis/requests/conversation/query";
 import { deleteConversation } from "@/apis/requests/conversation/delete";
 import { cn } from "@/lib/utils";
-import { useInitMessageStore } from "@/store/initMessage";
+import { useInitMessageStore } from "@/app/chat/stores/initMessage";
 import { tokenStore } from "@/lib/request";
 import { Avatar } from "@/components/ui/avatar";
 import { FeedbackDialog } from "./FeedbackDialog";
