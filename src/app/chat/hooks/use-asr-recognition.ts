@@ -86,15 +86,28 @@ export function useAsrRecognition({onMessage}:{
     pcmView.set(pcmData);
 
     // 创建Blob并下载
-    const blob = new Blob([buffer], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `recording_${new Date().toISOString().replace(/[:.]/g, '-')}.wav`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    // 下载 WAV 文件
+    const wavBlob = new Blob([buffer], { type: 'audio/wav' });
+    const wavUrl = URL.createObjectURL(wavBlob);
+    const wavA = document.createElement('a');
+    wavA.href = wavUrl;
+    wavA.download = `recording_${timestamp}.wav`;
+    document.body.appendChild(wavA);
+    wavA.click();
+    document.body.removeChild(wavA);
+    URL.revokeObjectURL(wavUrl);
+
+    // 同时下载原始 PCM（16-bit LE）文件
+    const pcmBlob = new Blob([pcmData.buffer], { type: 'application/octet-stream' });
+    const pcmUrl = URL.createObjectURL(pcmBlob);
+    const pcmA = document.createElement('a');
+    pcmA.href = pcmUrl;
+    pcmA.download = `recording_${timestamp}.pcm`;
+    document.body.appendChild(pcmA);
+    pcmA.click();
+    document.body.removeChild(pcmA);
+    URL.revokeObjectURL(pcmUrl);
 
     console.log(`下载录制音频: ${combinedAudio.length} 样本, 时长: ${(combinedAudio.length / sampleRate).toFixed(2)}秒`);
   }, []);
@@ -194,7 +207,7 @@ export function useAsrRecognition({onMessage}:{
       mediaStreamRef.current = stream;
 
       // 创建音频上下文 (48kHz采样率，匹配麦克风配置)
-      const audioContext = new AudioContext({ sampleRate: 48000 });
+      const audioContext = new AudioContext({ sampleRate: 48000, });
       audioContextRef.current = audioContext;
 
       // 创建音频源
