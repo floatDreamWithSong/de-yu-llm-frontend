@@ -172,20 +172,24 @@ const HomePage = () => {
                 启创·InnoSpark, 做有温度的教育大模型
               </h1>
             </div>
-            <h2 id="subtitle" className="text-foreground/70 text-sm md:text-xl lg:text-2xl leading-relaxed px-4">
+            <h2
+              id="subtitle"
+              className="text-foreground/70 text-sm md:text-xl lg:text-2xl leading-relaxed px-4"
+            >
               <span className="font-semibold">InnoSpark</span>
               <br className="md:hidden" />
               致力于打造新一代人工智能技术，为教育行业提供智能化解决方案，助力教育行业数智化转型升级
             </h2>
-            <div id="btn-group" className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center mt-8 md:mt-16">
-                <Button
-                  variant={"default"}
-                  className="rounded-full text-lg px-16 py-7"
-                >
-              <Link to="/chat">
-                  开始对话
-              </Link>
-                </Button>
+            <div
+              id="btn-group"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center mt-8 md:mt-16"
+            >
+              <Button
+                variant={"default"}
+                className="rounded-full text-lg px-16 py-7"
+              >
+                <Link to="/chat" preload="render" >开始对话</Link>
+              </Button>
               <Button
                 variant={"outline"}
                 className="rounded-full text-lg px-16 py-7"
@@ -257,7 +261,10 @@ const HomePage = () => {
               </h3>
               <div className={`space-y-1 py-6 ani-p-${index}`}>
                 {item.description.map((item) => (
-                  <p className="text-sm text-foreground/70 md:text-lg" key={item}>
+                  <p
+                    className="text-sm text-foreground/70 md:text-lg"
+                    key={item}
+                  >
                     {item}
                   </p>
                 ))}
@@ -299,21 +306,21 @@ const HomePage = () => {
               text: "开发文档",
               href: "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig",
             },
-            { text: "API 参考",
-              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/P6onwPbqJi4bZqkZpedcaLkonUc"
-             },
+            {
+              text: "API 参考",
+              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/P6onwPbqJi4bZqkZpedcaLkonUc",
+            },
             // { text: "技术博客" },
           ]}
         />
         <FooterSection
           title="联系我们"
           links={[
-            { text: "商务合作",
-              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig"
-             },
-            { text: "加入我们",
-              href: "https://www.aiecnu.cn/contact"
-             },
+            {
+              text: "商务合作",
+              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig",
+            },
+            { text: "加入我们", href: "https://www.aiecnu.cn/contact" },
             // { text: "媒体咨询" },
           ]}
         />

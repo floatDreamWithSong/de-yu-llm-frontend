@@ -11,8 +11,9 @@ const AuthWrapper = ({
     <div
       className={cn([
         "bg-white w-1/2 max-w-[500px] aspect-[5/6] rounded-4xl p-12 min-w-[400px]",
+        isMobile && "mx-auto",
         className,
-        isMobile && "bg-transparent"
+        isMobile && "bg-transparent aspect-auto min-w-[380px]"
       ])}
       {...props}
     >

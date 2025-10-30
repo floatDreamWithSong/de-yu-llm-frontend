@@ -421,7 +421,12 @@ export default function ConversationPage() {
                                           <LoaderCircle className="size-4 animate-spin" />
                                         )}
                                     </div>
-
+                                    {!message.isStreaming && (
+                                      <p className="text-sm text-foreground/50 w-full italic mt-4 mx-2">
+                                        本回答由 AI
+                                        生成，内容仅供参考，请仔细甄别。
+                                      </p>
+                                    )}
                                     {!message.isStreaming && (
                                       <Actions className="mt-2">
                                         <Action

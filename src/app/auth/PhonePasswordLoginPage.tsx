@@ -127,7 +127,7 @@ export default function PhonePasswordLoginPage() {
                   setIsChecked(checked === "indeterminate" ? false : checked)
                 }
               />
-              <Label className="gap-0.5">
+              <Label className="gap-0.5 max-md:text-xs">
                 已阅读并同意 启创 的
                 <Link
                   to="."
