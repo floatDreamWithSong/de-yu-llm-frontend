@@ -330,15 +330,15 @@ export default function ConversationPage() {
                     )
                   ) : (
                     <div className="flex gap-3">
-{
-  !isMobile &&                       <div>
-  <MessageAvatar
-    src={basicInfo.iconUrl}
-    className="order-1"
-    name={basicInfo.name}
-  />
-</div>
-}
+                      {!isMobile && (
+                        <div>
+                          <MessageAvatar
+                            src={basicInfo.iconUrl}
+                            className="order-1"
+                            name={basicInfo.name}
+                          />
+                        </div>
+                      )}
                       <div>
                         <Branch
                           className="flex flex-col bg-transparent"
@@ -394,20 +394,27 @@ export default function ConversationPage() {
                                           </ReasoningContent>
                                         </Reasoning>
                                       )}
-                                      {!!_message.content && (
-                                        <Response
-                                          onToggleCodeEditor={() => {
-                                            if (isOpenCite !== _message.id) {
-                                              setIsOpenCodeEditor(_message.id);
-                                            } else {
-                                              setIsOpenCodeEditor("");
-                                            }
-                                          }}
-                                          cites={_message.searchRes}
-                                        >
-                                          {_message.content}
-                                        </Response>
-                                      )}
+                                      {!!_message.content &&
+                                        (!_message.isSensitive ? (
+                                          <Response
+                                            onToggleCodeEditor={() => {
+                                              if (isOpenCite !== _message.id) {
+                                                setIsOpenCodeEditor(
+                                                  _message.id,
+                                                );
+                                              } else {
+                                                setIsOpenCodeEditor("");
+                                              }
+                                            }}
+                                            cites={_message.searchRes}
+                                          >
+                                            {_message.content}
+                                          </Response>
+                                        ) : (
+                                          <Response>
+                                            这个话题暂时还不能聊哦，也请不要引导我聊敏感话题，否则会被封禁哦！
+                                          </Response>
+                                        ))}
                                       {_message.isStreaming &&
                                         !_message.think &&
                                         !_message.content && (
@@ -534,7 +541,9 @@ export default function ConversationPage() {
             status={status}
             {...search}
           />
-          <p className="text-sm text-foreground/70 text-center w-full">内容由AI生成，仅供参考</p>
+          <p className="text-sm text-foreground/70 text-center w-full">
+            内容由AI生成，仅供参考
+          </p>
         </div>
       </ResizablePanel>
       <ResizableHandle

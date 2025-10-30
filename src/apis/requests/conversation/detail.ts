@@ -14,6 +14,7 @@ export const ExtSchema = z.object({
   think: z.string(),
   cite: z.array(SseSearchCiteSchema).nullable(),
   code: z.array(SseEditorCodeSchema).nullable(),
+  sensitive: z.boolean().optional().default(false),
 });
 export type Ext = z.infer<typeof ExtSchema>;
 

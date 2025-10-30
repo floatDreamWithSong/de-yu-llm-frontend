@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { sleep } from "@/utils/sleep";
 import type {
   SseChat,
+  SseError,
   SseMeta,
   SseModel,
   StreamChunk,
@@ -45,6 +46,7 @@ export interface ChatMessage {
   code?: string;
   botState?: SseModel;
   suggestions?: string[];
+  isSensitive: boolean;
 }
 export type FeedbackProps = {
   messageId: string;
@@ -206,6 +208,7 @@ export function useStreamCompletion(
           codeType: message.ext.code?.[0].codeType,
           code: message.ext.code?.[0].code,
           // botState: parseBotState(message.ext.botState),
+          isSensitive: message.ext.sensitive,
         }))
         .reverse();
 
@@ -230,6 +233,7 @@ export function useStreamCompletion(
               codeType: message.ext.code?.[0].codeType,
               code: message.ext.code?.[0].code,
               // botState: parseBotState(message.ext.botState),
+              isSensitive: message.ext.sensitive,
             }))
             .reverse() ?? [],
       };
@@ -298,6 +302,7 @@ export function useStreamCompletion(
         role,
         timestamp: -1,
         isStreaming,
+        isSensitive: false,
       };
       setMessages((prev) => [...prev, newMessage]);
       if (role === "user") {
@@ -602,6 +607,12 @@ export function useStreamCompletion(
                   console.log("搜索完成");
                 } else if (currentType === "end") {
                   console.log("对话结束");
+                } else if (currentType === "error") {
+                  const data = _data as SseError;
+                  console.error("错误:", data);
+                  modifyMessage(aiMessageId, {
+                    isSensitive: true,
+                  });
                 } else {
                   console.warn("未匹配的", currentType);
                 }

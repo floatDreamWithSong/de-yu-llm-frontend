@@ -31,6 +31,10 @@ export interface SseModel {
   bot_id: string;
   bot_name: string;
 }
+export interface SseError {
+  code: number;
+  msg: string;
+}
 
 interface Chunk<E extends string, D> {
   id: number;
@@ -46,7 +50,8 @@ export type StreamChunk =
   | Chunk<"searchFind", number>
   | Chunk<"searchChoice", number>
   | Chunk<"searchCite", SseSearchCite>
-  | Chunk<"searchEnd", unknown>;
+  | Chunk<"searchEnd", unknown>
+  | Chunk<"error", SseError>;
 
 export interface TextContent {
   text?: string;
