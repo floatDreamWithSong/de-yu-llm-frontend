@@ -53,7 +53,7 @@ export default function UserPromptTextarea({
   
   // 语音识别功能
   const { status: asrStatus, startRecognition, stopRecognition } = useAsrRecognition({onMessage: (message) => {
-    if(!message) return;
+    if(typeof message !== "string") return;
     setValue(()=>{
       if(spanRef.current) {
         spanRef.current.innerHTML = message;
