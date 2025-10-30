@@ -4,8 +4,12 @@ import { env } from "@/env";
 import type { ASRResponse } from "@/apis/requests/asr";
 import { tokenStore } from "@/lib/request";
 import RecordRTC from "recordrtc";
-// eslint-disable-next-line prefer-const
-let EXPORT_FILE_FLAG = false;
+declare global {
+  interface Window {
+    EXPORT_FILE_FLAG: boolean;
+  }
+}
+window.EXPORT_FILE_FLAG = false;
 interface UseAsrRecognitionReturn {
   status: "idle" | "pending" | "recognizing";
   startRecognition: () => void;
@@ -40,7 +44,6 @@ export function useAsrRecognition({
 
     if (recorderRef.current) {
       recorderRef.current.stopRecording();
-      recorderRef.current.reset();
       recorderRef.current = null;
     }
 
@@ -86,7 +89,7 @@ export function useAsrRecognition({
       // 停止录音并在回调中导出 WAV 文件
       if (recorderRef.current) {
         recorderRef.current.stopRecording(() => {
-          if (!import.meta.env.DEV && !EXPORT_FILE_FLAG) return;
+          if (!import.meta.env.DEV && !window.EXPORT_FILE_FLAG) return;
           try {
             const blob = recorderRef.current?.getBlob();
 
