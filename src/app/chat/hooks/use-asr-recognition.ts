@@ -207,18 +207,16 @@ export function useAsrRecognition({
       ws.onmessage = (event) => {
         try {
           const response: ASRResponse = JSON.parse(event.data);
-          if (response.is_final) {
-            // 最终响应，替换全部文本
-            if (response.text) onMessage(response.text);
+          if (
+            response.mode === "2pass-offline" ||
+            response.mode === "offline"
+          ) {
+            offlineTextRef.current += response.text;
+            onlineTextRef.current = "";
           } else {
-            if (response.mode === "2pass-online") {
-              onlineTextRef.current += response.text;
-            } else {
-              offlineTextRef.current += response.text;
-              onlineTextRef.current = "";
-            }
-            onMessage(offlineTextRef.current + onlineTextRef.current);
+            onlineTextRef.current += response.text;
           }
+          onMessage(offlineTextRef.current + onlineTextRef.current);
         } catch (err) {
           console.error("解析 ASR 响应失败:", err);
           setError("解析识别结果失败");

@@ -1,3 +1,4 @@
+import { feedbackMessage } from "@/apis/requests/conversation/feedback";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,15 +9,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export function FeedbackDialog({
   open,
   onClose,
 }: { open: boolean; onClose: () => void }) {
+  const [feedback, setFeedback] = useState("");
   const onSubmit = () => {
-    toast.success("提交成功, 感谢您的反馈！");
-    onClose()
+    feedbackMessage({
+      messageId: "",
+      action: 4,
+      feedback: {
+        type: 0,
+        content: feedback,
+      },
+    })
+      .then(() => {
+        toast.success("提交成功, 感谢您的反馈！");
+        onClose();
+      })
+      .catch(() => {
+        toast.error("提交失败");
+      });
   };
   return (
     <Dialog open={open}>
@@ -29,13 +45,19 @@ export function FeedbackDialog({
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
-            <Textarea placeholder="请填写反馈内容" />
+            <Textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder="请填写反馈内容"
+            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={onClose}>
               取消
             </Button>
-            <Button type="submit" onClick={onSubmit}>提交</Button>
+            <Button type="submit" onClick={onSubmit}>
+              提交
+            </Button>
           </DialogFooter>
         </DialogContent>
       </form>

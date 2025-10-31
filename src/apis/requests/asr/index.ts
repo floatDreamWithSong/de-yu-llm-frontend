@@ -1,5 +1,5 @@
 import z from 'zod'
-const modeSchema = z.union([z.literal("2pass-offline"), z.literal("2pass-online")])
+const modeSchema = z.string()
 const ResponseChunkSchema = z.object({
   is_final: z.boolean(),
   mode: modeSchema,

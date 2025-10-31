@@ -8,7 +8,7 @@ export const FeedbackSchema = z.object({
 export type Feedback = z.infer<typeof FeedbackSchema>;
 
 export const RequestSchema = z.object({
-  action: z.number(), // 撤销-0/喜欢-1/不喜欢-2/删除消息-3
+  action: z.number(), // 撤销-0/喜欢-1/不喜欢-2/删除消息-3/反馈投诉-4
   feedback: z.union([FeedbackSchema, z.null()]).optional(),
   messageId: z.string(),
 });
