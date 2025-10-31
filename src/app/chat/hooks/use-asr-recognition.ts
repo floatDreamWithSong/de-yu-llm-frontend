@@ -3,13 +3,8 @@ import { toast } from "sonner";
 import { env } from "@/env";
 import type { ASRResponse } from "@/apis/requests/asr";
 import { tokenStore } from "@/lib/request";
-import RecordRTC from "recordrtc";
-declare global {
-  interface Window {
-    EXPORT_FILE_FLAG: boolean;
-  }
-}
-window.EXPORT_FILE_FLAG = false;
+import Recorder from "recorder-core";
+
 interface UseAsrRecognitionReturn {
   status: "idle" | "pending" | "recognizing";
   startRecognition: () => void;
@@ -28,9 +23,10 @@ export function useAsrRecognition({
   const offlineTextRef = useRef<string>("");
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const recorderRef = useRef<RecordRTC | null>(null);
+  const recorderRef = useRef<ReturnType<typeof Recorder> | null>(null); // Recorder实例
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>(null);
+  const sampleBufRef = useRef<Int16Array>(new Int16Array());
   const clearText = () => {
     onlineTextRef.current = "";
     offlineTextRef.current = "";
@@ -43,7 +39,7 @@ export function useAsrRecognition({
     }
 
     if (recorderRef.current) {
-      recorderRef.current.stopRecording();
+      recorderRef.current.close();
       recorderRef.current = null;
     }
 
@@ -52,26 +48,63 @@ export function useAsrRecognition({
       mediaStreamRef.current = null;
     }
 
+    // 清空采样缓冲区
+    sampleBufRef.current = new Int16Array();
     clearText();
     setStatus("idle");
   }, []);
 
-  // 发送音频数据到 WebSocket
-  const sendAudioData = useCallback((audioData: Blob) => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
+  // 处理录音数据（类似CLI的recProcess函数）
+  const processAudioData = useCallback(
+    (
+      buffer: Float32Array[],
+      _powerLevel: number,
+      _bufferDuration: number,
+      bufferSampleRate: number,
+      _newBufferIdx: number,
+      asyncEnd?: () => void
+    ) => {
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+        asyncEnd?.();
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const arrayBuffer = reader.result as ArrayBuffer;
-      const uint8Array = new Uint8Array(arrayBuffer);
+      try {
+        // 从buffer数组取最新的数据（类似CLI的data_48k = buffer[buffer.length-1]）
+        const data_48k = buffer[buffer.length - 1];
 
-      // 发送音频数据包
-      wsRef.current?.send(uint8Array);
-    };
-    reader.readAsArrayBuffer(audioData);
-  }, []);
+        // 采样率转换：从bufferSampleRate（通常48k）到16000
+        const array_48k = new Array(data_48k);
+        const data_16k = Recorder.SampleData(
+          array_48k,
+          bufferSampleRate,
+          16000
+        ).data;
+
+        // 累积数据到sampleBuf（类似CLI的sampleBuf累积）
+        const newSampleBuf = Int16Array.from([
+          ...sampleBufRef.current,
+          ...data_16k,
+        ]);
+        sampleBufRef.current = newSampleBuf;
+
+        // 分块发送：每次发送960个样本（960*2字节=1920字节，相当于120ms@16kHz）
+        const chunk_size = 960;
+        while (sampleBufRef.current.length >= chunk_size) {
+          const sendBuf = sampleBufRef.current.slice(0, chunk_size);
+          sampleBufRef.current = sampleBufRef.current.slice(chunk_size);
+
+          // 直接发送Int16Array数据（类似CLI的wsconnecter.wsSend）
+          wsRef.current?.send(sendBuf);
+        }
+      } catch (err) {
+        console.error("处理录音数据失败:", err);
+      }
+
+      asyncEnd?.();
+    },
+    []
+  );
 
   // 停止语音识别时发送尾包
   const sendLastPacket = useCallback(() => {
@@ -86,40 +119,19 @@ export function useAsrRecognition({
     try {
       sendLastPacket();
 
-      // 停止录音并在回调中导出 WAV 文件
+      // 停止Recorder录音
       if (recorderRef.current) {
-        recorderRef.current.stopRecording(() => {
-          if (!import.meta.env.DEV && !window.EXPORT_FILE_FLAG) return;
-          try {
-            const blob = recorderRef.current?.getBlob();
-
-            // 检查 Blob 是否有效且不为空
-            if (blob && blob.size > 0) {
-              const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-              const fileName = `asr_recording_${timestamp}.wav`;
-
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = fileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-
-              console.log(
-                `导出 WAV 文件: ${fileName}, 大小: ${(blob.size / 1024).toFixed(
-                  2
-                )} KB`
-              );
-            } else {
-              console.warn("录音数据为空，跳过导出");
-            }
-          } catch (blobError) {
-            console.error("导出 WAV 文件失败:", blobError);
+        recorderRef.current.stop(
+          () => {
+            // 录音停止后的回调
+            console.log("录音已停止");
+          },
+          (err: string) => {
+            console.error("停止录音失败:", err);
           }
-        });
+        );
       }
+
       toast.info("正在停止语音识别，请稍后...");
     } catch (err) {
       console.error("停止语音识别失败:", err);
@@ -152,20 +164,13 @@ export function useAsrRecognition({
 
       mediaStreamRef.current = stream;
 
-      // 创建 RecordRTC 录音机
-      const options: RecordRTC.Options = {
-        type: "audio",
-        recorderType: RecordRTC.StereoAudioRecorder,
-        mimeType: "audio/wav",
-        numberOfAudioChannels: 1,
-        sampleRate: 48000,
-        desiredSampRate: 48000,
-        bufferSize: 16384,
-        timeSlice: 600, // 600ms 切片，匹配原来的包大小
-        ondataavailable: sendAudioData
-      };
-
-      const recorder = new RecordRTC(stream, options);
+      // 创建Recorder录音机（类似CLI的配置）
+      const recorder = Recorder({
+        type: "pcm",
+        bitRate: 16,
+        sampleRate: 16000, // 目标采样率16kHz
+        onProcess: processAudioData, // 使用新的PCM处理函数
+      });
       recorderRef.current = recorder;
 
       // 建立 WebSocket 连接
@@ -184,10 +189,19 @@ export function useAsrRecognition({
         const firstPacket = new Uint8Array([0]);
         ws.send(firstPacket);
 
-        // 开始录制
-        recorder.startRecording();
-        setStatus("recognizing");
-        toast.success("开始语音识别");
+        // 开始录制（Recorder的start方法）
+        recorder.open(
+          () => {
+            recorder.start();
+            setStatus("recognizing");
+            toast.success("开始语音识别");
+          },
+          (err: string) => {
+            console.error("录音启动失败:", err);
+            setError("录音启动失败");
+            cleanup();
+          }
+        );
       };
 
       ws.onmessage = (event) => {
@@ -195,8 +209,7 @@ export function useAsrRecognition({
           const response: ASRResponse = JSON.parse(event.data);
           if (response.is_final) {
             // 最终响应，替换全部文本
-            onlineTextRef.current = "";
-            offlineTextRef.current = response.text;
+            if (response.text) onMessage(response.text);
           } else {
             if (response.mode === "2pass-online") {
               onlineTextRef.current += response.text;
@@ -204,8 +217,8 @@ export function useAsrRecognition({
               offlineTextRef.current += response.text;
               onlineTextRef.current = "";
             }
+            onMessage(offlineTextRef.current + onlineTextRef.current);
           }
-          onMessage(offlineTextRef.current + onlineTextRef.current);
         } catch (err) {
           console.error("解析 ASR 响应失败:", err);
           setError("解析识别结果失败");
@@ -242,7 +255,7 @@ export function useAsrRecognition({
       }
       cleanup();
     }
-  }, [sendAudioData, cleanup, onMessage]);
+  }, [cleanup, onMessage, processAudioData]);
 
   // 组件卸载时清理资源
   useEffect(() => cleanup, [cleanup]);
