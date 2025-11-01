@@ -1,4 +1,4 @@
-import { feedbackMessage } from "@/apis/requests/conversation/feedback";
+import { feedbackContent } from "@/apis/requests/user/feedback";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,17 +18,11 @@ export function FeedbackDialog({
 }: { open: boolean; onClose: () => void }) {
   const [feedback, setFeedback] = useState("");
   const onSubmit = () => {
-    feedbackMessage({
-      messageId: "",
-      action: 4,
-      feedback: {
-        type: 0,
-        content: feedback,
-      },
-    })
+    feedbackContent(feedback)
       .then(() => {
         toast.success("提交成功, 感谢您的反馈！");
         onClose();
+        setFeedback("");
       })
       .catch(() => {
         toast.error("提交失败");

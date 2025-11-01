@@ -54,7 +54,7 @@ const databaseRoute = createRoute({
 const accountManageRoute = createRoute({
   path: "/account-manage",
   getParentRoute: () => chatRoute,
-  component: lazyRouteComponent(() => import("./settings/AccountManage")),
+  component: lazyRouteComponent(() => import("./settings/AccountManagePage")),
 });
 
 const chatRouteTree = chatRoute.addChildren([
