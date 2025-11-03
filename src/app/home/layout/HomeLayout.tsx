@@ -43,7 +43,7 @@ const navLinks = [
     ),
   },
   {
-    to: <a href="https://www.aiecnu.cn/index.html">关于我们</a>,
+    to: <a href="https://aiedu.ecnu.edu.cn/">关于我们</a>,
   },
 ];
 const HomeLayout = () => {

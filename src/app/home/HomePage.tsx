@@ -318,9 +318,9 @@ const HomePage = () => {
           links={[
             {
               text: "商务合作",
-              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig",
+              href: "https://aiedu.ecnu.edu.cn/",
             },
-            { text: "加入我们", href: "https://www.aiecnu.cn/contact" },
+            { text: "加入我们", href: "https://aiedu.ecnu.edu.cn/" },
             // { text: "媒体咨询" },
           ]}
         />
