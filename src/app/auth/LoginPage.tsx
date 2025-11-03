@@ -22,6 +22,7 @@ import AuthWrapper from "@/app/auth/components/AuthWrapper";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { sendVerificationCode } from "@/apis/requests/user/code";
+import { EXTERNAL_LINKS } from "@/utils/constants/link";
 // const iconSize = 26;
 
 const formSchema = z.object({
@@ -107,19 +108,23 @@ export default function LoginPage() {
                   />
                   <Label className="gap-0.5 max-md:text-xs">
                     已阅读并同意 启创 的
-                    <Link
-                      to="."
+                    <a
+                      href={EXTERNAL_LINKS.SERVICE_POLICY}
+                      target="_blank"
+                      rel="noreferrer"
                       className="text-black font-bold underline-offset-4 hover:underline"
                     >
                       使用协议
-                    </Link>
+                    </a>
                     和
-                    <Link
-                      to="."
+                    <a
+                      href={EXTERNAL_LINKS.PRIVACY_POLICY}
+                      target="_blank"
+                      rel="noreferrer"
                       className="text-black font-bold underline-offset-4 hover:underline"
                     >
                       隐私协议
-                    </Link>
+                    </a>
                   </Label>
                 </div>
                 <AuthButton disabled={sendCodeMutation.isPending} type="submit">

@@ -4,6 +4,7 @@ import { createConversation } from "@/apis/requests/conversation/create";
 import UserPromptTextarea from "@/app/chat/components/UserPromptTextarea";
 import { useTitleAni } from "@/app/chat/hooks/use-title-ani";
 import { useInitMessageStore } from "@/app/chat/stores/init-message";
+import { EXTERNAL_LINKS } from "@/utils/constants/link";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import { motion } from "motion/react";
@@ -92,11 +93,11 @@ export default function ChatPage() {
         status={status}
         {...search}
       />
-      <div className="flex items-end justify-center p-2 gap-2">
-        <a href=""> 隐私政策</a>
-        <a href=""> 服务政策</a>
-        <a href=""> 联系方式</a>
-        </div>
+      <div className="flex items-end justify-center p-2 gap-4 font-bold text-primary/90 [&>a]:hover:underline">
+        <a href={EXTERNAL_LINKS.PRIVACY_POLICY} target="_blank" rel="noreferrer"> 隐私政策</a>
+        <a href={EXTERNAL_LINKS.SERVICE_POLICY} target="_blank" rel="noreferrer"> 服务政策</a>
+        <a href={EXTERNAL_LINKS.CONTACT_US} target="_blank" rel="noreferrer"> 联系我们</a>
+      </div>
     </div>
   );
 }

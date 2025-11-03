@@ -9,12 +9,13 @@ import { Link, Outlet } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { EXTERNAL_LINKS } from "@/utils/constants/link";
 
 const navLinks = [
   {
     to: (
       <a
-        href={"https://zcnvvrmhxi9w.feishu.cn/wiki/BQRWwAPQ1iJ64Nki1kbcGuUKnqb"}
+        href={EXTERNAL_LINKS.INTRODUCTION}
         target="_blank"
         rel="noreferrer"
       >
@@ -25,25 +26,23 @@ const navLinks = [
   {
     to: (
       <a
-        href={
-          "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig"
-        }
+        href={EXTERNAL_LINKS.USAGE_GUIDE}
         target="_blank"
         rel="noreferrer"
       >
-        说明文档
+        使用指南
       </a>
     ),
   },
   {
     to: (
-      <a href={"https://inno-api.aiecnu.net/"} target="_blank" rel="noreferrer">
+      <a href={EXTERNAL_LINKS.OPEN_PLATFORM} target="_blank" rel="noreferrer">
         开放平台
       </a>
     ),
   },
   {
-    to: <a href="https://aiedu.ecnu.edu.cn/">关于我们</a>,
+    to: <a href={EXTERNAL_LINKS.CONTACT_US}>关于我们</a>,
   },
 ];
 const HomeLayout = () => {

@@ -15,6 +15,7 @@ import gsap from "gsap";
 import { ScrollSmoother, ScrollTrigger, SplitText } from "gsap/all";
 import { useGSAP } from "@gsap/react";
 import { Link } from "@tanstack/react-router";
+import { EXTERNAL_LINKS } from "@/utils/constants/link";
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
 
 const midList = [
@@ -188,7 +189,9 @@ const HomePage = () => {
                 variant={"default"}
                 className="rounded-full text-lg px-16 py-7"
               >
-                <Link to="/chat" preload="render" >开始对话</Link>
+                <Link to="/chat" preload="render">
+                  开始对话
+                </Link>
               </Button>
               <Button
                 variant={"outline"}
@@ -196,7 +199,7 @@ const HomePage = () => {
                 size={"lg"}
               >
                 <a
-                  href="https://innospark.aiecnu.cn/innospark/docs"
+                  href={EXTERNAL_LINKS.INTRODUCTION}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -296,32 +299,40 @@ const HomePage = () => {
           links={[
             { text: "AI对话", href: "/chat" },
             { text: "智能助手", href: "/chat/agent" },
-            // { text: "行业解决方案" },
           ]}
         />
         <FooterSection
           title="资源"
           links={[
             {
-              text: "开发文档",
-              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/BUAAwhXK3i5dFGkdROKcpOYtnig",
+              text: "使用指南",
+              href: EXTERNAL_LINKS.USAGE_GUIDE,
+            },
+            {
+              text: "API 申请",
+              href: EXTERNAL_LINKS.API_APPLY,
             },
             {
               text: "API 参考",
-              href: "https://zcnvvrmhxi9w.feishu.cn/wiki/P6onwPbqJi4bZqkZpedcaLkonUc",
+              href: EXTERNAL_LINKS.API_REFERENCE,
             },
-            // { text: "技术博客" },
           ]}
         />
         <FooterSection
-          title="联系我们"
+          title="关于我们"
           links={[
             {
-              text: "商务合作",
-              href: "https://aiedu.ecnu.edu.cn/",
+              text: "联系我们",
+              href: EXTERNAL_LINKS.CONTACT_US,
             },
-            { text: "加入我们", href: "https://aiedu.ecnu.edu.cn/" },
-            // { text: "媒体咨询" },
+            {
+              text: "服务政策",
+              href: EXTERNAL_LINKS.SERVICE_POLICY,
+            },
+            {
+              text: "隐私政策",
+              href: EXTERNAL_LINKS.PRIVACY_POLICY,
+            },
           ]}
         />
       </footer>
