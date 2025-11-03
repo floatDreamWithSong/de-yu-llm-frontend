@@ -394,8 +394,8 @@ export default function ConversationPage() {
                                           </ReasoningContent>
                                         </Reasoning>
                                       )}
-                                      {!!_message.content &&
-                                        (!_message.isSensitive ? (
+                                      {!_message.isSensitive ? (
+                                        !!_message.content && (
                                           <Response
                                             onToggleCodeEditor={() => {
                                               if (isOpenCite !== _message.id) {
@@ -410,11 +410,12 @@ export default function ConversationPage() {
                                           >
                                             {_message.content}
                                           </Response>
-                                        ) : (
-                                          <Response>
-                                            这个话题暂时还不能聊哦，也请不要引导我聊敏感话题，否则会被封禁哦！
-                                          </Response>
-                                        ))}
+                                        )
+                                      ) : (
+                                        <Response>
+                                          这个话题暂时还不能聊哦，也请不要引导我聊敏感话题，否则会被封禁哦！
+                                        </Response>
+                                      )}
                                       {_message.isStreaming &&
                                         !_message.think &&
                                         !_message.content && (

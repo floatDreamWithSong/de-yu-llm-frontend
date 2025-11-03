@@ -192,7 +192,7 @@ export function useStreamCompletion(
       // 将更早的消息插入到现有消息的前面
       const earlierMessages = data.pages
         .flatMap((page) => page.messageList ?? [])
-        .filter((message) => !!message.content)
+        .filter((message) => !!message.content || message.ext.sensitive)
         .map<ChatMessage>((message: MessageItem) => ({
           id: message.messageId,
           content: message.content,
