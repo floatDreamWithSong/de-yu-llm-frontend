@@ -95,7 +95,7 @@ export default function ChatPage() {
       />
       <div className="flex items-end justify-center p-2 gap-4 font-bold text-primary/90 [&>a]:hover:underline">
         <a href={EXTERNAL_LINKS.PRIVACY_POLICY} target="_blank" rel="noreferrer"> 隐私政策</a>
-        <a href={EXTERNAL_LINKS.SERVICE_POLICY} target="_blank" rel="noreferrer"> 服务政策</a>
+        <a href={EXTERNAL_LINKS.SERVICE_PROTOCOL} target="_blank" rel="noreferrer"> 服务协议</a>
         <a href={EXTERNAL_LINKS.CONTACT_US} target="_blank" rel="noreferrer"> 联系我们</a>
       </div>
     </div>

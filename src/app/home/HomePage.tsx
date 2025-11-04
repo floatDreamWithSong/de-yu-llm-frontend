@@ -326,8 +326,8 @@ const HomePage = () => {
               href: EXTERNAL_LINKS.CONTACT_US,
             },
             {
-              text: "服务政策",
-              href: EXTERNAL_LINKS.SERVICE_POLICY,
+              text: "服务协议",
+              href: EXTERNAL_LINKS.SERVICE_PROTOCOL,
             },
             {
               text: "隐私政策",

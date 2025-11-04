@@ -110,7 +110,7 @@ export default function LoginPage() {
                   <Label className="gap-0.5 max-md:text-xs">
                     已阅读并同意 启创 的
                     <a
-                      href={EXTERNAL_LINKS.SERVICE_POLICY}
+                      href={EXTERNAL_LINKS.SERVICE_PROTOCOL}
                       target="_blank"
                       rel="noreferrer"
                       className="text-black font-bold underline-offset-4 hover:underline"
