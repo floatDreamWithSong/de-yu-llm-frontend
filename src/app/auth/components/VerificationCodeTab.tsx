@@ -68,6 +68,7 @@ export default function VerificationCodeTab({
       {
         authId: phone,
         authType: "phone-verify",
+        cause: 'passport'
       },
       {
         onError() {

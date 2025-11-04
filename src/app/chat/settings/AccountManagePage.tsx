@@ -7,7 +7,12 @@ import {
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircleIcon, ArrowLeftIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  ArrowLeftIcon,
+  EyeClosedIcon,
+  EyeIcon,
+} from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import {
   AlertDialog,
@@ -34,6 +39,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { passwordSchema } from "@/apis/requests/user/schema";
+import { checkCode } from "@/apis/requests/user/check-code";
+import { mobileSchema } from "@/utils/schemas";
+import { sendVerificationCode } from "@/apis/requests/user/code";
+import { useRef, useState } from "react";
 
 export default function AccountManagePage() {
   const router = useRouter();
@@ -98,7 +108,6 @@ export default function AccountManagePage() {
     </div>
   );
 }
-const passwordSchema = z.string().min(6, "密码至少6位").max(20, "密码最多20位");
 const formSchema = z
   .object({
     newPassword: passwordSchema,
@@ -108,12 +117,57 @@ const formSchema = z
     message: "两次输入的密码不一致",
     path: ["confirmPassword"],
   });
+const checkCodeSchema = z.object({
+  phone: mobileSchema,
+  code: z.string(),
+});
 const ResetPasswordForm = () => {
+  const [isVerified, setIsVerified] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const countDownRef = useRef<NodeJS.Timeout | null>(null);
+  const [countDown, setCountDown] = useState(0);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       newPassword: "",
       confirmPassword: "",
+    },
+  });
+  const codeForm = useForm<z.infer<typeof checkCodeSchema>>({
+    resolver: zodResolver(checkCodeSchema),
+    defaultValues: {
+      code: "",
+      phone: "",
+    },
+  });
+  const checkCodeMutation = useMutation({
+    mutationFn: checkCode,
+    onSuccess: () => {
+      toast.success("验证码验证成功");
+      setIsVerified(true);
+    },
+    onError: () => {
+      toast.error("验证码验证失败");
+    },
+  });
+  const sendCodeMutation = useMutation({
+    mutationFn: sendVerificationCode,
+    onSuccess: () => {
+      toast.success("验证码发送成功");
+      setCountDown(60);
+      countDownRef.current = setInterval(() => {
+        setCountDown((prev) => {
+          if (prev <= 0 && countDownRef.current) {
+            clearInterval(countDownRef.current as NodeJS.Timeout);
+            countDownRef.current = null;
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    },
+    onError: () => {
+      toast.error("验证码发送失败");
     },
   });
   const resetPasswordMutation = useMutation({
@@ -126,54 +180,135 @@ const ResetPasswordForm = () => {
     },
   });
   const handleResetPassword = (newPassword: string) => {
+    if (!isVerified) {
+      toast.error("请填写手机验证码！");
+      return;
+    }
     resetPasswordMutation.mutate({ newPassword });
   };
   return (
-    <Form {...form}>
-      <form
-        className="space-y-4"
-        onSubmit={form.handleSubmit((data) =>
-          handleResetPassword(data.newPassword),
-        )}
-      >
-        <FormField
-          control={form.control}
-          name="newPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>新密码</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="请输入新密码"
-                  className="max-w-[300px]"
-                  type="password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+    <>
+      <Form {...codeForm}>
+        <form
+          className="space-y-4"
+          onSubmit={codeForm.handleSubmit((data) =>
+            checkCodeMutation.mutate({
+              authId: "",
+              authType: "phone-verify",
+              cause: "password",
+              verify: data.code,
+            }),
           )}
-        />
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>确认密码</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="请确认新密码"
-                  className="max-w-[300px]"
-                  type="password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+        >
+          <FormField
+            control={codeForm.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>手机号</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="请输入手机号"
+                    className="max-w-[300px]"
+                    type="text"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="button"
+            disabled={countDown > 0}
+            onClick={() =>
+              sendCodeMutation.mutate({
+                authId: codeForm.getValues().phone,
+                authType: "phone-verify",
+                cause: "password",
+              })
+            }
+          >
+            {countDown > 0 ? `${countDown}s` : "获取验证码"}
+          </Button>
+          <FormField
+            control={codeForm.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>验证码</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="请输入验证码"
+                    className="max-w-[300px]"
+                    type="text"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">校验验证码</Button>
+        </form>
+      </Form>
+      <Form {...form}>
+        <form
+          className="space-y-4"
+          onSubmit={form.handleSubmit((data) =>
+            handleResetPassword(data.newPassword),
           )}
-        />
-        <Button type="submit">确认更改</Button>
-      </form>
-    </Form>
+        >
+          <FormField
+            control={form.control}
+            name="newPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>新密码</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="请输入新密码"
+                    className="max-w-[300px]"
+                    type={isPasswordVisible ? "text" : "password"}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>确认密码</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="请确认新密码"
+                    className="max-w-[300px]"
+                    type="password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+            >
+              {!isPasswordVisible ? "显示密码" : "隐藏密码"}
+              {!isPasswordVisible ? <EyeIcon /> : <EyeClosedIcon />}
+            </Button>
+            <Button disabled={!isVerified} type="submit">
+              确认更改
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 };

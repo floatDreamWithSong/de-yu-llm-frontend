@@ -54,6 +54,7 @@ export default function LoginPage() {
       {
         authId: data.phone,
         authType: "phone-verify",
+        cause: 'passport'
       },
       {
         onError() {

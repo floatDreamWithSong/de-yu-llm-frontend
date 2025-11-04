@@ -24,14 +24,11 @@ import { RequestVerify } from "@/apis/requests/user/verifiy";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { tokenStore } from "@/lib/request";
 import { EXTERNAL_LINKS } from "@/utils/constants/link";
+import { passwordSchema } from "@/apis/requests/user/schema";
 
 const formSchema = z.object({
   phone: mobileSchema,
-  password: z
-    .string()
-    .min(6, "密码至少6位")
-    .max(20, "密码最多20位")
-    .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, "密码必须包含字母和数字"),
+  password: passwordSchema,
 });
 
 export default function PhonePasswordLoginPage() {
