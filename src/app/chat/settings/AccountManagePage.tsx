@@ -58,7 +58,7 @@ export default function AccountManagePage() {
         >
           <ArrowLeftIcon />
         </Button>
-        <h2 className="text-xl font-bold">系统设置</h2>
+        <h2 className="text-xl font-bold">账户管理</h2>
       </nav>
       <Accordion
         type="multiple"

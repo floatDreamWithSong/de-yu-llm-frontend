@@ -549,8 +549,6 @@ export default function ChatSidebar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="ml-2">
-            {/* <DropdownMenuLabel>系统设置</DropdownMenuLabel>
-            <DropdownMenuSeparator /> */}
             <Link to="/chat/account-manage" preload="render">
               <DropdownMenuItem>
                 <User className="size-4" />
