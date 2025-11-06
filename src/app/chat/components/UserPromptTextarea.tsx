@@ -50,17 +50,23 @@ export default function UserPromptTextarea({
   const spanRef = useRef<HTMLSpanElement>(null);
   const navigator = useNavigate();
   const { isMobile } = useSidebar();
-  
+
   // 语音识别功能
-  const { status: asrStatus, startRecognition, stopRecognition } = useAsrRecognition({onMessage: (message) => {
-    if(typeof message !== "string") return;
-    setValue(()=>{
-      if(spanRef.current) {
-        spanRef.current.innerHTML = message;
-      }
-      return message;
-    });
-  }});
+  const {
+    status: asrStatus,
+    startRecognition,
+    stopRecognition,
+  } = useAsrRecognition({
+    onMessage: (message) => {
+      if (typeof message !== "string") return;
+      setValue(() => {
+        if (spanRef.current) {
+          spanRef.current.innerHTML = message;
+        }
+        return message;
+      });
+    },
+  });
 
   const handleInput = useCallback((e: React.FormEvent<HTMLSpanElement>) => {
     // if (status !== "ready" || disabled) return;
@@ -87,7 +93,10 @@ export default function UserPromptTextarea({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (status === "ready" && !disabled) {
-      const prompt = value.replaceAll("<br>", "\n").trim();
+      const prompt = value
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/&nbsp;/gi, " ")
+        .trim();
       onSubmit?.(prompt, () => {
         setValue("");
         if (spanRef.current) {
@@ -107,7 +116,7 @@ export default function UserPromptTextarea({
   // 处理麦克风按钮点击
   const handleMicClick = () => {
     if (status !== "ready" || disabled) return;
-    
+
     if (asrStatus === "recognizing") {
       stopRecognition();
     }
@@ -262,15 +271,21 @@ export default function UserPromptTextarea({
                 variant={asrStatus === "recognizing" ? "default" : "outline"}
                 className={cn(
                   "rounded-full border-0 transition-all duration-200",
-                  asrStatus === "recognizing" && "animate-pulse"
+                  asrStatus === "recognizing" && "animate-pulse",
                 )}
-                disabled={status !== "ready" || asrStatus === "pending" || disabled}
+                disabled={
+                  status !== "ready" || asrStatus === "pending" || disabled
+                }
               >
                 <MicIcon size={16} />
               </PromptInputButton>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{asrStatus === "recognizing" ? "点击停止录音" : "点击开始语音输入"}</p>
+              <p>
+                {asrStatus === "recognizing"
+                  ? "点击停止录音"
+                  : "点击开始语音输入"}
+              </p>
             </TooltipContent>
           </Tooltip>
           <PromptInputSubmit
