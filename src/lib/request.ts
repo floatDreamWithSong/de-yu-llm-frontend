@@ -112,7 +112,6 @@ function createAxiosInstance(): AxiosInstance {
           window.location.href = "/auth/login";
         }
         if (payload.code === 200_000_006) {
-          tokenStore.remove();
           window.location.href = "/auth/login/password/set";
         }
         const errmsg = payload.msg || "请求失败";

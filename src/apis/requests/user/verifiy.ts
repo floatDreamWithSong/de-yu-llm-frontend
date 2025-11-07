@@ -1,6 +1,6 @@
 import z from "zod";
 import { request } from "@/lib/request";
-import { AuthInfoSchema, CredentialsSchema, UserProfileSchema } from "./schema";
+import { AuthInfoSchema, CredentialsSchema } from "./schema";
 
 export const RequestSchema = AuthInfoSchema.extend({
   verify: z.string(),
@@ -14,6 +14,6 @@ export const RequestVerify = (data: z.infer<typeof RequestSchema>) => {
     dataValidator: RequestSchema,
     responseValidator: CredentialsSchema.extend({
       new: z.boolean(),
-    }).and(UserProfileSchema),
+    }),
   })
 };
