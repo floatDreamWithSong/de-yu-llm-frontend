@@ -19,11 +19,20 @@
 //       partialize: (s) => ({ token: s.token }),
 //       storage: createJSONStorage(() => localStorage),
 
+
 //       onRehydrateStorage: () => (state) => {
-//         console.log("恢复", state);
-//         // state 就是刚刚恢复出来的值（可能为 undefined）
-//         if (!state) return;
-//       },
-//     },
-//   ),
-// );
+  //         console.log("恢复", state);
+  //         // state 就是刚刚恢复出来的值（可能为 undefined）
+  //         if (!state) return;
+  //       },
+  //     },
+  //   ),
+  // );
+  
+// import { UserProfileSchema } from "@/apis/requests/user/schema";
+// import type z from "zod";
+// import { createStore } from "zustand/vanilla";
+// export const userInfoStore = createStore<z.infer<typeof UserProfileSchema>>((set) => ({
+//   username: "",
+//   avatar: "",
+// }));

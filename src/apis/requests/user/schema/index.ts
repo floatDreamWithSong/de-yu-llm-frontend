@@ -7,6 +7,12 @@ export const AuthInfoSchema = z.object({
 export const CredentialsSchema = z.object({
   token: z.string(),
 });
+
+export const UserProfileSchema = z.object({
+  username: z.string(),
+  avatar: z.string(),
+});
+export const UserProfileSchemaPartial = UserProfileSchema.partial();
 export type UserCredentials = z.infer<typeof CredentialsSchema>;
 
 export const verifyCodeCauseSchema = z.union([z.literal("passport"), z.literal("password")]);

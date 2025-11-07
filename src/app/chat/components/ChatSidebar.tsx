@@ -49,6 +49,7 @@ import {
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
@@ -61,8 +62,9 @@ import { deleteConversation } from "@/apis/requests/conversation/delete";
 import { cn } from "@/lib/utils";
 import { useInitMessageStore } from "@/app/chat/stores/init-message";
 import { tokenStore } from "@/lib/request";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FeedbackDialog } from "./FeedbackDialog";
+import { getProfile } from "@/apis/requests/user/profile";
 
 export default function ChatSidebar() {
   const {
@@ -73,6 +75,10 @@ export default function ChatSidebar() {
   } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
+  const userInfo = useQuery({
+    queryKey: [ClientQueryKeys.user.profile],
+    queryFn: getProfile,
+  });
   const matchRouteId = location.pathname.startsWith("/chat/agent")
     ? "agent"
     : location.pathname.startsWith("/chat/database")
@@ -573,7 +579,10 @@ export default function ChatSidebar() {
           </DropdownMenuContent>
         </DropdownMenu>
         <Avatar>
-          <img src="/default-user.png" alt="avatar" />
+          <AvatarImage src={userInfo.data?.avatar} />
+          <AvatarFallback>
+            <img src="/default-user.png" alt="avatar" />
+          </AvatarFallback>
         </Avatar>
       </SidebarFooter>
       <FeedbackDialog

@@ -1,6 +1,6 @@
 import z from "zod";
 import { request } from "@/lib/request";
-import { CredentialsSchema } from "./schema";
+import { CredentialsSchema, UserProfileSchema } from "./schema";
 
 export const RequestSchema = z.object({
   ticket: z.string(),
@@ -13,6 +13,6 @@ export const RequestThirdPartyLogin = (data: z.infer<typeof RequestSchema>) => {
     method: "POST",
     data,
     dataValidator: RequestSchema,
-    responseValidator: CredentialsSchema
+    responseValidator: CredentialsSchema.and(UserProfileSchema)
   })
 };

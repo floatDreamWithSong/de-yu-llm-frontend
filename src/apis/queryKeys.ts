@@ -1,4 +1,7 @@
 const ClientQueryKeys = {
+  user: {
+    profile: "profile",
+  },
   consversation: {
     conversationHistory: "conversationHistory",
     conversationDetail: "conversationDetail",

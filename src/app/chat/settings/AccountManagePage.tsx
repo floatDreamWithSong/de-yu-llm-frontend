@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { setPassword } from "@/apis/requests/user/set-password";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -39,11 +39,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { passwordSchema } from "@/apis/requests/user/schema";
+import { passwordSchema, UserProfileSchemaPartial } from "@/apis/requests/user/schema";
 import { checkCode } from "@/apis/requests/user/check-code";
 import { mobileSchema } from "@/utils/schemas";
 import { sendVerificationCode } from "@/apis/requests/user/code";
 import { useRef, useState } from "react";
+import { getProfile, updateProfile } from "@/apis/requests/user/profile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { uploadCosFile } from "@/apis/requests/cos";
+import ClientQueryKeys from "@/apis/queryKeys";
 
 export default function AccountManagePage() {
   const router = useRouter();
@@ -72,6 +76,12 @@ export default function AccountManagePage() {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
+          <AccordionTrigger>用户资料</AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 text-balance">
+            <UserInfoForm />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-3">
           <AccordionTrigger>注销账号</AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4 text-balance">
             <Alert variant="destructive">
@@ -307,6 +317,119 @@ const ResetPasswordForm = () => {
               确认更改
             </Button>
           </div>
+        </form>
+      </Form>
+    </>
+  );
+};
+
+const UserInfoForm = () => {
+  const userInfo = useQuery({
+    queryKey: [ClientQueryKeys.user.profile],
+    queryFn: getProfile,
+  });
+  const queryClient = useQueryClient();
+  const form = useForm<z.infer<typeof UserProfileSchemaPartial>>({
+    resolver: zodResolver(UserProfileSchemaPartial),
+    defaultValues: userInfo.data
+  });
+
+  const uploadAvatarMutation = useMutation({
+    mutationFn: uploadCosFile,
+    onSuccess: (data) => {
+      form.setValue("avatar", data.url);
+      toast.success("头像上传成功");
+    },
+    onError: () => {
+      toast.error("头像上传失败");
+    },
+  });
+  const updateProfileMutation = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: () => {
+      toast.success("用户资料更新成功");
+      queryClient.invalidateQueries({ queryKey: [ClientQueryKeys.user.profile] });
+    },
+    onError: () => {
+      toast.error("用户资料更新失败");
+    },
+  });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 获取文件扩展名
+    let suffix = file.name.split(".").pop();
+    if (!suffix) {
+      toast.error("文件格式不支持");
+      return;
+    }
+    suffix = `.${suffix}`;
+    console.log(suffix);
+    uploadAvatarMutation.mutate({
+      prefix: "avatar",
+      suffix: suffix,
+      file: file,
+    });
+  };
+
+  const handleSubmit = (data: z.infer<typeof UserProfileSchemaPartial>) => {
+    updateProfileMutation.mutate(data);
+  };
+
+  return (
+    <>
+      <Form {...form}>
+        <form
+          className="space-y-4"
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>用户名</FormLabel>
+                <FormControl>
+                  <Input placeholder="请输入用户名" className="max-w-[300px]" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="avatar"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>头像</FormLabel>
+                <Avatar className="mb-2">
+                  <AvatarImage src={field.value} />
+                  <AvatarFallback>
+                    {form.getValues("username")?.slice(0, 2) || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <FormControl>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    placeholder="请上传头像"
+                    className="max-w-[300px]"
+                    onChange={handleFileChange}
+                    disabled={uploadAvatarMutation.isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="submit"
+            disabled={updateProfileMutation.isPending || uploadAvatarMutation.isPending}
+          >
+            {updateProfileMutation.isPending ? "提交中..." : "确认更改"}
+          </Button>
         </form>
       </Form>
     </>
