@@ -39,7 +39,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { passwordSchema, UserProfileSchemaPartial } from "@/apis/requests/user/schema";
+import {
+  passwordSchema,
+  UserProfileSchemaPartial,
+} from "@/apis/requests/user/schema";
 import { checkCode } from "@/apis/requests/user/check-code";
 import { mobileSchema } from "@/utils/schemas";
 import { sendVerificationCode } from "@/apis/requests/user/code";
@@ -48,6 +51,7 @@ import { getProfile, updateProfile } from "@/apis/requests/user/profile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { uploadCosFile } from "@/apis/requests/cos";
 import ClientQueryKeys from "@/apis/queryKeys";
+import { Switch } from "@/components/ui/switch";
 
 export default function AccountManagePage() {
   const router = useRouter();
@@ -67,8 +71,14 @@ export default function AccountManagePage() {
       <Accordion
         type="multiple"
         className="w-full mt-8 px-4"
-        defaultValue={["item-1", "item-2"]}
+        defaultValue={["item-0", "item-1", "item-2"]}
       >
+        <AccordionItem value="item-0">
+          <AccordionTrigger>记忆</AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 text-balance">
+            <MemorySettingForm />
+          </AccordionContent>
+        </AccordionItem>
         <AccordionItem value="item-1">
           <AccordionTrigger>更改密码</AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4 text-balance">
@@ -118,6 +128,17 @@ export default function AccountManagePage() {
     </div>
   );
 }
+
+const MemorySettingForm = () => {
+  const [isMemoryEnabled, setIsMemoryEnabled] = useState(false);
+  return (
+    <div className="flex items-center gap-2 justify-between">
+      允许助手在回复时参考并使用您保存的记忆
+      <Switch checked={isMemoryEnabled} onCheckedChange={setIsMemoryEnabled} />
+    </div>
+  );
+};
+
 const formSchema = z
   .object({
     newPassword: passwordSchema,
@@ -331,7 +352,7 @@ const UserInfoForm = () => {
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof UserProfileSchemaPartial>>({
     resolver: zodResolver(UserProfileSchemaPartial),
-    defaultValues: userInfo.data
+    defaultValues: userInfo.data,
   });
 
   const uploadAvatarMutation = useMutation({
@@ -348,7 +369,9 @@ const UserInfoForm = () => {
     mutationFn: updateProfile,
     onSuccess: () => {
       toast.success("用户资料更新成功");
-      queryClient.invalidateQueries({ queryKey: [ClientQueryKeys.user.profile] });
+      queryClient.invalidateQueries({
+        queryKey: [ClientQueryKeys.user.profile],
+      });
     },
     onError: () => {
       toast.error("用户资料更新失败");
@@ -381,10 +404,7 @@ const UserInfoForm = () => {
   return (
     <>
       <Form {...form}>
-        <form
-          className="space-y-4"
-          onSubmit={form.handleSubmit(handleSubmit)}
-        >
+        <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
           <FormField
             control={form.control}
             name="username"
@@ -392,7 +412,11 @@ const UserInfoForm = () => {
               <FormItem>
                 <FormLabel>用户名</FormLabel>
                 <FormControl>
-                  <Input placeholder="请输入用户名" className="max-w-[300px]" {...field} />
+                  <Input
+                    placeholder="请输入用户名"
+                    className="max-w-[300px]"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -426,7 +450,9 @@ const UserInfoForm = () => {
           />
           <Button
             type="submit"
-            disabled={updateProfileMutation.isPending || uploadAvatarMutation.isPending}
+            disabled={
+              updateProfileMutation.isPending || uploadAvatarMutation.isPending
+            }
           >
             {updateProfileMutation.isPending ? "提交中..." : "确认更改"}
           </Button>
