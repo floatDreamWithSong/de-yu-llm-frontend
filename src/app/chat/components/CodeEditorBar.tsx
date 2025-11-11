@@ -2,7 +2,7 @@ import type { SseEditorCode } from "@/apis/requests/conversation/schema";
 import Editor, { type EditorProps } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 
 import { loader } from "@monaco-editor/react";
@@ -75,9 +75,25 @@ const CodeEditorBar = ({
           <TabsTrigger value="preview">预览</TabsTrigger>
           <TabsTrigger value="code">代码</TabsTrigger>
         </TabsList>
-        <Button onClick={onClose} variant="ghost" size="icon">
-          <X className="w-4 h-4" />
-        </Button>
+        <div>
+          <Button
+            variant={"ghost"}
+            size={"icon"}
+            onClick={() => {
+              const blob = new Blob([localCode], { type: "text/html" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "code.html";
+              a.click();
+            }}
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+          <Button onClick={onClose} variant="ghost" size="icon">
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* 预览区 */}
