@@ -22,10 +22,18 @@ import {
   MicIcon,
   Paperclip,
   PencilLine,
+  X,
+  ImagePlus,
 } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type React from "react";
 import { useAsrRecognition } from "@/app/chat/hooks/use-asr-recognition";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function UserPromptTextarea({
   className,
@@ -47,8 +55,9 @@ export default function UserPromptTextarea({
   webSearch?: boolean;
 }) {
   const [value, setValue] = useState("");
+  const [binaryDatas, setBinaryDatas] = useState<Blob[]>([]);
   const spanRef = useRef<HTMLSpanElement>(null);
-  const navigator = useNavigate();
+  const navigate = useNavigate();
   const { isMobile } = useSidebar();
 
   // 语音识别功能
@@ -75,11 +84,25 @@ export default function UserPromptTextarea({
     const newValue = target.innerHTML;
     setValue(newValue);
   }, []);
-  const handlePaste = (e: React.ClipboardEvent<HTMLSpanElement>) => {
+  const handlePaste = async (e: React.ClipboardEvent<HTMLSpanElement>) => {
     if (status !== "ready" || disabled) return;
     e.preventDefault(); // 1. 阻止默认粘贴
-    const text = e.clipboardData.getData("text/plain"); // 2. 只拿纯文本
-    document.execCommand("insertText", false, text); // 3. 当成文本插入
+    const text = await navigator.clipboard.readText();
+    if (text) {
+      console.log(text);
+      document.execCommand("insertText", false, text);
+      return;
+    }
+    const clipboardItems = await navigator.clipboard.read();
+
+    for (const clipboardItem of clipboardItems) {
+      for (const type of clipboardItem.types) {
+        const blob = await clipboardItem.getType(type);
+        // we can now use blob here
+        console.log(blob);
+        setBinaryDatas((prev) => [...prev, blob]);
+      }
+    }
   };
   // 只在初始渲染时设置内容，之后让用户直接编辑
   const isInitializedRef = useRef(false);
@@ -157,6 +180,33 @@ export default function UserPromptTextarea({
           spanRef.current?.focus();
         }}
       >
+        {binaryDatas.length > 0 && (
+          <div className="space-x-2 overflow-x-scroll w-full h-fit flex flex-nowrap">
+            {binaryDatas.map(
+              (blob, index) =>
+                blob.type.startsWith("image/") && (
+                  <div
+                    className="relative min-w-18 h-18 border-2 rounded-md"
+                    style={{
+                      backgroundImage: `url(${URL.createObjectURL(blob)})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  >
+                    <X
+                      className="size-4 cursor-pointer absolute top-0 right-0 bg-background rounded-md stroke-text"
+                      onClick={() => {
+                        setBinaryDatas((prev) =>
+                          prev.filter((_, i) => i !== index),
+                        );
+                      }}
+                    />
+                  </div>
+                ),
+            )}
+          </div>
+        )}
         <div className="inline mx-2 mt-0 float-left">
           {showBot ? (
             !botInfo.isFetching &&
@@ -195,7 +245,7 @@ export default function UserPromptTextarea({
           {thinkAble ? (
             <PromptInputButton
               onClick={() => {
-                navigator({
+                navigate({
                   to: ".",
                   search: {
                     botId,
@@ -225,7 +275,7 @@ export default function UserPromptTextarea({
           )}
           <PromptInputButton
             onClick={() => {
-              navigator({
+              navigate({
                 to: ".",
                 search: {
                   botId,
@@ -243,7 +293,7 @@ export default function UserPromptTextarea({
           {isBuiltInAgent(botId) && (
             <PromptInputButton
               onClick={() =>
-                navigator({
+                navigate({
                   to: ".",
                   search: {
                     think,
@@ -259,9 +309,23 @@ export default function UserPromptTextarea({
               {!isMobile && <span>代码生成</span>}
             </PromptInputButton>
           )}
-          <PromptInputButton variant={"outline"} className="rounded-full">
-            <Paperclip size={16} />
-          </PromptInputButton>
+          <DropdownMenu dir="ltr">
+            <DropdownMenuTrigger asChild>
+              <PromptInputButton variant={"outline"} className="rounded-full">
+                <Paperclip size={16} />
+              </PromptInputButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>
+                <ImagePlus size={16} />
+                上传图片
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <MicIcon size={16} />
+                上传音频
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="ml-1">
           <Tooltip>
