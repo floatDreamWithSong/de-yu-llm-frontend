@@ -34,6 +34,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useTitleAni } from "@/app/chat/hooks/use-title-ani";
 import { cn } from "@/lib/utils";
+import { ResponseSchema as AgentListResponseSchema } from "@/apis/requests/agent/list";
 /**
  * 语文
 数学
@@ -63,31 +64,40 @@ const agentTypeList = [
   "教师支持",
 ];
 const AgentPage = () => {
-  // const agentListQuery = useInfiniteQuery({
-  //   initialPageParam: void 0 as string | undefined,
-  //   queryKey: [ClientQueryKeys.agent],
-  //   queryFn: ({ pageParam: cursor }) => {
-  //     return getAgentList({
-  //       page: {
-  //         size: 50,
-  //         cursor,
-  //       },
-  //     });
-  //   },
-  //   staleTime: 60 * 1000,
-  //   getNextPageParam: (lastPage) =>
-  //     lastPage.hasMore ? lastPage.nextCursor : undefined,
-  // });
   const agentListQuery = useInfiniteQuery({
     initialPageParam: void 0 as string | undefined,
     queryKey: [ClientQueryKeys.agent],
-    queryFn: ({ pageParam: cursor }) => {
-      return getAgentList({
+    queryFn: async({ pageParam: cursor }) => {
+      const cachedData =  AgentListResponseSchema.safeParse(JSON.parse(localStorage.getItem(ClientQueryKeys.agent.agentList) || "{}"));
+      if(cachedData.success){
+        const newData = await getAgentList({
+          page: {
+            size: 1,
+          },
+        }).then(res => res.intelligences[0]);
+        if(newData.publishTime===cachedData.data.intelligences[0].publishTime){
+          return cachedData.data;
+        }
+      }
+      const data = await getAgentList({
         page: {
-          size: 160,
+          size: 40,
           cursor,
         },
       });
+      while(data.hasMore){
+        const nextData = await getAgentList({
+          page: {
+            size: 40,
+            cursor: data.nextCursor,
+          },
+        });
+        data.intelligences.push(...nextData.intelligences);
+        data.hasMore = nextData.hasMore;
+        data.nextCursor = nextData.nextCursor;
+      }
+      localStorage.setItem(ClientQueryKeys.agent.agentList, JSON.stringify(data));
+      return data;
     },
     staleTime: Number.POSITIVE_INFINITY,
     getNextPageParam: (lastPage) =>
@@ -306,17 +316,6 @@ const AgentPage = () => {
           </PaginationContent>
         )}
       </Pagination>
-
-      {/* <div
-          ref={bottomRef}
-          className="text-center text-muted-foreground text-sm my-6 min-h-1"
-        >
-          {agentListQuery.hasNextPage && agentListQuery.isFetchingNextPage && (
-            <div>加载中...</div>
-          )}
-          {!agentListQuery.hasNextPage &&
-            !agentListQuery.isFetchingNextPage && <div>没有更多了~</div>}
-        </div> */}
     </div>
   );
 };

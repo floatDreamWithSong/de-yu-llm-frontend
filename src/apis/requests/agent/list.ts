@@ -9,16 +9,18 @@ export const RequestSchema = z.object({
   }),
 });
 
+export const ResponseSchema = z.object({
+  hasMore: z.boolean(),
+  intelligences: z.array(agentListItemSchema),
+  nextCursor: z.string(),
+});
+
 export const getAgentList = (data: z.infer<typeof RequestSchema>) => {
   return request({
     url: "/intelligence/list",
     method: "POST",
     data,
     dataValidator: RequestSchema,
-    responseValidator: z.object({
-      hasMore: z.boolean(),
-      intelligences: z.array(agentListItemSchema),
-      nextCursor: z.string(),
-    }),
+    responseValidator: ResponseSchema,
   });
 };
