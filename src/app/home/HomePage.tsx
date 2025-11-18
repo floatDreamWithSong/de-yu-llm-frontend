@@ -7,7 +7,7 @@ import mid2 from "@/assets/imgs/home/mid-2.png";
 import mid3 from "@/assets/imgs/home/mid-3.png";
 import mid4 from "@/assets/imgs/home/mid-4.png";
 import mid5 from "@/assets/imgs/home/mid-5.png";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -185,18 +185,18 @@ const HomePage = () => {
               id="btn-group"
               className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center mt-8 md:mt-16"
             >
-              <Button
+              <LinkButton
                 variant={"default"}
+                to="/chat" preload="render"
                 className="rounded-full text-lg px-16 py-7"
               >
-                <Link to="/chat" preload="render">
                   开始对话
-                </Link>
-              </Button>
+              </LinkButton>
               <Button
                 variant={"outline"}
                 className="rounded-full text-lg px-16 py-7"
                 size={"lg"}
+                asChild
               >
                 <a
                   href={EXTERNAL_LINKS.INTRODUCTION}
