@@ -4,17 +4,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
-    "dev:test": "vite --port 3000 --mode test",
     "build": "tsc && vite build --mode production",
-    "build:dev": "tsc && vite build --mode development",
-    "build:test": "tsc && vite build --mode test",
     "fast": "vite build --mode production",
     "fast:test": "vite build --mode test",
+    "fast:ecnu": "vite build --mode ecnu",
+    "fast:beta": "vite build --mode beta",
     "preview": "vite preview",
     "test": "vitest run",
     "format": "biome format --write",
     "lint": "eslint .",
     "fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
     "mock": "node --watch .mock/compeletion.cjs"
   },
   "dependencies": {

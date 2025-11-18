@@ -27,6 +27,7 @@ import type {
 import { useSidebar } from "@/components/ui/sidebar";
 import { genConversationTitle } from "@/apis/requests/conversation/gen-title";
 import { formatBotId } from "./use-bot";
+import { env } from "@/env";
 
 export interface ChatMessage {
   id: string;
@@ -442,6 +443,9 @@ export function useStreamCompletion(
         requestData.model = "InnoSpark-R";
       if (requestData.botId) {
         requestData.botId = formatBotId(requestData.botId).normal;
+      }
+      if(env.VITE_SAFE_MODE && requestData.model==='InnoSpark'){
+        requestData.model = "Safe-InnoSpark"
       }
       console.log(requestData);
       try {

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { env } from "@/env";
 
 // 基础配置
-export let BASE_URL = env.VITE_API_BASE_URL;
+export let BASE_URL = `https://${env.VITE_API_BASE_URL}`;
 declare global {
   interface Window {
     setBase(base: string): void;

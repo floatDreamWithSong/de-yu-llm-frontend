@@ -174,7 +174,7 @@ export function useAsrRecognition({
       recorderRef.current = recorder;
 
       // 建立 WebSocket 连接
-      const ws = new WebSocket(env.VITE_ASR_WS_URL);
+      const ws = new WebSocket(`wss://${env.VITE_API_BASE_URL}/asr`);
       wsRef.current = ws;
 
       ws.onopen = () => {

@@ -34,6 +34,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { env } from "@/env";
 
 export default function UserPromptTextarea({
   className,
@@ -172,7 +173,7 @@ export default function UserPromptTextarea({
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
       <div
-        className="h-full overflow-y-auto p-2"
+        className="h-full overflow-y-auto p-2 cursor-text"
         style={{
           scrollbarColor: "transparent transparent",
         }}
@@ -241,6 +242,7 @@ export default function UserPromptTextarea({
         {!value && <span className="text-gray-500 align-bottom">继续提问</span>}
       </div>
       <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
+      {!env.VITE_SAFE_MODE ? (
         <div>
           {thinkAble ? (
             <PromptInputButton
@@ -327,6 +329,7 @@ export default function UserPromptTextarea({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+): <div />}
         <div className="ml-1">
           <Tooltip>
             <TooltipTrigger asChild>

@@ -55,6 +55,7 @@ export const RequestSchema = z.object({
     z.literal("InnoSpark-R"),
     z.literal("deyu-default"),
     z.literal("InnoSpark"),
+    z.literal("Safe-InnoSpark"),
   ]),
   replyId: z.union([z.null(), z.string()]).optional(),
 });

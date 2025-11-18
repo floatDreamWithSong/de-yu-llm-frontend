@@ -9,10 +9,10 @@ export const env = createEnv({
   clientPrefix: "VITE_",
 
   client: {
-    VITE_API_BASE_URL: z.string().url(),
+    VITE_API_BASE_URL: z.string().transform(i=>i.endsWith('/')?i.slice(0, -1):i),
+    VITE_SAFE_MODE: z.string().transform(i=>i==='true'?true:false),
     VITE_BACKEND_ENV_HEAD: z.string(),
     VITE_BACKEND_ENV_VALUE: z.string().optional(),
-    VITE_ASR_WS_URL: z.string().url(),
   },
 
   /**
@@ -36,3 +36,5 @@ export const env = createEnv({
    */
   // emptyStringAsUndefined: ,
 });
+
+console.log(env);
