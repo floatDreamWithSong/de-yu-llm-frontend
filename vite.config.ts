@@ -86,7 +86,7 @@ const vendorMap = new Map<string, string>([
   ["streamdown", "streamdown"],
 ]);
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({mode})=>({
   plugins: [
     codeInspectorPlugin({
       editor: "cursor",
@@ -111,8 +111,11 @@ export default defineConfig({
       "@imgs": resolve(__dirname, "./src/assets/imgs"),
     },
   },
+  preview: {
+    open: true,
+  },
   build: {
-    outDir: "dist",
+    outDir: `dist/${mode}`,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -136,4 +139,4 @@ export default defineConfig({
       include: [/node_modules/],
     },
   },
-});
+}));
