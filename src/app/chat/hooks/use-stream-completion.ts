@@ -639,19 +639,19 @@ export function useStreamCompletion(
             }
           }
         }
-        const {
-          initMessage: currentInitMessage,
-          hasProcessed: currentHasProcessed,
-        } = useInitMessageStore.getState();
-        if (!currentInitMessage && currentHasProcessed) {
-          await genConversationTitle({
-            conversationId,
-            messages: requestData.messages,
-          });
-          queryClient.invalidateQueries({
-            queryKey: [ClientQueryKeys.consversation.conversationHistory],
-          });
-        }
+        setMessages(mes=>{
+          if(mes.length<3){
+            genConversationTitle({
+              conversationId,
+              messages: requestData.messages,
+            }).then(()=>{
+              queryClient.invalidateQueries({
+                queryKey: [ClientQueryKeys.consversation.conversationHistory],
+              });
+            })
+          }
+          return mes
+        })
         modifyMessage(aiMessageId, { isStreaming: false }, (msg) => {
           if (options?.completionsOption?.isRegen) {
             setLastAssistantMessageBranch((pre) => {
