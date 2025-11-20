@@ -65,6 +65,7 @@ import { tokenStore } from "@/lib/request";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { getProfile } from "@/apis/requests/user/profile";
+import { env } from "@/env";
 
 export default function ChatSidebar() {
   const {
@@ -371,18 +372,20 @@ export default function ChatSidebar() {
             {!iconMode && <span className={"ml-2"}>开始对话</span>}
           </LinkButton>
 
-          <LinkButton
-            to="/chat/agent"
-            className={cn([
-              "rounded-full text-lg overflow-clip gap-0",
-              matchRouteId !== "agent" ? "bg-gray-100 text-[#545469]" : "",
-            ])}
-            size={iconMode ? "icon" : "lg"}
-            variant={"secondary"}
-          >
-            <BotIcon className="stroke-2 size-5" />
-            {!iconMode && <span className={"ml-2"}>智能助手</span>}
-          </LinkButton>
+          {!env.VITE_SAFE_MODE && (
+            <LinkButton
+              to="/chat/agent"
+              className={cn([
+                "rounded-full text-lg overflow-clip gap-0",
+                matchRouteId !== "agent" ? "bg-gray-100 text-[#545469]" : "",
+              ])}
+              size={iconMode ? "icon" : "lg"}
+              variant={"secondary"}
+            >
+              <BotIcon className="stroke-2 size-5" />
+              {!iconMode && <span className={"ml-2"}>智能助手</span>}
+            </LinkButton>
+          )}
 
           {/* <Button
             className={cn([
