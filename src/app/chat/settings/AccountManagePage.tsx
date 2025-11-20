@@ -130,11 +130,19 @@ export default function AccountManagePage() {
 }
 
 const MemorySettingForm = () => {
-  const [isMemoryEnabled, setIsMemoryEnabled] = useState(false);
+  const [isMemoryEnabled, setIsMemoryEnabled] = useState(
+    (localStorage.getItem("isMemoryEnabled") ?? "true") === "true",
+  );
   return (
     <div className="flex items-center gap-2 justify-between">
       允许助手在回复时参考并使用您保存的记忆
-      <Switch checked={isMemoryEnabled} onCheckedChange={setIsMemoryEnabled} />
+      <Switch
+        checked={isMemoryEnabled}
+        onCheckedChange={(checked) => {
+          setIsMemoryEnabled(checked);
+          localStorage.setItem("isMemoryEnabled", checked ? "true" : "false");
+        }}
+      />
     </div>
   );
 };
