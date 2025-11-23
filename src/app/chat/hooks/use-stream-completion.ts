@@ -48,6 +48,7 @@ export interface ChatMessage {
   botState?: SseModel;
   suggestions?: string[];
   isSensitive: boolean;
+  imageAttaches: string[];
 }
 export type FeedbackProps = {
   messageId: string;
@@ -210,6 +211,7 @@ export function useStreamCompletion(
           code: message.ext.code?.[0].code,
           // botState: parseBotState(message.ext.botState),
           isSensitive: message.ext.sensitive,
+          imageAttaches: message.imageAttaches,
         }))
         .reverse();
 
@@ -235,6 +237,7 @@ export function useStreamCompletion(
               code: message.ext.code?.[0].code,
               // botState: parseBotState(message.ext.botState),
               isSensitive: message.ext.sensitive,
+              imageAttaches: message.imageAttaches,
             }))
             .reverse() ?? [],
       };
@@ -289,11 +292,13 @@ export function useStreamCompletion(
     ({
       role,
       content = "",
+      attaches = [],
       isStreaming = true,
-      id = Math.random().toString(36).substring(2, 9),
+      id = crypto.randomUUID(),
     }: {
       role: "user" | "assistant";
       content?: string;
+      attaches?: string[];
       isStreaming?: boolean;
       id?: string;
     }) => {
@@ -304,6 +309,7 @@ export function useStreamCompletion(
         timestamp: -1,
         isStreaming,
         isSensitive: false,
+        imageAttaches: attaches,
       };
       setMessages((prev) => [...prev, newMessage]);
       if (role === "user") {
@@ -399,7 +405,7 @@ export function useStreamCompletion(
 
   const sendMessage = useCallback(
     async (
-      content: string,
+      {content, attachesUrl}: {content: string, attachesUrl: string[]},
       options?: DeepPartial<Omit<CompletionRequest, "messages">>,
       onSuccess?: () => void
     ) => {
@@ -420,6 +426,7 @@ export function useStreamCompletion(
       status.current = "submitted";
       let aiMessageId = "";
       setIsOpenCite("");
+      const withImage = attachesUrl.length > 0;
       const requestData: CompletionRequest = {
         model: completionConfig.model,
         botId: completionConfig.botId,
@@ -432,15 +439,22 @@ export function useStreamCompletion(
         messages: [
           {
             content,
-            contentType: 0,
-            attaches: [],
+            contentType: withImage ? 1 : 0,
+            attaches: attachesUrl,
             references: [],
             role: "user",
           },
         ],
       };
+      if(withImage) {
+        requestData.model = "InnoSpark-VL";
+      }
       if (requestData.completionsOption.useDeepThink)
-        requestData.model = "InnoSpark-R";
+        if(withImage) {
+          requestData.model = "InnoSpark-R-VL";
+        } else {
+          requestData.model = "InnoSpark-R";
+        }
       if (requestData.botId) {
         requestData.botId = formatBotId(requestData.botId).normal;
       }
@@ -486,7 +500,7 @@ export function useStreamCompletion(
         if (!reader) {
           throw new Error("无法读取响应流");
         }
-        let tempUserMessageId = addMessage({ content, role: "user" });
+        let tempUserMessageId = addMessage({ content, role: "user", attaches: attachesUrl });
 
         const decoder = new TextDecoder();
         let buffer = "";

@@ -24,8 +24,9 @@ import {
   PencilLine,
   X,
   ImagePlus,
+  Loader2,
 } from "lucide-react";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, memo } from "react";
 import type React from "react";
 import { useAsrRecognition } from "@/app/chat/hooks/use-asr-recognition";
 import {
@@ -35,6 +36,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { env } from "@/env";
+import { uploadCosFile } from "@/apis/requests/cos";
+import { toast } from "sonner";
+import type { Attach } from "../types/attach";
 
 export default function UserPromptTextarea({
   className,
@@ -46,7 +50,7 @@ export default function UserPromptTextarea({
   think,
   webSearch,
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
-  onSubmit: (value: string, onSuccess?: () => void) => void;
+  onSubmit: (args: {value: string, onSuccess?: () => void, attachesUrl: string[]}) => void;
   onAbort: () => void;
   initialBotId?: string;
   disabled?: boolean;
@@ -56,7 +60,7 @@ export default function UserPromptTextarea({
   webSearch?: boolean;
 }) {
   const [value, setValue] = useState("");
-  const [binaryDatas, setBinaryDatas] = useState<Blob[]>([]);
+  const [attaches, setAttaches] = useState<Attach[]>([]);
   const spanRef = useRef<HTMLSpanElement>(null);
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
@@ -85,6 +89,36 @@ export default function UserPromptTextarea({
     const newValue = target.innerHTML;
     setValue(newValue);
   }, []);
+  const addAttach = (attach: Attach)=>{
+    setAttaches((prev) => {
+      if(prev.length === 10){
+        toast.info("最多上传10个附件");
+        return prev;
+      }
+      uploadCosFile({
+        prefix: "chat",
+        suffix: attach.localData.type.split("/")[1],
+        file: attach.localData,
+        onProgress: (progress) => {
+          setAttaches((prev) =>
+            prev.map((a) =>
+              a.localId === attach.localId ? { ...a, progress } : a,
+            ),
+          );
+        },
+      }).then((res) => {
+        setAttaches((prev) =>
+          prev.map((a) =>
+            a.localId === attach.localId
+              ? { ...a, uploadUrl: res.url, isUploading: false }
+              : a,
+          ),
+        );
+      });
+      return [...prev, attach]
+    });
+
+  }
   const handlePaste = async (e: React.ClipboardEvent<HTMLSpanElement>) => {
     if (status !== "ready" || disabled) return;
     e.preventDefault(); // 1. 阻止默认粘贴
@@ -100,8 +134,14 @@ export default function UserPromptTextarea({
       for (const type of clipboardItem.types) {
         const blob = await clipboardItem.getType(type);
         // we can now use blob here
-        console.log(blob);
-        setBinaryDatas((prev) => [...prev, blob]);
+        const attach: Attach = {
+          localId: crypto.randomUUID(),
+          localData: blob,
+          uploadUrl: "",
+          progress: 0,
+          isUploading: true,
+        };
+        addAttach(attach);
       }
     }
   };
@@ -121,12 +161,12 @@ export default function UserPromptTextarea({
         .replace(/<br\s*\/?>/gi, "\n")
         .replace(/&nbsp;/gi, " ")
         .trim();
-      onSubmit?.(prompt, () => {
+      onSubmit?.({value: prompt, attachesUrl: attaches.map((a) => a.uploadUrl), onSuccess: () => {
         setValue("");
         if (spanRef.current) {
           spanRef.current.innerHTML = "";
         }
-      });
+      }});
     } else {
       onAbort();
     }
@@ -181,31 +221,19 @@ export default function UserPromptTextarea({
           spanRef.current?.focus();
         }}
       >
-        {binaryDatas.length > 0 && (
+        {attaches.length > 0 && (
           <div className="space-x-2 overflow-x-scroll w-full h-fit flex flex-nowrap">
-            {binaryDatas.map(
-              (blob, index) =>
-                blob.type.startsWith("image/") && (
-                  <div
-                    className="relative min-w-18 h-18 border-2 rounded-md"
-                    style={{
-                      backgroundImage: `url(${URL.createObjectURL(blob)})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                  >
-                    <X
-                      className="size-4 cursor-pointer absolute top-0 right-0 bg-background rounded-md stroke-text"
-                      onClick={() => {
-                        setBinaryDatas((prev) =>
-                          prev.filter((_, i) => i !== index),
-                        );
-                      }}
-                    />
-                  </div>
-                ),
-            )}
+            {attaches.map((attach) => (
+              <AttachItem
+                key={attach.localId}
+                attach={attach}
+                onRemove={() => {
+                  setAttaches((prev) =>
+                    prev.filter((i) => i.localId !== attach.localId),
+                  );
+                }}
+              />
+            ))}
           </div>
         )}
         <div className="inline mx-2 mt-0 float-left">
@@ -242,94 +270,117 @@ export default function UserPromptTextarea({
         {!value && <span className="text-gray-500 align-bottom">继续提问</span>}
       </div>
       <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
-      {!env.VITE_SAFE_MODE ? (
-        <div>
-          {thinkAble ? (
+        {!env.VITE_SAFE_MODE ? (
+          <div>
+            {thinkAble ? (
+              <PromptInputButton
+                onClick={() => {
+                  navigate({
+                    to: ".",
+                    search: {
+                      botId,
+                      webSearch,
+                      think: think ? void 0 : true,
+                    },
+                  });
+                }}
+                variant={think ? "default" : "outline"}
+                className="rounded-full"
+              >
+                <Atom size={16} />
+                {!isMobile && <span>深度思考</span>}
+              </PromptInputButton>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <PromptInputButton
+                    variant={"outline"}
+                    className="rounded-full"
+                  >
+                    <Atom size={16} />
+                    {!isMobile && <span>深度思考</span>}
+                  </PromptInputButton>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>该智能体模型不可深度思考</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
             <PromptInputButton
               onClick={() => {
                 navigate({
                   to: ".",
                   search: {
                     botId,
-                    webSearch,
-                    think: think ? void 0 : true,
+                    think,
+                    webSearch: webSearch ? void 0 : true,
                   },
                 });
               }}
-              variant={think ? "default" : "outline"}
+              variant={webSearch ? "default" : "outline"}
               className="rounded-full"
             >
-              <Atom size={16} />
-              {!isMobile && <span>深度思考</span>}
+              <Earth size={16} />
+              {!isMobile && <span>联网搜索</span>}
             </PromptInputButton>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <PromptInputButton variant={"outline"} className="rounded-full">
-                  <Atom size={16} />
-                  {!isMobile && <span>深度思考</span>}
-                </PromptInputButton>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>该智能体模型不可深度思考</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          <PromptInputButton
-            onClick={() => {
-              navigate({
-                to: ".",
-                search: {
-                  botId,
-                  think,
-                  webSearch: webSearch ? void 0 : true,
-                },
-              });
-            }}
-            variant={webSearch ? "default" : "outline"}
-            className="rounded-full"
-          >
-            <Earth size={16} />
-            {!isMobile && <span>联网搜索</span>}
-          </PromptInputButton>
-          {isBuiltInAgent(botId) && (
-            <PromptInputButton
-              onClick={() =>
-                navigate({
-                  to: ".",
-                  search: {
-                    think,
-                    webSearch,
-                    botId: botId === "code-gen" ? void 0 : "code-gen",
-                  },
-                })
-              }
-              variant={botId === "code-gen" ? "default" : "outline"}
-              className="rounded-full"
-            >
-              <CodeXml size={16} />
-              {!isMobile && <span>代码生成</span>}
-            </PromptInputButton>
-          )}
-          <DropdownMenu dir="ltr">
-            <DropdownMenuTrigger asChild>
-              <PromptInputButton variant={"outline"} className="rounded-full">
-                <Paperclip size={16} />
+            {isBuiltInAgent(botId) && (
+              <PromptInputButton
+                onClick={() =>
+                  navigate({
+                    to: ".",
+                    search: {
+                      think,
+                      webSearch,
+                      botId: botId === "code-gen" ? void 0 : "code-gen",
+                    },
+                  })
+                }
+                variant={botId === "code-gen" ? "default" : "outline"}
+                className="rounded-full"
+              >
+                <CodeXml size={16} />
+                {!isMobile && <span>代码生成</span>}
               </PromptInputButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>
-                <ImagePlus size={16} />
-                上传图片
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <MicIcon size={16} />
-                上传音频
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-): <div />}
+            )}
+            <DropdownMenu dir="ltr">
+              <DropdownMenuTrigger asChild>
+                <PromptInputButton variant={"outline"} className="rounded-full">
+                  <Paperclip size={16} />
+                </PromptInputButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/*";
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      const attach: Attach = {
+                        localId: crypto.randomUUID(),
+                        localData: file,
+                        uploadUrl: "",
+                        progress: 0,
+                        isUploading: true,
+                      };
+                      addAttach(attach);
+                    }
+                  };
+                  input.click();
+                }}>
+                  <ImagePlus size={16} />
+                  上传图片
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <MicIcon size={16} />
+                  上传音频
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <div />
+        )}
         <div className="ml-1">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -358,10 +409,40 @@ export default function UserPromptTextarea({
           <PromptInputSubmit
             className="rounded-full"
             status={status}
-            disabled={disabled || (status === "ready" && !value.trim())}
+            disabled={disabled || (status === "ready" && !value.trim() || attaches.some((a) => a.isUploading))}
           />
         </div>
       </div>
     </PromptInput>
   );
 }
+
+const AttachItem = memo(
+  ({ attach, onRemove }: { attach: Attach; onRemove: () => void }) => {
+    return (
+      attach.localData.type.startsWith("image/") && (
+        <div
+          className="relative min-w-18 h-18 border-2 rounded-md overflow-hidden"
+          style={{
+            backgroundImage: `url(${URL.createObjectURL(attach.localData)})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          {attach.isUploading ? (
+            <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex flex-col items-center justify-center">
+              <Loader2 className="size-4 animate-spin stroke-white" />
+              <div className="text-white">{attach.progress}%</div>
+            </div>
+          ) : (
+            <X
+              className="size-4 cursor-pointer absolute top-0 right-0 bg-background rounded-md stroke-text"
+              onClick={onRemove}
+            />
+          )}
+        </div>
+      )
+    );
+  },
+);

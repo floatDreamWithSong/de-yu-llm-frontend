@@ -63,8 +63,13 @@ export default function ConversationPage() {
   const { conversationId } = useParams({
     from: "/_authenticated/chat/$conversationId",
   });
-  const { initMessage, hasProcessed, markAsProcessed, clearInitMessage } =
-    useInitMessageStore();
+  const {
+    initMessage,
+    hasProcessed,
+    markAsProcessed,
+    clearInitMessage,
+    attachesUrl,
+  } = useInitMessageStore();
   const [isReplace, setIsReplace] = useState(false);
   const inlinePromptTextareaRef = useRef<MessageEditorRef>(null);
   const previousMessageIdRef = useRef<string | null>(null);
@@ -114,11 +119,12 @@ export default function ConversationPage() {
       markAsProcessed();
       const message = initMessage;
       clearInitMessage();
-      sendMessage(message);
+      sendMessage({ content: message, attachesUrl });
       // 发送消息后清除初始消息
     }
   }, [
     initMessage,
+    attachesUrl,
     hasProcessed,
     markAsProcessed,
     clearInitMessage,
@@ -136,15 +142,18 @@ export default function ConversationPage() {
         lastAssistantMessageBranch.length === 0,
       );
       setTimeout(() => {
-        sendMessage(message, {
-          botId: search.botId,
-          completionsOption: {
-            useDeepThink: search.think,
-            webSearch: search.webSearch,
-            isRegen: true,
+        sendMessage(
+          { content: message, attachesUrl },
+          {
+            botId: search.botId,
+            completionsOption: {
+              useDeepThink: search.think,
+              webSearch: search.webSearch,
+              isRegen: true,
+            },
+            replyId: lastUserMessage.id,
           },
-          replyId: lastUserMessage.id,
-        });
+        );
       }, 0);
     }
   };
@@ -164,7 +173,11 @@ export default function ConversationPage() {
     setIsReplace(false);
   };
 
-  const handleSubmit = (message: string, onSuccess?: () => void) => {
+  const handleSubmit = ({
+    value: message,
+    onSuccess,
+    attachesUrl,
+  }: { value: string; onSuccess?: () => void; attachesUrl: string[] }) => {
     if (message.trim() && status === "ready") {
       if (isReplace) {
         inlinePromptTextareaRef.current?.blur();
@@ -175,7 +188,7 @@ export default function ConversationPage() {
       }
       setTimeout(() => {
         sendMessage(
-          message,
+          { content: message, attachesUrl },
           {
             botId: search.botId,
             completionsOption: {
@@ -297,6 +310,22 @@ export default function ConversationPage() {
                   {message.role === "user" ? (
                     message.id !== lastUserMessageId.current || !isReplace ? (
                       <div className="flex flex-col items-end">
+                        {message.imageAttaches.length > 0 && (
+                          <div className="flex items-end flex-wrap mb-2">
+                            {message.imageAttaches.map((image) => (
+                              <div
+                                key={image}
+                                className="relative min-w-18 h-18 border-2 rounded-md overflow-hidden"
+                                style={{
+                                  backgroundImage: `url(${image})`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  backgroundRepeat: "no-repeat",
+                                }}
+                              ></div>
+                            ))}
+                          </div>
+                        )}
                         <MessageContent>
                           <p>{message.content}</p>
                         </MessageContent>
@@ -309,21 +338,25 @@ export default function ConversationPage() {
                               >
                                 <Copy className="size-4" />
                               </Action>
-                              <Action
-                                label="Regenerate"
-                                onClick={() =>
-                                  handleEditUserMessage(message.content)
-                                }
-                              >
-                                <PencilLine className="size-4" />
-                              </Action>
+                              {!message.imageAttaches.length && (
+                                <Action
+                                  label="Regenerate"
+                                  onClick={() =>
+                                    handleEditUserMessage(message.content)
+                                  }
+                                >
+                                  <PencilLine className="size-4" />
+                                </Action>
+                              )}
                             </Actions>
                           )}
                       </div>
                     ) : (
                       <MessageEditor
                         ref={inlinePromptTextareaRef}
-                        onSubmit={handleSubmit}
+                        onSubmit={(value, onSuccess) =>
+                          handleSubmit({ value, onSuccess, attachesUrl })
+                        }
                         onExit={cancelEditUserMessage}
                         disabled={status !== "ready"}
                       />
@@ -355,12 +388,12 @@ export default function ConversationPage() {
                                   : lastAssistantMessageBranch
                                 : [message]
                               : [message]
-                            ).map((_message, _, messageArray) => {
+                            ).map((_message, _index, messageArray) => {
                               const forRegenList = messageArray.length > 1;
                               const regenerateable =
-                                _message.id ===
+                                (_message.id ===
                                   lastAssistantMessageId.current ||
-                                messageArray.length > 1;
+                                messageArray.length > 1) && (_index !== 0 && messageArray[_index - 1].imageAttaches.length === 0);
                               return (
                                 <div key={_message.id}>
                                   <MessageCiteButton
@@ -516,7 +549,11 @@ export default function ConversationPage() {
                                             className="agent-chat-suggestion"
                                             key={suggest}
                                             onClick={() =>
-                                              handleSubmit(suggest)
+                                              handleSubmit({
+                                                value: suggest,
+                                                onSuccess: () => {},
+                                                attachesUrl,
+                                              })
                                             }
                                             suggestion={suggest}
                                             style={{

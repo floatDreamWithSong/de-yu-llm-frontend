@@ -26,6 +26,16 @@ export const MessageListSchema = z.object({
   ext: ExtSchema,
   feedback: z.number(),
   index: z.number(),
+  userInputMultiContent: z.array(z.union([z.object({
+    type: z.literal("text"),
+    text: z.string(),
+  }), z.object({
+    type: z.literal("image_url"),
+    image: z.object({
+      url: z.string(),
+    })
+  })])).nullable(),
+  imageAttaches: z.array(z.string()).default([]),
   messageId: z.string(),
   messageType: z.number(),
   replyId: z.union([z.null(), z.string()]),
@@ -34,6 +44,20 @@ export const MessageListSchema = z.object({
   userType: z.number().transform((value) => {
     return value === 2 ? "user" : "assistant";
   }),
+}).transform(i=>{
+  if(i.userInputMultiContent?.length){
+    if(!i.content){
+      const textPart = i.userInputMultiContent.find(i=>i.type==='text');
+      if(textPart){
+        i.content = textPart.text;
+      }
+    }
+    const imagePart = i.userInputMultiContent.filter(i=>i.type==='image_url');
+    if(imagePart){
+      i.imageAttaches = imagePart.map(i=>i.image.url)
+    }
+  }
+  return i;
 });
 export type MessageItem = z.infer<typeof MessageListSchema>;
 

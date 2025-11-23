@@ -31,7 +31,7 @@ export default function ChatPage() {
 
   useTitleAni({ title: ".model-title", subtitle: ".model-subtitle" });
 
-  const handleSubmit = async (message: string, onSuccess?: () => void) => {
+  const handleSubmit = async ({value: message, onSuccess, attachesUrl}: {value: string, onSuccess?: () => void, attachesUrl: string[]}) => {
     if (message.trim() && status === "ready") {
       setStatus("submitted");
       try {
@@ -43,7 +43,7 @@ export default function ChatPage() {
         console.log("对话创建成功:", conversation);
 
         // 将初始消息存储到状态库中
-        setInitMessage(message);
+        setInitMessage(message, attachesUrl);
 
         // 跳转到对话页面
         onSuccess?.();

@@ -1,15 +1,26 @@
 import { request } from "@/lib/request";
+import axios from "axios";
 import z from "zod";
+
+type progressCallback = (progress: number) => void;
 
 interface UploadRequest {
   signedUrl: string;
   file: Blob;
+  onProgress?: progressCallback;
 }
 
 const upload = (request: UploadRequest) =>
-  fetch(request.signedUrl, {
+  axios.put(request.signedUrl, request.file, {
     method: "PUT",
-    body: request.file,
+    onUploadProgress: (progress) => {
+      if (!progress.total){
+        request.onProgress?.(0);
+        return;
+      }
+      const percentCompleted = Math.round((progress.loaded * 100) / progress.total);
+      request.onProgress?.(percentCompleted);
+    },
     headers: {
       "Content-Type": request.file.type ?? "application/octet-stream",
     },
@@ -35,12 +46,12 @@ const getSignedUrl = (data: z.infer<typeof requestSchema>) =>
   });
 
 export const uploadCosFile = async (
-  request: z.infer<typeof requestSchema> & { file: Blob }
+  request: z.infer<typeof requestSchema> & { file: Blob } & { onProgress?: progressCallback }
 ) => {
   const { presignedURL: signedUrl, accessURL: AccessURL } = await getSignedUrl(
     request
   );
-  await upload({ signedUrl, file: request.file });
+  await upload({ signedUrl, file: request.file, onProgress: request.onProgress });
   return {
     url: AccessURL,
   };
