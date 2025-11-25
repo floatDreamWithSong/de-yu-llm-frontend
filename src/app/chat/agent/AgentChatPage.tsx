@@ -46,28 +46,25 @@ export default function AgentChatPage() {
     }
   }, []);
 
-  const handleSubmit = async (message: string, onSuccess?: () => void) => {
+  const handleSubmit = async ({value: message, onSuccess, attachesUrl}: {value: string, onSuccess?: () => void, attachesUrl: string[]}) => {
     if (message.trim() && status === "ready") {
       setStatus("submitted");
       try {
         signal.current = new AbortController();
         console.log("创建对话并发送消息:", message);
         const conversation = await createConversation(signal.current, {
-          botId: agentId,
+          botId: search.botId,
         });
         console.log("对话创建成功:", conversation);
 
         // 将初始消息存储到状态库中
-        setInitMessage(message);
+        setInitMessage(message, attachesUrl);
 
         // 跳转到对话页面
         onSuccess?.();
         navigate({
           to: "/chat/$conversationId",
-          search: {
-            ...search,
-            botId: agentId,
-          },
+          search,
           params: { conversationId: conversation.conversationId },
         });
       } catch (error) {
@@ -144,7 +141,7 @@ export default function AgentChatPage() {
                             <Suggestion
                               className="agent-suggestion transition-colors"
                               key={question}
-                              onClick={() => handleSubmit(question)}
+                              onClick={() => handleSubmit({value: question, attachesUrl: []})}
                               suggestion={question}
                             />
                           ),
