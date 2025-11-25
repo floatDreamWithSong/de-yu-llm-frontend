@@ -58,6 +58,8 @@ import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import "./styles/suggestion.scss";
 import { useSidebar } from "@/components/ui/sidebar";
 import type { ImperativePanelHandle } from "react-resizable-panels";
+import PreviewImage from "./components/PreviewImage";
+import { PhotoProvider } from "react-photo-view";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({
@@ -283,11 +285,7 @@ export default function ConversationPage() {
       ])}
     >
       <ResizablePanel
-        className={cn([
-          " mx-auto pb-6 size-full duration-300 transition-all",
-          // !!isOpenCite && "lg:pr-80",
-          // isOpenCodeEditor && "lg:pr-240",
-        ])}
+        className={cn([" mx-auto pb-6 size-full duration-300 transition-all"])}
       >
         <div className="max-w-[1000px] mx-auto px-4 flex flex-col h-full transition-none">
           <Conversation id="list-container" className="style__scroller-none">
@@ -311,19 +309,12 @@ export default function ConversationPage() {
                     message.id !== lastUserMessageId.current || !isReplace ? (
                       <div className="flex flex-col items-end">
                         {message.imageAttaches.length > 0 && (
-                          <div className="flex items-end flex-wrap mb-2">
-                            {message.imageAttaches.map((image) => (
-                              <div
-                                key={image}
-                                className="relative min-w-18 h-18 border-2 rounded-md overflow-hidden"
-                                style={{
-                                  backgroundImage: `url(${image})`,
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "center",
-                                  backgroundRepeat: "no-repeat",
-                                }}
-                              ></div>
-                            ))}
+                          <div className="flex space-x-2 items-end flex-wrap mb-2">
+                            <PhotoProvider>
+                              {message.imageAttaches.map((image) => (
+                                <PreviewImage key={image} url={image} />
+                              ))}
+                            </PhotoProvider>
                           </div>
                         )}
                         <MessageContent>
@@ -393,7 +384,10 @@ export default function ConversationPage() {
                               const regenerateable =
                                 (_message.id ===
                                   lastAssistantMessageId.current ||
-                                messageArray.length > 1) && (_index !== 0 && messageArray[_index - 1].imageAttaches.length === 0);
+                                  messageArray.length > 1) &&
+                                _index !== 0 &&
+                                messageArray[_index - 1].imageAttaches
+                                  .length === 0;
                               return (
                                 <div key={_message.id}>
                                   <MessageCiteButton
@@ -584,9 +578,6 @@ export default function ConversationPage() {
             status={status}
             {...search}
           />
-          {/* <p className="text-sm text-foreground/70 text-center w-full">
-            内容由AI生成，仅供参考
-          </p> */}
         </div>
       </ResizablePanel>
       <ResizableHandle

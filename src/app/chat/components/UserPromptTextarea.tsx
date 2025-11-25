@@ -39,6 +39,8 @@ import { env } from "@/env";
 import { uploadCosFile } from "@/apis/requests/cos";
 import { toast } from "sonner";
 import type { Attach } from "../types/attach";
+import PreviewImage from "./PreviewImage";
+import { PhotoProvider } from "react-photo-view";
 
 export default function UserPromptTextarea({
   className,
@@ -50,7 +52,11 @@ export default function UserPromptTextarea({
   think,
   webSearch,
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
-  onSubmit: (args: {value: string, onSuccess?: () => void, attachesUrl: string[]}) => void;
+  onSubmit: (args: {
+    value: string;
+    onSuccess?: () => void;
+    attachesUrl: string[];
+  }) => void;
   onAbort: () => void;
   initialBotId?: string;
   disabled?: boolean;
@@ -89,9 +95,9 @@ export default function UserPromptTextarea({
     const newValue = target.innerHTML;
     setValue(newValue);
   }, []);
-  const addAttach = (attach: Attach)=>{
+  const addAttach = (attach: Attach) => {
     setAttaches((prev) => {
-      if(prev.length === 10){
+      if (prev.length === 10) {
         toast.info("最多上传10个附件");
         return prev;
       }
@@ -115,10 +121,9 @@ export default function UserPromptTextarea({
           ),
         );
       });
-      return [...prev, attach]
+      return [...prev, attach];
     });
-
-  }
+  };
   const handlePaste = async (e: React.ClipboardEvent<HTMLSpanElement>) => {
     if (status !== "ready" || disabled) return;
     e.preventDefault(); // 1. 阻止默认粘贴
@@ -161,12 +166,19 @@ export default function UserPromptTextarea({
         .replace(/<br\s*\/?>/gi, "\n")
         .replace(/&nbsp;/gi, " ")
         .trim();
-      onSubmit?.({value: prompt, attachesUrl: attaches.map((a) => a.uploadUrl), onSuccess: () => {
-        setValue("");
-        if (spanRef.current) {
-          spanRef.current.innerHTML = "";
-        }
-      }});
+      onSubmit?.({
+        value: prompt,
+        attachesUrl: attaches.map((a) => a.uploadUrl),
+        onSuccess: () => {
+          setValue("");
+          if (spanRef.current) {
+            spanRef.current.innerHTML = "";
+          }
+          if (attaches.length > 0) {
+            setAttaches([]);
+          }
+        },
+      });
     } else {
       onAbort();
     }
@@ -204,7 +216,7 @@ export default function UserPromptTextarea({
       onSubmit={handleSubmit}
       className={cn(
         "relative flex flex-col divide-none p-2 border-4 mb-4",
-        "shadow-none border-primary/30 style__shallow-shadow max-w-[1000px] aspect-[4/1] min-h-32",
+        "shadow-none border-primary/30 style__shallow-shadow max-w-[900px] aspect-[4/1] min-h-32",
         className,
       )}
       style={{
@@ -212,17 +224,9 @@ export default function UserPromptTextarea({
       }}
     >
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-      <div
-        className="h-full overflow-y-auto p-2 cursor-text"
-        style={{
-          scrollbarColor: "transparent transparent",
-        }}
-        onClick={() => {
-          spanRef.current?.focus();
-        }}
-      >
-        {attaches.length > 0 && (
-          <div className="space-x-2 overflow-x-scroll w-full h-fit flex flex-nowrap">
+      {attaches.length > 0 && (
+        <PhotoProvider>
+          <div className="space-x-2 overflow-x-scroll w-full h-fit flex flex-nowrap bg-white px-2 pt-2">
             {attaches.map((attach) => (
               <AttachItem
                 key={attach.localId}
@@ -235,7 +239,17 @@ export default function UserPromptTextarea({
               />
             ))}
           </div>
-        )}
+        </PhotoProvider>
+      )}
+      <div
+        className="flex-1 overflow-y-auto p-2 cursor-text"
+        style={{
+          scrollbarColor: "transparent transparent",
+        }}
+        onClick={() => {
+          spanRef.current?.focus();
+        }}
+      >
         <div className="inline mx-2 mt-0 float-left">
           {showBot ? (
             !botInfo.isFetching &&
@@ -349,25 +363,27 @@ export default function UserPromptTextarea({
                 </PromptInputButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => {
-                  const input = document.createElement("input");
-                  input.type = "file";
-                  input.accept = "image/*";
-                  input.onchange = (e) => {
-                    const file = (e.target as HTMLInputElement).files?.[0];
-                    if (file) {
-                      const attach: Attach = {
-                        localId: crypto.randomUUID(),
-                        localData: file,
-                        uploadUrl: "",
-                        progress: 0,
-                        isUploading: true,
-                      };
-                      addAttach(attach);
-                    }
-                  };
-                  input.click();
-                }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "image/*";
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        const attach: Attach = {
+                          localId: crypto.randomUUID(),
+                          localData: file,
+                          uploadUrl: "",
+                          progress: 0,
+                          isUploading: true,
+                        };
+                        addAttach(attach);
+                      }
+                    };
+                    input.click();
+                  }}
+                >
                   <ImagePlus size={16} />
                   上传图片
                 </DropdownMenuItem>
@@ -409,7 +425,11 @@ export default function UserPromptTextarea({
           <PromptInputSubmit
             className="rounded-full"
             status={status}
-            disabled={disabled || (status === "ready" && !value.trim() || attaches.some((a) => a.isUploading))}
+            disabled={
+              disabled ||
+              (status === "ready" && !value.trim()) ||
+              attaches.some((a) => a.isUploading)
+            }
           />
         </div>
       </div>
@@ -421,27 +441,22 @@ const AttachItem = memo(
   ({ attach, onRemove }: { attach: Attach; onRemove: () => void }) => {
     return (
       attach.localData.type.startsWith("image/") && (
-        <div
-          className="relative min-w-18 h-18 border-2 rounded-md overflow-hidden"
-          style={{
-            backgroundImage: `url(${URL.createObjectURL(attach.localData)})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
+        <PreviewImage url={URL.createObjectURL(attach.localData)}>
           {attach.isUploading ? (
-            <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex flex-col items-center justify-center">
+            <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex flex-col items-center justify-center rounded-md">
               <Loader2 className="size-4 animate-spin stroke-white" />
               <div className="text-white">{attach.progress}%</div>
             </div>
           ) : (
             <X
-              className="size-4 cursor-pointer absolute top-0 right-0 bg-background rounded-md stroke-text"
-              onClick={onRemove}
+              className="size-4 cursor-pointer absolute top-0 right-0 bg-background rounded-md stroke-text border-2 translate-x-1/2 -translate-y-1/2"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
             />
           )}
-        </div>
+        </PreviewImage>
       )
     );
   },
