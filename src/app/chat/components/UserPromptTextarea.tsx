@@ -216,7 +216,7 @@ export default function UserPromptTextarea({
       onSubmit={handleSubmit}
       className={cn(
         "relative flex flex-col divide-none p-2 border-4 mb-4",
-        "shadow-none border-primary/30 style__shallow-shadow max-w-[900px] aspect-[4/1] min-h-32",
+        "shadow-none border-primary/30 style__shallow-shadow max-w-[658px] h-fit",
         className,
       )}
       style={{
@@ -242,9 +242,12 @@ export default function UserPromptTextarea({
         </PhotoProvider>
       )}
       <div
-        className="flex-1 overflow-y-auto p-2 cursor-text"
+        className=" p-2 cursor-text overflow-y-auto"
         style={{
-          scrollbarColor: "transparent transparent",
+          minHeight: "20px",
+          maxHeight: "100px",
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--color-secondary) white',
         }}
         onClick={() => {
           spanRef.current?.focus();
@@ -275,8 +278,11 @@ export default function UserPromptTextarea({
           contentEditable={status === "ready" && !disabled}
           onInput={handleInput}
           onPaste={handlePaste}
+          style={{
+            lineHeight: '20px',
+          }}
           className={cn(
-            "outline-none border-none align-bottom",
+            "outline-none border-none",
             (status !== "ready" || disabled) && "opacity-50 cursor-not-allowed",
           )}
           suppressContentEditableWarning
