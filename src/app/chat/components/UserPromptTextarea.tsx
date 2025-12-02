@@ -208,7 +208,7 @@ export default function UserPromptTextarea({
       const inputElement = spanRef.current;
       if (inputElement) {
         // 找到输入框容器（PromptInput form 元素）
-        const container = inputElement.closest("form");
+        const container = inputElement.closest("#input-container");
         if (container) {
           // 滚动整个输入框容器到安全位置
           // block: 'end' 确保输入框在视口底部可见
@@ -371,7 +371,7 @@ export default function UserPromptTextarea({
     />
   );
   return (
-    <>
+    <div id="input-container">
       <PromptInput
         onKeyDown={(e) => {
           if (status !== "ready" || disabled) return;
@@ -487,7 +487,7 @@ export default function UserPromptTextarea({
           {AttachButton}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

@@ -23,6 +23,7 @@ import type { ChatStatus } from "ai";
 import { useCallback, useRef, useState } from "react";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
+import { useIsMobile } from "@/hooks/use-mobile";
 gsap.registerPlugin(SplitText);
 
 export default function AgentChatPage() {
@@ -105,6 +106,7 @@ export default function AgentChatPage() {
       }
     }
   }, [botInfo.isSuccess, botInfo.isFetching]);
+  const isMobile = useIsMobile();
   return (
     <ResizablePanelGroup
       direction="horizontal"
@@ -122,13 +124,15 @@ export default function AgentChatPage() {
               <ConversationContent className="relative">
                 <Message from={"assistant"}>
                   <div className="flex gap-3">
-                    <div>
-                      <MessageAvatar
-                        src={botInfo.data.iconUrl}
-                        className="order-1"
-                        name="启创"
-                      />
-                    </div>
+                  {!isMobile && (
+                        <div>
+                          <MessageAvatar
+                            src={botInfo.data?.iconUrl}
+                            className="order-1"
+                            name={botInfo.data?.name}
+                          />
+                        </div>
+                      )}
                     <div>
                       <MessageContent className="group-[.is-assistant]:bg-white m-2 style__shallow-shadow rounded-3xl">
                         <div id="agent-prologue">
