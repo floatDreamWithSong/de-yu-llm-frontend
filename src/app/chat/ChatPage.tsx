@@ -67,7 +67,7 @@ export default function ChatPage() {
   };
   const isMobile = useIsMobile();
   return (
-    <div className="max-md:flex max-md:flex-col md:grid md:grid-rows-3 h-full px-8">
+    <div className="max-md:flex max-md:flex-col md:grid md:grid-rows-3 h-full px-4">
       <div
         className={cn([
           "absolute right-0 top-0 w-3/4 pointer-events-none",

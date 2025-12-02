@@ -64,7 +64,8 @@ const HomeLayout = () => {
               启创·
               <span className="text-2xl">
                 InnoSpark
-                {import.meta.env.VITE_ENV === "test" && "（内测版）"}
+                {import.meta.env.VITE_ENV === "beta" && "（内测版）"}
+                {import.meta.env.VITE_ENV === "production" && "（开发版）"}
               </span>
             </span>
           </h1>
