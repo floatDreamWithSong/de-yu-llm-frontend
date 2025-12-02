@@ -1,10 +1,8 @@
 "use client";
 import AuthButton from "@/app/auth/components/AuthButton";
 import { AuthInput } from "@/app/auth/components/AuthInput";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Link } from "@tanstack/react-router";
-import { useCallback, useContext, useState } from "react";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/app/auth/contexts";
 import z from "zod";
 import { mobileSchema } from "@/utils/schemas";
@@ -22,21 +20,40 @@ import AuthWrapper from "@/app/auth/components/AuthWrapper";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { sendVerificationCode } from "@/apis/requests/user/code";
-import { EXTERNAL_LINKS } from "@/utils/constants/link";
-// const iconSize = 26;
+import { RequestVerify } from "@/apis/requests/user/verifiy";
+import ServicePolicy from "./components/ServicePolicy";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { tokenStore } from "@/lib/request";
 
-const formSchema = z.object({
-  phone: mobileSchema,
-});
-export default function LoginPage() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      phone: "",
-    },
+const createFormSchema = (isMobile: boolean) =>
+  z.object({
+    phone: mobileSchema,
+    pin: isMobile
+      ? z
+          .string()
+          .min(1, { message: "请输入验证码" })
+          .length(6, { message: "验证码必须为 6 位" })
+          .refine((v) => /^\d{6}$/.test(v), {
+            message: "验证码只能包含数字",
+          })
+      : z
+          .string()
+          .length(6, { message: "验证码必须为 6 位" })
+          .refine((v) => /^\d{6}$/.test(v), {
+            message: "验证码只能包含数字",
+          })
+          .optional(),
   });
-  const [isChecked, setIsChecked] = useState(false);
+
+export default function LoginPage() {
+  const isMobile = useIsMobile();
+  const formSchema = useMemo(() => createFormSchema(isMobile), [isMobile]);
+  const navigate = useNavigate();
+  const search = useSearch({
+    from: "/auth/login",
+  });
   const [isVerificationStage, setVerificationStage] = useState(false);
+  const [countDown, setCountDown] = useState<number>(0);
   const handleSwitchBack = useCallback(() => {
     setVerificationStage(false);
   }, []);
@@ -44,35 +61,119 @@ export default function LoginPage() {
   const sendCodeMutation = useMutation({
     mutationFn: sendVerificationCode,
   });
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    if (!isChecked) {
-      toast.info("请勾选使用协议与隐私协议");
+  const loginMutation = useMutation({
+    mutationFn: RequestVerify,
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      phone: "",
+      pin: "",
+    },
+  });
+
+  useEffect(() => {
+    if (countDown <= 0) return;
+    const timeout = setTimeout(() => {
+      setCountDown(countDown - 1);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [countDown]);
+
+  const handleSendCode = useCallback(() => {
+    const phone = form.getValues("phone");
+    if (!phone) {
+      form.setError("phone", {
+        message: "请先输入手机号",
+      });
       return;
     }
-    authContext.setPhone(data.phone);
     sendCodeMutation.mutate(
       {
-        authId: data.phone,
+        authId: phone,
         authType: "phone-verify",
-        cause: 'passport'
+        cause: "passport",
       },
       {
         onError() {
           toast.error("验证码发送失败");
         },
         onSuccess() {
-          setVerificationStage(true);
+          setCountDown(60);
           toast("验证码已发送");
         },
       },
     );
+  }, [sendCodeMutation, form]);
+
+  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    if (isMobile) {
+      // 移动端：直接进行登录验证
+      if (!data.pin) {
+        form.setError("pin", {
+          message: "请输入验证码",
+        });
+        return;
+      }
+      loginMutation.mutate(
+        {
+          verify: data.pin,
+          authId: data.phone,
+          authType: "phone-verify",
+        },
+        {
+          onError() {
+            form.setError("pin", {
+              message: "验证码错误",
+            });
+          },
+          onSuccess(data) {
+            toast.success("登录成功");
+            tokenStore.set(data.token);
+            const redirectUrl = search.redirect || "/chat";
+            if (data.new) {
+              toast.success("请设置密码");
+              navigate({
+                to: "/auth/login/password/set",
+                search: {
+                  redirect: redirectUrl,
+                },
+              });
+              return;
+            }
+            navigate({
+              to: redirectUrl,
+            });
+          },
+        },
+      );
+    } else {
+      // 桌面端：先发送验证码，然后跳转到验证码页面
+      authContext.setPhone(data.phone);
+      sendCodeMutation.mutate(
+        {
+          authId: data.phone,
+          authType: "phone-verify",
+          cause: "passport",
+        },
+        {
+          onError() {
+            toast.error("验证码发送失败");
+          },
+          onSuccess() {
+            setVerificationStage(true);
+            toast("验证码已发送");
+          },
+        },
+      );
+    }
   };
   return (
     <>
-      {!isVerificationStage ? (
+      {(!isVerificationStage || isMobile) ? (
         <AuthWrapper>
           <div className="flex flex-col h-full items-center">
-            <h3 className="text-2xl font-bold w-full h-fit my-10 text-center">
+            <h3 className="text-2xl font-bold w-full h-fit my-8 text-center">
               验证登录
             </h3>
             <Form {...form}>
@@ -92,43 +193,42 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <div
-                  className="justify-center flex items-center gap-2 pb-6"
-                  style={{
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  <Checkbox
-                    checked={isChecked}
-                    className="border-primary"
-                    onCheckedChange={(checked) =>
-                      setIsChecked(
-                        checked === "indeterminate" ? false : checked,
-                      )
-                    }
+                {isMobile && (
+                  <FormField
+                    control={form.control}
+                    name="pin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="relative w-full">
+                          <FormControl>
+                            <AuthInput
+                              placeholder="请输入验证码"
+                              maxLength={6}
+                              className="pr-24"
+                              {...field}
+                            />
+                          </FormControl>
+                          <button
+                            type="button"
+                            disabled={countDown > 0 || sendCodeMutation.isPending}
+                            onClick={handleSendCode}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-primary text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {countDown > 0 ? `${countDown}s` : "获取验证码"}
+                          </button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <Label className="gap-0.5 max-md:text-xs">
-                    已阅读并同意 启创 的
-                    <a
-                      href={EXTERNAL_LINKS.SERVICE_PROTOCOL}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-black font-bold underline-offset-4 hover:underline"
-                    >
-                      使用协议
-                    </a>
-                    和
-                    <a
-                      href={EXTERNAL_LINKS.PRIVACY_POLICY}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-black font-bold underline-offset-4 hover:underline"
-                    >
-                      隐私协议
-                    </a>
-                  </Label>
-                </div>
-                <AuthButton disabled={sendCodeMutation.isPending} type="submit">
+                )}
+                <ServicePolicy />
+                <AuthButton
+                  disabled={
+                    sendCodeMutation.isPending || loginMutation.isPending
+                  }
+                  type="submit"
+                >
                   下一步
                 </AuthButton>
                 <AuthButton variant={"secondary"} asChild>

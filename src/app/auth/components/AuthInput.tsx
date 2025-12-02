@@ -29,7 +29,7 @@ function AuthInput({
         }
         className={cn(
           "h-12 rounded-full md:text-lg pl-4 border-gray-200 bg-[#f6f6f6] pr-4 placeholder:text-gray-400 focus:bg-white focus:border-gray-300 focus:ring-0",
-          phone && "pl-24 border-0",
+          phone && "pl-20 border-0",
           className,
         )}
         {...props}
@@ -38,8 +38,8 @@ function AuthInput({
         <div className="absolute left-0 top-0 flex h-12 items-center">
           <Select defaultValue="+86">
             <SelectTrigger
-              className="ml-4 border-0 bg-transparent shadow-none focus:ring-0 md:text-lg focus-visible:ring-0 "
-              icon={<ChevronDown className="stroke-black" />}
+              className="ml-2 border-0 bg-transparent shadow-none focus:ring-0 md:text-lg focus-visible:ring-0 text-foreground/50"
+              icon={<ChevronDown className="stroke-foreground/50" />}
             >
               <SelectValue />
             </SelectTrigger>

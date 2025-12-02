@@ -1,11 +1,8 @@
 "use client";
 import AuthButton from "@/app/auth/components/AuthButton";
 import { AuthInput } from "@/app/auth/components/AuthInput";
-import { Checkbox } from "@/components/ui/checkbox";
 
-import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
 import z from "zod";
 import { mobileSchema } from "@/utils/schemas";
 import { useForm } from "react-hook-form";
@@ -23,8 +20,8 @@ import { useMutation } from "@tanstack/react-query";
 import { RequestVerify } from "@/apis/requests/user/verifiy";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { tokenStore } from "@/lib/request";
-import { EXTERNAL_LINKS } from "@/utils/constants/link";
 import { passwordSchema } from "@/apis/requests/user/schema";
+import ServicePolicy from "./components/ServicePolicy";
 
 const formSchema = z.object({
   phone: mobileSchema,
@@ -39,7 +36,6 @@ export default function PhonePasswordLoginPage() {
       password: "",
     },
   });
-  const [isChecked, setIsChecked] = useState(false);
   const navigate = useNavigate();
   const search = useSearch({
     from: "/auth/login/password",
@@ -49,10 +45,6 @@ export default function PhonePasswordLoginPage() {
   });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    if (!isChecked) {
-      toast.info("请勾选使用协议与隐私协议");
-      return;
-    }
     phonePasswordLoginMutation.mutate(
       {
         authId: data.phone,
@@ -78,7 +70,7 @@ export default function PhonePasswordLoginPage() {
   return (
     <AuthWrapper>
       <div className="flex flex-col h-full items-center">
-        <h3 className="text-2xl font-bold w-full h-fit mb-8 text-center">
+        <h3 className="text-2xl font-bold w-full h-fit my-8 text-center">
           密码登录
         </h3>
         <Form {...form}>
@@ -112,40 +104,7 @@ export default function PhonePasswordLoginPage() {
                 </FormItem>
               )}
             />
-            <div
-              className="justify-center flex items-center gap-2 pb-6"
-              style={{
-                letterSpacing: "0.5px",
-              }}
-            >
-              <Checkbox
-                checked={isChecked}
-                className="border-primary"
-                onCheckedChange={(checked) =>
-                  setIsChecked(checked === "indeterminate" ? false : checked)
-                }
-              />
-              <Label className="gap-0.5 max-md:text-xs">
-                已阅读并同意 启创 的
-                <a
-                  href={EXTERNAL_LINKS.SERVICE_PROTOCOL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-black font-bold underline-offset-4 hover:underline"
-                >
-                  使用协议
-                </a>
-                和
-                <a
-                  href={EXTERNAL_LINKS.PRIVACY_POLICY}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-black font-bold underline-offset-4 hover:underline"
-                >
-                  隐私协议
-                </a>
-              </Label>
-            </div>
+            <ServicePolicy className="pb-6" />
             <div className="space-y-4">
               <AuthButton
                 disabled={phonePasswordLoginMutation.isPending}
