@@ -2,6 +2,7 @@ import { Outlet } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthContext } from "../contexts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import MobileBanner from "../components/MobileBanner";
 
 function LayoutContent() {
   const isMobile = useIsMobile();
@@ -15,12 +16,7 @@ function LayoutContent() {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="space-y-4 text-center p-10">
-          <h1 className="text-4xl font-bold bg-gradient-to-r pb-2 from-[#594eff] via-[#8667f1] to-[#5a73fd] bg-clip-text text-transparent">
-            启创·InnoSpark
-          </h1>
-          <h2 className="text-[#5a5c72] text-xl">做有温度的教育大模型</h2>
-        </div>
+        <MobileBanner />
         <Outlet />
       </div>
     );

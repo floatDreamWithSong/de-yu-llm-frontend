@@ -198,6 +198,37 @@ export default function UserPromptTextarea({
       startRecognition();
     }
   };
+
+  // 处理输入框聚焦，在移动端时将输入框滚动到安全位置
+  const handleFocus = useCallback(() => {
+    if (!isMobile) return;
+    
+    // 延迟执行，确保键盘已经弹出
+    setTimeout(() => {
+      const inputElement = spanRef.current;
+      if (inputElement) {
+        // 找到输入框容器（PromptInput form 元素）
+        const container = inputElement.closest('form');
+        if (container) {
+          // 滚动整个输入框容器到安全位置
+          // block: 'end' 确保输入框在视口底部可见
+          // behavior: 'smooth' 提供平滑滚动体验
+          container.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest",
+          });
+        } else {
+          // 如果找不到容器，则滚动输入元素本身
+          inputElement.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest",
+          });
+        }
+      }
+    }, 300); // 300ms 延迟，等待键盘弹出动画完成
+  }, [isMobile]);
   return (
     <PromptInput
       onKeyDown={(e) => {
@@ -269,6 +300,7 @@ export default function UserPromptTextarea({
           contentEditable={status === "ready" && !disabled}
           onInput={handleInput}
           onPaste={handlePaste}
+          onFocus={handleFocus}
           style={{
             lineHeight: "20px",
           }}
