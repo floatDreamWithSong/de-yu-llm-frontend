@@ -6,7 +6,10 @@ gsap.registerPlugin(SplitText);
 export const useTitleAni = ({
   title,
   subtitle,
-}: { title: string; subtitle: string }) => {
+}: {
+  title: string;
+  subtitle?: string;
+}) => {
   useGSAP(() => {
     const modelTitle = new SplitText(title, {
       type: "chars",
@@ -19,16 +22,18 @@ export const useTitleAni = ({
       stagger: 0.01,
       delay: 0.2,
     });
-    const modelSubtitle = new SplitText(subtitle, {
-      type: "chars",
-    });
-    gsap.from(modelSubtitle.chars, {
-      duration: 0.3,
-      opacity: 0,
-      y: 10,
-      ease: "power3.out",
-      stagger: 0.01,
-      delay: 0.6,
-    });
+    if (subtitle) {
+      const modelSubtitle = new SplitText(subtitle, {
+        type: "chars",
+      });
+      gsap.from(modelSubtitle.chars, {
+        duration: 0.3,
+        opacity: 0,
+        y: 10,
+        ease: "power3.out",
+        stagger: 0.01,
+        delay: 0.6,
+      });
+    }
   }, []);
 };

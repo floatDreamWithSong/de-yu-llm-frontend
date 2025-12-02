@@ -323,13 +323,17 @@ export default function ChatSidebar() {
       collapsible={"icon"}
     >
       <SidebarHeader className="space-y-4">
-        <div className="flex items-center px-2 gap-2">
+        <div className="flex items-center gap-2 justify-center">
           <div className="flex flex-row overflow-clip">
-            <Avatar className="p-0.5 transition-transform cursor-pointer translate-x-1 ">
+            <Avatar
+              className={cn([
+                "p-0.5 transition-transform cursor-pointer",
+              ])}
+            >
               <img
                 src="/logo.svg"
                 alt="logo"
-                className=""
+                className="-translate-x-0.5 "
                 onMouseUp={() => iconMode && setOpen(true)}
               />
             </Avatar>
@@ -350,15 +354,19 @@ export default function ChatSidebar() {
             </AnimatePresence>
           </div>
 
-          <SidebarTrigger
-            className={cn([
-              "self-end",
-              iconMode ? "opacity-0 transition-none" : "delay-300",
-            ])}
-            icon={<img src="/collapse.svg" alt="collapse" />}
-          />
+          {!iconMode && (
+            <SidebarTrigger
+              className={cn(["self-end"])}
+              icon={<img src="/collapse.svg" alt="collapse" />}
+            />
+          )}
         </div>
-        <div className="px-3 space-y-4 flex flex-col my-6">
+        <div
+          className={cn([
+            "m-auto space-y-4 flex flex-col my-6",
+            isExpanded && "w-full",
+          ])}
+        >
           <LinkButton
             to="/chat"
             className={cn([

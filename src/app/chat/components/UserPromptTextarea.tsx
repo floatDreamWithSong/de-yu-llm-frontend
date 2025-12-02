@@ -12,7 +12,6 @@ import {
 import { useBotInfo, useBotBasicInfo } from "@/app/chat/hooks/use-bot";
 import { isBuiltInAgent } from "@/utils/constants/agent";
 import { cn } from "@/lib/utils";
-import { Icon } from "@radix-ui/react-select";
 import { useNavigate } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
 import {
@@ -21,7 +20,6 @@ import {
   Earth,
   MicIcon,
   Paperclip,
-  PencilLine,
   X,
   ImagePlus,
   Loader2,
@@ -127,7 +125,7 @@ export default function UserPromptTextarea({
   const handlePaste = async (e: React.ClipboardEvent<HTMLSpanElement>) => {
     if (status !== "ready" || disabled) return;
     e.preventDefault(); // 1. 阻止默认粘贴
-    const text = await navigator.clipboard.readText();
+    const text = await navigator.clipboard.readText().then((i) => i.trim());
     if (text) {
       console.log(text);
       document.execCommand("insertText", false, text);
@@ -242,36 +240,29 @@ export default function UserPromptTextarea({
         </PhotoProvider>
       )}
       <div
-        className=" p-2 cursor-text overflow-y-auto"
+        className="px-2 cursor-text overflow-y-auto"
         style={{
-          minHeight: "20px",
-          maxHeight: "100px",
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--color-secondary) white',
+          boxSizing: 'content-box',
+          minHeight: "24px",
+          maxHeight: "96px",
+          scrollbarWidth: "thin",
+          scrollbarColor: "var(--color-secondary) white",
         }}
         onClick={() => {
           spanRef.current?.focus();
         }}
       >
         <div className="inline mx-2 mt-0 float-left">
-          {showBot ? (
-            !botInfo.isFetching &&
-            !botInfo.isError && (
-              <>
-                <Icon
-                  className="size-5 -mt-1 inline stoke-3 stroke-primary mx-1"
-                  asChild
-                >
-                  <img src={botBasicInfo.iconUrl} alt="bot" />
-                </Icon>
-                <span className="text-primary align-bottom font-semibold">
-                  {botBasicInfo.name}
-                </span>
-              </>
-            )
-          ) : (
-            <PencilLine className="size-5 -mt-1 inline stoke-3 stroke-primary" />
-          )}
+          {showBot
+            ? !botInfo.isFetching &&
+              !botInfo.isError && (
+                <>
+                  <span className="text-primary align-bottom font-semibold">
+                    {botBasicInfo.name}
+                  </span>
+                </>
+              )
+            : null}
         </div>
         <span
           ref={spanRef}
@@ -279,7 +270,7 @@ export default function UserPromptTextarea({
           onInput={handleInput}
           onPaste={handlePaste}
           style={{
-            lineHeight: '20px',
+            lineHeight: "20px",
           }}
           className={cn(
             "outline-none border-none",
@@ -289,7 +280,7 @@ export default function UserPromptTextarea({
         />
         {!value && <span className="text-gray-500 align-bottom">继续提问</span>}
       </div>
-      <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2">
+      <div className="m-2 flex justify-between [&>div]:flex [&>div]:items-center [&>div]:gap-2 mt-6">
         {!env.VITE_SAFE_MODE ? (
           <div>
             {thinkAble ? (

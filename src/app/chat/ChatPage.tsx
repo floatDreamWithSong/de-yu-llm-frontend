@@ -7,8 +7,6 @@ import { useInitMessageStore } from "@/app/chat/stores/init-message";
 import { EXTERNAL_LINKS } from "@/utils/constants/link";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { ChatStatus } from "ai";
-import { motion } from "motion/react";
-
 import { useCallback, useRef, useState } from "react";
 
 export default function ChatPage() {
@@ -29,9 +27,13 @@ export default function ChatPage() {
     }
   }, []);
 
-  useTitleAni({ title: ".model-title", subtitle: ".model-subtitle" });
+  useTitleAni({ title: ".model-title" });
 
-  const handleSubmit = async ({value: message, onSuccess, attachesUrl}: {value: string, onSuccess?: () => void, attachesUrl: string[]}) => {
+  const handleSubmit = async ({
+    value: message,
+    onSuccess,
+    attachesUrl,
+  }: { value: string; onSuccess?: () => void; attachesUrl: string[] }) => {
     if (message.trim() && status === "ready") {
       setStatus("submitted");
       try {
@@ -63,28 +65,15 @@ export default function ChatPage() {
 
   return (
     <div className="max-md:flex max-md:flex-col md:grid md:grid-rows-3 h-full px-8">
-      <div className="absolute right-0 top-0 w-1/2 pointer-events-none">
+      <div className="absolute right-0 top-0 w-3/4 pointer-events-none">
         <img src="/chat-bg.png" alt="" />
       </div>
       <div className="max-md:flex-1 max-md:flex max-md:flex-col max-md:justify-center my-6 row-span-1 mx-auto md:self-end space-y-6 text-center">
         <div className="flex items-center">
-          <motion.img
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              delay: 0.3,
-            }}
-            src="/logo.svg"
-            alt="logo"
-            className="h-10 mr-4"
-          />
           <h1 className="model-title md:text-4xl font-bold text-primary whitespace-pre">
-            启创·InnoSpark, 做有温度的教育大模型
+            启创·InnoSpark &nbsp; 做有温度的教育大模型
           </h1>
         </div>
-        <h2 className="model-subtitle max-md:text-sm">
-          我可以帮助你【设计实验】、【搜索文献】、【分析文档】、【分析数据】，你也可以直接开始和我对话
-        </h2>
       </div>
       <UserPromptTextarea
         className="row-span-1 mx-auto align-middle"
@@ -94,9 +83,23 @@ export default function ChatPage() {
         {...search}
       />
       <div className="flex items-end justify-center p-2 gap-4 font-bold text-primary/90 [&>a]:hover:underline">
-        <a href={EXTERNAL_LINKS.PRIVACY_POLICY} target="_blank" rel="noreferrer"> 隐私政策</a>
-        <a href={EXTERNAL_LINKS.SERVICE_PROTOCOL} target="_blank" rel="noreferrer"> 服务协议</a>
-        <a href={EXTERNAL_LINKS.CONTACT_US} target="_blank" rel="noreferrer"> 联系我们</a>
+        <a
+          href={EXTERNAL_LINKS.PRIVACY_POLICY}
+          target="_blank"
+          rel="noreferrer"
+        >
+          隐私政策
+        </a>
+        <a
+          href={EXTERNAL_LINKS.SERVICE_PROTOCOL}
+          target="_blank"
+          rel="noreferrer"
+        >
+          服务协议
+        </a>
+        <a href={EXTERNAL_LINKS.CONTACT_US} target="_blank" rel="noreferrer">
+          联系我们
+        </a>
       </div>
     </div>
   );

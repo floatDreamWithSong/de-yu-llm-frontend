@@ -9,8 +9,7 @@ export const authenticatedRoute = createRoute({
   beforeLoad: ({ location }) => {
     // 实时检查用户认证状态
     const token = tokenStore.get();
-    const isAuthenticated =
-      import.meta.env.MODE === "test" ? true : Boolean(token);
+    const isAuthenticated = Boolean(token);
 
     if (!isAuthenticated) {
       // 如果未认证，重定向到登录页面，并保存当前路径用于登录后跳转

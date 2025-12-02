@@ -3,7 +3,7 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 import removeConsole from "vite-plugin-remove-console";
-
+import { qrcode } from 'vite-plugin-qrcode';
 import { resolve } from "node:path";
 
 const vendorMap = new Map<string, string>([
@@ -100,6 +100,7 @@ export default defineConfig(({mode})=>({
     }),
     tailwindcss(),
     removeConsole(),
+    qrcode(),
   ],
   // test: {
   //   globals: true,

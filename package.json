@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3000",
+    "dev": "vite --port 3000 --host",
     "build": "tsc && vite build --mode production",
     "fast": "vite build --mode production",
     "fast:ecnu": "vite build --mode ecnu",
+    "fast:beta": "vite build --mode beta",
     "preview": "vite preview --outDir dist/production",
     "preview:ecnu": "vite preview --outDir dist/ecnu",
     "test": "vitest run",
@@ -119,6 +120,7 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.46.0",
     "vite": "npm:rolldown-vite@latest",
+    "vite-plugin-qrcode": "^0.3.0",
     "vite-plugin-remove-console": "^2.2.0",
     "vitest": "^3.2.4",
     "web-vitals": "^4.2.4"

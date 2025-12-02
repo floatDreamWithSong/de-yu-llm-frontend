@@ -26,9 +26,6 @@ export const TOKEN_KEY = "token";
 export const tokenStore = {
   get: () => {
     const token = localStorage.getItem(TOKEN_KEY);
-    if (import.meta.env.MODE === "test") {
-      return "xh-polaris";
-    }
     return token;
   },
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
