@@ -85,7 +85,7 @@ export default function ChatPage() {
           <MobileBanner />
         </div>
       ) : (
-        <div className="max-md:flex-1 max-md:flex max-md:flex-col max-md:justify-center my-6 row-span-1 mx-auto md:self-end space-y-6 text-center">
+        <div className="max-md:flex-1 max-md:flex max-md:flex-col max-md:justify-center my-6 mb-8 row-span-1 mx-auto md:self-end space-y-6 text-center">
           <div className="flex items-center">
             <h1 className="model-title md:text-4xl font-bold text-primary whitespace-pre">
               启创·InnoSpark &nbsp; 做有温度的教育大模型

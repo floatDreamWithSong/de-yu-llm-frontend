@@ -673,8 +673,8 @@ export default function UserPromptTextarea({
         }}
         onSubmit={handleSubmit}
         className={cn(
-          "relative flex flex-col divide-none p-2 border-4 mb-4",
-          "shadow-none border-primary/30 style__shallow-shadow max-w-[658px] h-fit",
+          "relative flex flex-col divide-none p-2 border-2 mb-4",
+          "shadow-none border-primary/25 style__shallow-shadow max-w-[658px] h-fit",
           isMobile && "rounded-3xl",
           className,
         )}
