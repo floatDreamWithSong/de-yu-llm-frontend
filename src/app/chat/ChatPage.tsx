@@ -11,6 +11,7 @@ import { useCallback, useRef, useState } from "react";
 import MobileBanner from "../auth/components/MobileBanner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import type { SubmitArgType } from "./types/submit";
 
 export default function ChatPage() {
   const navigate = useNavigate({
@@ -22,6 +23,7 @@ export default function ChatPage() {
   const [status, setStatus] = useState<ChatStatus>("ready");
   const signal = useRef<AbortController | null>(null);
   const setInitMessage = useInitMessageStore((s) => s.setInitMessage);
+  const setInitCoteaConfig = useInitMessageStore((s) => s.setInitCoteaConfig);
   const abortRequest = useCallback(() => {
     if (signal.current) {
       setStatus("ready");
@@ -36,7 +38,8 @@ export default function ChatPage() {
     value: message,
     onSuccess,
     attachesUrl,
-  }: { value: string; onSuccess?: () => void; attachesUrl: string[] }) => {
+    coteaConfig: initCoteaConfig,
+  }: SubmitArgType) => {
     if (message.trim() && status === "ready") {
       setStatus("submitted");
       try {
@@ -49,7 +52,7 @@ export default function ChatPage() {
 
         // 将初始消息存储到状态库中
         setInitMessage(message, attachesUrl);
-
+        setInitCoteaConfig(initCoteaConfig);  
         // 跳转到对话页面
         onSuccess?.();
         navigate({

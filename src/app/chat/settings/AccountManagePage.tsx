@@ -10,8 +10,12 @@ import { Input } from "@/components/ui/input";
 import {
   AlertCircleIcon,
   ArrowLeftIcon,
+  Brain,
   EyeClosedIcon,
   EyeIcon,
+  Lock,
+  Trash2,
+  User,
 } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import {
@@ -47,16 +51,27 @@ import { checkCode } from "@/apis/requests/user/check-code";
 import { mobileSchema } from "@/utils/schemas";
 import { sendVerificationCode } from "@/apis/requests/user/code";
 import { useRef, useState } from "react";
-import { getProfile, updateProfile } from "@/apis/requests/user/profile";
+import { getProfile, updateProfile, type RoleType } from "@/apis/requests/user/profile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { uploadCosFile } from "@/apis/requests/cos";
 import ClientQueryKeys from "@/apis/queryKeys";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { COTEA_ENUM } from "@/apis/requests/conversation/enums/cotea";
+import { Loader } from "@/components/ai-elements/loader";
 
 export default function AccountManagePage() {
   const router = useRouter();
   return (
-    <div className="max-w-[800px] mx-auto px-12 my-12">
+    <div className="max-w-[800px] mx-auto px-12 my-12 pb-12">
       <nav className="flex items-center justify-center gap-2 relative">
         <Button
           variant="ghost"
@@ -74,26 +89,47 @@ export default function AccountManagePage() {
         defaultValue={["item-0", "item-1", "item-2"]}
       >
         <AccordionItem value="item-0">
-          <AccordionTrigger>记忆</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-4 text-balance">
+          <AccordionTrigger>
+            <span className="flex items-center gap-2">
+              <Brain className="size-4" />
+              记忆
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 text-balance pl-4">
             <MemorySettingForm />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-1">
-          <AccordionTrigger>更改密码</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-4 text-balance">
+          <AccordionTrigger>
+            <span className="flex items-center gap-2">
+              <Lock className="size-4" />
+              更改密码
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 text-balance pl-4">
             <ResetPasswordForm />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
-          <AccordionTrigger>用户资料</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-4 text-balance">
+          <AccordionTrigger>
+            <span className="flex items-center gap-2">
+              <User className="size-4" />
+              用户资料
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 text-balance pl-4">
             <UserInfoForm />
+            <UserProfile />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
-          <AccordionTrigger>注销账号</AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-4 text-balance">
+          <AccordionTrigger>
+            <span className="flex items-center gap-2">
+              <Trash2 className="size-4" />
+              注销账号
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 text-balance pl-4">
             <Alert variant="destructive">
               <AlertCircleIcon />
               <AlertTitle>账号注销后无法找回</AlertTitle>
@@ -357,10 +393,34 @@ const UserInfoForm = () => {
     queryKey: [ClientQueryKeys.user.profile],
     queryFn: getProfile,
   });
+
+  if (!userInfo.data) {
+    return null;
+  }
+
+  return (
+    <UserInfoFormContent
+      key={userInfo.data.username}
+      initialData={{
+        username: userInfo.data.username,
+        avatar: userInfo.data.avatar,
+      }}
+    />
+  );
+};
+
+const UserInfoFormContent = ({
+  initialData,
+}: {
+  initialData: {
+    username?: string;
+    avatar?: string;
+  };
+}) => {
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof UserProfileSchemaPartial>>({
     resolver: zodResolver(UserProfileSchemaPartial),
-    defaultValues: userInfo.data,
+    defaultValues: initialData,
   });
 
   const uploadAvatarMutation = useMutation({
@@ -385,7 +445,6 @@ const UserInfoForm = () => {
       toast.error("用户资料更新失败");
     },
   });
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -467,5 +526,202 @@ const UserInfoForm = () => {
         </form>
       </Form>
     </>
+  );
+};
+
+
+// 构建 role 字符串（用于提交到服务器）
+const buildRole = (
+  roleType: RoleType,
+  grade: string | null,
+  subject: string | null,
+): string | null => {
+  if (!roleType || !grade) return null;
+
+  switch (roleType) {
+    case COTEA_ENUM.UserProfileRoleEnum.keys[0]:
+      return `${grade} ${COTEA_ENUM.UserProfileRoleEnum.STUDENT}`;
+    case COTEA_ENUM.UserProfileRoleEnum.keys[1]:
+      return subject ? `${grade} ${subject} ${COTEA_ENUM.UserProfileRoleEnum.TEACHER}` : null;
+    case COTEA_ENUM.UserProfileRoleEnum.keys[2]:
+      return `${grade} ${COTEA_ENUM.UserProfileRoleEnum.PARENT}`;
+    default:
+      return null;
+  }
+};
+
+const UserProfile = () => {
+  const userInfo = useQuery({
+    queryKey: [ClientQueryKeys.user.profile],
+    queryFn: getProfile,
+  });
+
+  // 使用 key 让组件在数据变化时重新挂载，确保初始状态正确
+  if (!userInfo.data) {
+    return null;
+  }
+
+  return (
+    <UserProfileForm
+      key={`${userInfo.data.profile?.roleType}-${userInfo.data.profile?.grade}-${userInfo.data.profile?.subject}`}
+      initialProfile={userInfo.data.profile}
+    />
+  );
+};
+
+const UserProfileForm = ({
+  initialProfile,
+}: {
+  initialProfile: {
+    roleType: RoleType;
+    grade: string | null;
+    subject: string | null;
+  };
+}) => {
+  const queryClient = useQueryClient();
+
+  const [roleType, setRoleType] = useState<RoleType>(initialProfile.roleType);
+  const [grade, setGrade] = useState<string | null>(initialProfile.grade);
+  const [subject, setSubject] = useState<string | null>(initialProfile.subject);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: () => {
+      toast.success("身份信息更新成功");
+      queryClient.invalidateQueries({
+        queryKey: [ClientQueryKeys.user.profile],
+      });
+    },
+    onError: () => {
+      toast.error("身份信息更新失败");
+    },
+  });
+
+  const handleRoleTypeChange = (value: RoleType) => {
+    setRoleType(value);
+    // 切换角色时重置选项
+    setGrade(null);
+    setSubject(null);
+  };
+
+  const handleSubmit = () => {
+    const role = buildRole(roleType, grade, subject);
+    if (!role) {
+      toast.error("请完整填写身份信息");
+      return;
+    }
+    updateProfileMutation.mutate({
+      profile: { role },
+    });
+  };
+
+  // 判断是否可以提交
+  const canSubmit = () => {
+    if (!roleType || !grade) return false;
+    if (roleType === COTEA_ENUM.UserProfileRoleEnum.keys[1] && !subject) return false;
+    return true;
+  };
+
+  return (
+    <div className="space-y-4">
+      <RadioGroup
+        value={roleType ?? ""}
+        onValueChange={(v) => handleRoleTypeChange(v as RoleType)}
+        className="space-y-3"
+      >
+        {/* 学生选项 */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value={COTEA_ENUM.UserProfileRoleEnum.keys[0]} id="role-student" />
+            <Label htmlFor="role-student" className="cursor-pointer">
+              我是学生
+            </Label>
+          </div>
+          {roleType === COTEA_ENUM.UserProfileRoleEnum.keys[0] && (
+            <Select value={grade ?? ""} onValueChange={setGrade}>
+              <SelectTrigger className="w-[140px]" icon={null}>
+                <SelectValue placeholder="选择年级" />
+              </SelectTrigger>
+              <SelectContent>
+                {COTEA_ENUM.GradeEnum.keys.map((key) => (
+                  <SelectItem key={key} value={COTEA_ENUM.GradeEnum[key]}>
+                    {COTEA_ENUM.GradeEnum[key]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+
+        {/* 教师选项 */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value={COTEA_ENUM.UserProfileRoleEnum.keys[1]} id="role-teacher" />
+            <Label htmlFor="role-teacher" className="cursor-pointer">
+              我是教师
+            </Label>
+          </div>
+          {roleType === COTEA_ENUM.UserProfileRoleEnum.keys[1] && (
+            <>
+              <Select value={grade ?? ""} onValueChange={setGrade}>
+                <SelectTrigger className="w-[140px]" icon={null}>
+                  <SelectValue placeholder="选择年级" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COTEA_ENUM.GradeEnum.keys.map((key) => (
+                    <SelectItem key={key} value={COTEA_ENUM.GradeEnum[key]}>
+                      {COTEA_ENUM.GradeEnum[key]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={subject ?? ""} onValueChange={setSubject}>
+                <SelectTrigger className="w-[140px]" icon={null}>
+                  <SelectValue placeholder="选择学科" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COTEA_ENUM.SubjectEnum.keys.map((key) => (
+                    <SelectItem key={key} value={COTEA_ENUM.SubjectEnum[key]}>
+                      {COTEA_ENUM.SubjectEnum[key]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
+        </div>
+
+        {/* 家长选项 */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value={COTEA_ENUM.UserProfileRoleEnum.keys[2]} id="role-parent" />
+            <Label htmlFor="role-parent" className="cursor-pointer">
+              我是家长
+            </Label>
+          </div>
+          {roleType === COTEA_ENUM.UserProfileRoleEnum.keys[2] && (
+            <Select value={grade ?? ""} onValueChange={setGrade}>
+              <SelectTrigger className="w-[140px]" icon={null}>
+                <SelectValue placeholder="选择年级" />
+              </SelectTrigger>
+              <SelectContent>
+                {COTEA_ENUM.GradeEnum.keys.map((key) => (
+                  <SelectItem key={key} value={COTEA_ENUM.GradeEnum[key]}>
+                    {COTEA_ENUM.GradeEnum[key]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      </RadioGroup>
+
+      <Button
+        onClick={handleSubmit}
+        disabled={!canSubmit() || updateProfileMutation.isPending}
+      >
+        {updateProfileMutation.isPending ? <Loader /> : "保存身份信息"}
+      </Button>
+    </div>
   );
 };

@@ -11,7 +11,7 @@ env:
   BUILD_OUTPUT_DIR: 'dist/production'        # 构建产物目录（用于 local_path）
   TENCENTCLOUD_REGION: 'ap-shanghai'        # 腾讯云地域（根据实际桶区域调整）
   COS_BUCKET: 'innospark-1308722423'  # 目标 COS 桶（请确认）
-  CDN_DOMAIN: 'innospark.xhpolaris.com/'    # 需刷新的 CDN 域名（请确认）
+  CDN_DOMAIN: 'innospark.xhpolaris.com'    # 需刷新的 CDN 域名（请确认）
 
 jobs:
   deploy:

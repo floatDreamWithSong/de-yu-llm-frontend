@@ -23,6 +23,7 @@ import {
   X,
   ImagePlus,
   Loader2,
+  List,
 } from "lucide-react";
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 import type React from "react";
@@ -39,6 +40,33 @@ import { toast } from "sonner";
 import type { Attach } from "../types/attach";
 import PreviewImage from "./PreviewImage";
 import { PhotoProvider } from "react-photo-view";
+import { useQuery } from "@tanstack/react-query";
+import ClientQueryKeys from "@/apis/queryKeys";
+import { getProfile } from "@/apis/requests/user/profile";
+import { COTEA_ENUM, TaskType } from "@/apis/requests/conversation/enums/cotea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { SubmitFunctionType } from "../types/submit";
+import {
+  CoteaBotIds,
+  placeholderInterest,
+  type CoteaConfigType,
+} from "@/apis/requests/conversation/schema/cotea";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function UserPromptTextarea({
   className,
@@ -47,14 +75,10 @@ export default function UserPromptTextarea({
   disabled = false,
   status,
   botId,
-  think,
+  think: thinkEnable,
   webSearch,
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
-  onSubmit: (args: {
-    value: string;
-    onSuccess?: () => void;
-    attachesUrl: string[];
-  }) => void;
+  onSubmit: SubmitFunctionType;
   onAbort: () => void;
   initialBotId?: string;
   disabled?: boolean;
@@ -68,7 +92,12 @@ export default function UserPromptTextarea({
   const spanRef = useRef<HTMLSpanElement>(null);
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
-
+  const { data: userInfo } = useQuery({
+    queryKey: [ClientQueryKeys.user.profile],
+    queryFn: getProfile,
+  });
+  type SelectedCotea = (typeof TaskType.keys)[number] | "default";
+  const [selectedCotea, setSelectedCotea] = useState<SelectedCotea>("default");
   // 语音识别功能
   const {
     status: asrStatus,
@@ -253,37 +282,41 @@ export default function UserPromptTextarea({
     };
     input.click();
   };
-  const ThinkButton = thinkAble ? (
-    <PromptInputButton
-      onClick={() => {
-        navigate({
-          to: ".",
-          search: {
-            botId,
-            webSearch,
-            think: think ? void 0 : true,
-          },
-        });
-      }}
-      variant={think ? "default" : "outline"}
-      className="rounded-full"
-    >
-      <Atom size={16} />
-      深度思考
-    </PromptInputButton>
-  ) : (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <PromptInputButton variant={"outline"} className="rounded-full">
-          <Atom size={16} />
-          深度思考
-        </PromptInputButton>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>该智能体模型不可深度思考</p>
-      </TooltipContent>
-    </Tooltip>
-  );
+  const handleThinkClick = () => {
+    navigate({
+      to: ".",
+      search: {
+        botId,
+        webSearch,
+        think: thinkEnable ? void 0 : true,
+      },
+    });
+  };
+  // 引导式教学不能开深度思考，一旦开了深度思考就会把所有内容一起回复
+  console.log(selectedCotea);
+  const ThinkButton =
+    thinkAble && selectedCotea !== "GUIDED_TEACHING" ? (
+      <PromptInputButton
+        onClick={handleThinkClick}
+        variant={thinkEnable ? "default" : "outline"}
+        className="rounded-full"
+      >
+        <Atom size={16} />
+        深度思考
+      </PromptInputButton>
+    ) : (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PromptInputButton variant={"outline"} className="rounded-full">
+            <Atom size={16} />
+            深度思考
+          </PromptInputButton>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>该场景下不可深度思考</p>
+        </TooltipContent>
+      </Tooltip>
+    );
   const WebSearchButton = (
     <PromptInputButton
       onClick={() => {
@@ -291,7 +324,7 @@ export default function UserPromptTextarea({
           to: ".",
           search: {
             botId,
-            think,
+            think: thinkEnable,
             webSearch: webSearch ? void 0 : true,
           },
         });
@@ -309,7 +342,7 @@ export default function UserPromptTextarea({
         navigate({
           to: ".",
           search: {
-            think,
+            think: thinkEnable,
             webSearch,
             botId: botId === "code-gen" ? void 0 : "code-gen",
           },
@@ -370,6 +403,260 @@ export default function UserPromptTextarea({
       disabled={disabledSubmit}
     />
   );
+  /**
+   * 选择学生和家长的时候 在首页显示   知识讲解、引导教学
+选择教师的时候  首页显示  跨学科教案、情景化出题、知识讲解、引导教学
+   */
+  const [initCoteaConfig, setInitCoteaConfig] = useState<
+    CoteaConfigType | undefined
+  >(void 0);
+  const showCrossAndContext =
+    userInfo?.profile?.roleType === COTEA_ENUM.UserProfileRoleEnum.keys[1];
+  const coteaMenu = (
+    <Select
+      value={selectedCotea}
+      onValueChange={(value) => {
+        setSelectedCotea(value as SelectedCotea);
+        setInitCoteaConfig(() => {
+          switch (value) {
+            case TaskType.keys[0]:
+              return {
+                coteaId: CoteaBotIds[0],
+                subject: "",
+                time: "",
+                feature: "",
+              };
+            case TaskType.keys[1]:
+              return {
+                coteaId: CoteaBotIds[1],
+                level: "",
+                style: "",
+              };
+            case TaskType.keys[2]:
+              return {
+                coteaId: CoteaBotIds[2],
+                level: "",
+              };
+            case TaskType.keys[3]:
+              return {
+                coteaId: CoteaBotIds[3],
+                interest: [],
+              };
+            default:
+              break;
+          }
+        });
+      }}
+    >
+      <SelectTrigger icon={<List size={16} />}>
+        <SelectValue placeholder="选择任务" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectItem key={"default"} value={"default"}>
+            默认模式
+          </SelectItem>
+          {TaskType.keys
+            .filter((i) => {
+              if (
+                !showCrossAndContext &&
+                [TaskType.keys[0], TaskType.keys[3]].includes(i)
+              )
+                return false;
+              return true;
+            })
+            .map((key) => (
+              <SelectItem key={key} value={key}>
+                {TaskType[key]}
+              </SelectItem>
+            ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+
+  // 1 InterdisciplinaryTeachingPlan
+  const SubjectButton = initCoteaConfig?.coteaId ===
+    "cotea-InterdisciplinaryTeachingPlan" && (
+    <Select
+      value={initCoteaConfig.subject}
+      onValueChange={(value) =>
+        setInitCoteaConfig({ ...initCoteaConfig, subject: value })
+      }
+    >
+      <SelectTrigger icon={<List size={16} />}>
+        <SelectValue placeholder="选择学科" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {COTEA_ENUM.SubjectEnum.keys.map((key) => (
+            <SelectItem key={key} value={key}>
+              {COTEA_ENUM.SubjectEnum[key]}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+  const TimeButton = initCoteaConfig?.coteaId ===
+    "cotea-InterdisciplinaryTeachingPlan" && (
+    <Select
+      value={initCoteaConfig.time}
+      onValueChange={(value) =>
+        setInitCoteaConfig({ ...initCoteaConfig, time: value })
+      }
+    >
+      <SelectTrigger icon={<List size={16} />}>
+        <SelectValue placeholder="选择课时" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {Array.from({ length: 4 }, (_, index) => index + 1).map((key) => (
+            <SelectItem key={key} value={key.toString()}>
+              {key}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+  const FeatureButton = initCoteaConfig?.coteaId ===
+    "cotea-InterdisciplinaryTeachingPlan" && (
+    <Input
+      value={initCoteaConfig.feature}
+      onChange={(e) =>
+        setInitCoteaConfig({ ...initCoteaConfig, feature: e.target.value })
+      }
+      placeholder="请输入学生特点"
+    />
+  );
+  const InterdisciplinaryTeachingPlanGroup = (
+    <>
+      {SubjectButton}
+      {TimeButton}
+      {FeatureButton}
+    </>
+  );
+  const LevelButton = (initCoteaConfig?.coteaId ===
+    "cotea-PersonalizedKnowledgeExplanation" ||
+    initCoteaConfig?.coteaId === "cotea-GuidedTeaching") && (
+    <Select
+      value={initCoteaConfig.level}
+      onValueChange={(value) =>
+        setInitCoteaConfig({ ...initCoteaConfig, level: value })
+      }
+    >
+      <SelectTrigger icon={<List size={16} />}>
+        <SelectValue placeholder="选择知识基础" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {COTEA_ENUM.KnowledgeHandleLevelEnum.keys.map((key) => (
+            <SelectItem key={key} value={key}>
+              {COTEA_ENUM.KnowledgeHandleLevelEnum[key]}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+  const StyleButton = initCoteaConfig?.coteaId ===
+    "cotea-PersonalizedKnowledgeExplanation" && (
+    <Select
+      value={initCoteaConfig.style}
+      onValueChange={(value) =>
+        setInitCoteaConfig({ ...initCoteaConfig, style: value })
+      }
+    >
+      <SelectTrigger icon={<List size={16} />}>
+        <SelectValue placeholder="选择讲解风格" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {COTEA_ENUM.TeachingStyleEnum.keys.map((key) => (
+            <SelectItem key={key} value={key}>
+              {COTEA_ENUM.TeachingStyleEnum[key]}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+  const PersonalizedKnowledgeExplanationGroup = (
+    <>
+      {initCoteaConfig?.coteaId === "cotea-PersonalizedKnowledgeExplanation" &&
+        LevelButton}
+      {StyleButton}
+    </>
+  );
+  const [extraInterest, setExtraInterest] =
+    useState<string[]>(placeholderInterest);
+  const [newInterest, setNewInterest] = useState<string>("");
+  const [selectedInterest, setSelectedInterest] = useState<string[]>([]);
+  const GuidedTeachingGroup = (
+    <>{initCoteaConfig?.coteaId === "cotea-GuidedTeaching" && LevelButton}</>
+  );
+  const InterestButton = initCoteaConfig?.coteaId ===
+    "cotea-ContextualizedQuestion" && (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          选择{selectedInterest.length}个兴趣
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>选择兴趣</DialogTitle>
+        </DialogHeader>
+        <DialogContent>
+          <div className="flex flex-wrap gap-2">
+            {extraInterest.map((interest) => {
+              const checked = selectedInterest.includes(interest);
+              return (
+                <Button
+                  key={interest}
+                  variant={checked ? "default" : "outline"}
+                  className="inline-block cursor-pointer p-1"
+                  onClick={() => {
+                    if (checked) {
+                      setSelectedInterest(
+                        selectedInterest.filter((i) => i !== interest),
+                      );
+                    } else {
+                      setSelectedInterest([...selectedInterest, interest]);
+                    }
+                  }}
+                  size="sm"
+                >
+                  {interest}
+                </Button>
+              );
+            })}
+          </div>
+          <Input
+            value={newInterest}
+            onChange={(e) => setNewInterest(e.target.value)}
+            placeholder="请输入兴趣"
+          />
+          {extraInterest.includes(newInterest) && (
+            <div className="text-red-500 text-sm">兴趣已存在</div>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={extraInterest.includes(newInterest)}
+            onClick={() => {
+              setExtraInterest([...extraInterest, newInterest]);
+              setNewInterest("");
+            }}
+          >
+            添加兴趣
+          </Button>
+        </DialogContent>
+      </DialogContent>
+    </Dialog>
+  );
+  const ContextualizedQuestionGroup = <>{InterestButton}</>;
   return (
     <div id="input-container">
       <PromptInput
@@ -463,7 +750,12 @@ export default function UserPromptTextarea({
             ])}
           >
             {!env.VITE_SAFE_MODE && !isMobile ? (
-              <div>
+              <div className="flex-1 overflow-x-auto p-1">
+                {coteaMenu}
+                {InterdisciplinaryTeachingPlanGroup}
+                {PersonalizedKnowledgeExplanationGroup}
+                {GuidedTeachingGroup}
+                {ContextualizedQuestionGroup}
                 {ThinkButton}
                 {WebSearchButton}
                 {CodeGenButton}
@@ -480,7 +772,12 @@ export default function UserPromptTextarea({
         </div>
       </PromptInput>
       {isMobile && (
-        <div className="py-4 space-x-2 -mt-4 overflow-x-auto flex flex-nowrap">
+        <div className="py-4 space-x-2 -mt-4 overflow-x-auto flex flex-nowrap p-1">
+          {coteaMenu}
+          {InterdisciplinaryTeachingPlanGroup}
+          {PersonalizedKnowledgeExplanationGroup}
+          {GuidedTeachingGroup}
+          {ContextualizedQuestionGroup}
           {ThinkButton}
           {WebSearchButton}
           {CodeGenButton}
