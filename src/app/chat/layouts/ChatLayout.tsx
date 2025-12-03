@@ -11,7 +11,7 @@ import { Outlet } from "@tanstack/react-router";
 import "../styles/chat.scss";
 import type React from "react";
 
-const sidebarWidth = "248px";
+const sidebarWidth = "260px";
 
 export default function ChatLayout() {
   return (

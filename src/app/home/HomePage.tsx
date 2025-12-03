@@ -161,7 +161,7 @@ const HomePage = () => {
         }}
       >
         <div className="items-center justify-center flex-1 w-full flex px-4">
-          <div className="space-y-4 text-center max-w-6xl mx-auto">
+          <div className="space-y-4 text-center max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-center gap-4">
               <img
                 src="/logo.svg"
@@ -175,7 +175,7 @@ const HomePage = () => {
             </div>
             <h2
               id="subtitle"
-              className="text-foreground/70 text-sm md:text-xl lg:text-2xl leading-relaxed px-4"
+              className="text-foreground/70 text-sm md:text-xl lg:text-2xl leading-relaxed px-2"
             >
               <span className="font-semibold">InnoSpark</span>
               <br className="md:hidden" />
@@ -187,10 +187,11 @@ const HomePage = () => {
             >
               <LinkButton
                 variant={"default"}
-                to="/chat" preload="render"
+                to="/chat"
+                preload="render"
                 className="rounded-full text-lg px-16 py-7"
               >
-                  开始对话
+                开始对话
               </LinkButton>
               <Button
                 variant={"outline"}
