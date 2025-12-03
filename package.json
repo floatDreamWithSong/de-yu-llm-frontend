@@ -68,6 +68,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.18",
     "embla-carousel-react": "^8.6.0",
+    "enum-plus": "^3.1.6",
     "gsap": "^3.13.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.542.0",

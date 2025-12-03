@@ -1,0 +1,81 @@
+name: 前端自动化构建+上传COS+刷新CDN
+
+on:
+  push:
+    branches:
+      - inno
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '10'
+  BUILD_OUTPUT_DIR: 'dist/production'        # 构建产物目录（用于 local_path）
+  TENCENTCLOUD_REGION: 'ap-shanghai'        # 腾讯云地域（根据实际桶区域调整）
+  COS_BUCKET: 'innospark-1308722423'  # 目标 COS 桶（请确认）
+  CDN_DOMAIN: 'innospark.xhpolaris.com/'    # 需刷新的 CDN 域名（请确认）
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # install node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # explicit pnpm setup (fix for setup-node cache issues)
+      - name: Ensure pnpm (pnpm/action-setup)
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Verify environment
+        run: |
+          set -e
+          echo "node: $(node -v)"
+          echo "npm: $(npm -v)"
+          echo "pnpm: $(pnpm -v)"
+          which pnpm || true
+
+      # install deps & build
+      - name: Install dependencies & build
+        run: |
+          set -e
+          pnpm install --frozen-lockfile
+          pnpm fast
+
+      # Upload using TencentCloud/cos-action (uses the community action you referenced)
+      - name: Upload artifact to COS
+        uses: TencentCloud/cos-action@v1
+        with:
+          # 使用仓库 Secrets 中的 COS 凭证
+          secret_id: ${{ secrets.COS_SECRET_ID }}
+          secret_key: ${{ secrets.COS_SECRET_KEY }}
+          cos_bucket: ${{ env.COS_BUCKET }}
+          cos_region: ${{ env.TENCENTCLOUD_REGION }}
+          local_path: ${{ env.BUILD_OUTPUT_DIR }}    # 本地要上传的目录（来自 env）
+          clean: true                                # 清理目标目录（同示例）
+
+      # Refresh CDN using xh-polaris/tencent-cloud-cli-action (示例风格)
+      - name: Refresh CDN
+        uses: xh-polaris/tencent-cloud-cli-action@v1
+        with:
+          secret_id: ${{ secrets.COS_SECRET_ID }}
+          secret_key: ${{ secrets.COS_SECRET_KEY }}
+          region: ${{ env.TENCENTCLOUD_REGION }}
+          # 使用与示例同类型的命令，但替换为我们的域名（不要直接使用别人的参数）
+          commands: >
+            cdn PurgePathCache --cli-unfold-argument --Paths https://${{ env.CDN_DOMAIN }}/ --FlushType delete
+          output_format: json
+
+      - name: Done
+        run: |
+          echo "部署完成，构建产物目录：${{ env.BUILD_OUTPUT_DIR }}"

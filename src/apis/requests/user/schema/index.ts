@@ -11,6 +11,9 @@ export const CredentialsSchema = z.object({
 export const UserProfileSchema = z.object({
   username: z.string(),
   avatar: z.string(),
+  profile: z.object({
+    role: z.string() // 一年级；（语文；老师）|（学生）|（家长）
+  })
 });
 export const UserProfileSchemaPartial = UserProfileSchema.partial();
 export type UserCredentials = z.infer<typeof CredentialsSchema>;

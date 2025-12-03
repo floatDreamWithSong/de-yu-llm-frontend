@@ -18,8 +18,14 @@ export const getProfile = () =>
     responseValidator: z.object({
       name: z.string(),
       avatar: z.string(),
+      profile: z.object({
+        role: z.string(),
+      }),
     }).transform((data) => ({
       username: data.name,
       avatar: data.avatar,
+      profile: {
+        ...data.profile,
+      }
     })),
   })
