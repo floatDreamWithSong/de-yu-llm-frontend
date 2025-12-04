@@ -38,10 +38,6 @@ const createFormSchema = (isMobile: boolean) =>
           })
       : z
           .string()
-          .length(6, { message: "验证码必须为 6 位" })
-          .refine((v) => /^\d{6}$/.test(v), {
-            message: "验证码只能包含数字",
-          })
           .optional(),
   });
 
@@ -107,6 +103,7 @@ export default function LoginPage() {
   }, [sendCodeMutation, form]);
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log(isMobile)
     if (isMobile) {
       // 移动端：直接进行登录验证
       if (!data.pin) {
