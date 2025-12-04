@@ -75,11 +75,14 @@ interest: , 可以自定义添加
 
 export const ContextualizedQuestionSchema = z.object({
   coteaId: z.literal(CoteaBotIds[3]),
-  interest: z.array(z.string()),
+  interest: z.string(),
 });
 
-export type CoteaConfigType =
-  | z.infer<typeof InterdisciplinaryTeachingPlanSchema>
-  | z.infer<typeof PersonalizedKnowledgeExplanationSchema>
-  | z.infer<typeof GuidedTeachingSchema>
-  | z.infer<typeof ContextualizedQuestionSchema>;
+export const CoteaConfigSchema = z.union([
+  InterdisciplinaryTeachingPlanSchema,
+  PersonalizedKnowledgeExplanationSchema,
+  GuidedTeachingSchema,
+  ContextualizedQuestionSchema,
+]);
+
+export type CoteaConfigType = z.infer<typeof CoteaConfigSchema>;

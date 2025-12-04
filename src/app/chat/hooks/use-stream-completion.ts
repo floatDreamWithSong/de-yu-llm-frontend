@@ -28,6 +28,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { genConversationTitle } from "@/apis/requests/conversation/gen-title";
 import { formatBotId } from "./use-bot";
 import { env } from "@/env";
+import { useCoteaStore } from "@/app/chat/stores/cotea";
 
 export interface ChatMessage {
   id: string;
@@ -435,6 +436,7 @@ export function useStreamCompletion(
         completionsOption: {
           ...completionConfig.completionsOption,
           ...options?.completionsOption,
+          ext: useCoteaStore.getState().cotea,
         },
         messages: [
           {
@@ -460,6 +462,12 @@ export function useStreamCompletion(
       }
       if(env.VITE_SAFE_MODE && requestData.model==='InnoSpark'){
         requestData.model = "Safe-InnoSpark"
+      }
+      if(requestData.completionsOption.ext) {
+        requestData.botId = requestData.completionsOption.ext.coteaId;
+        if(requestData.completionsOption.ext.coteaId==='cotea-GuidedTeaching') {
+          requestData.completionsOption.useDeepThink = false;
+        }
       }
       console.log(requestData);
       try {

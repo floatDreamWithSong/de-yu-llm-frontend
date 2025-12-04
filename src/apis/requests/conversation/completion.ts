@@ -1,4 +1,5 @@
 import z from "zod";
+import { CoteaConfigSchema } from "./schema/cotea";
 
 /**
  * 
@@ -35,6 +36,7 @@ export const MessageSchema = z.object({
 });
 export type Message = z.infer<typeof MessageSchema>;
 
+const ExtSchema = CoteaConfigSchema
 export const CompletionsOptionSchema = z.object({
   isRegen: z.boolean(),
   isReplace: z.boolean(),
@@ -43,6 +45,7 @@ export const CompletionsOptionSchema = z.object({
   webSearch: z.boolean(),
   useDeepThink: z.boolean(),
   withSuggest: z.boolean(),
+  ext: ExtSchema.optional()
 });
 export type CompletionsOption = z.infer<typeof CompletionsOptionSchema>;
 

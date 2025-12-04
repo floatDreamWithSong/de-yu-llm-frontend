@@ -1,4 +1,3 @@
-import type { CoteaConfigType } from "@/apis/requests/conversation/schema/cotea";
 import { create } from "zustand";
 
 export interface InitMessageState {
@@ -7,20 +6,17 @@ export interface InitMessageState {
   attachesUrl: string[];
   // 是否已处理初始消息
   hasProcessed: boolean;
-  initCoteaConfig?: CoteaConfigType;
   // Actions
   setInitMessage: (message: string, attachesUrl: string[]) => void;
   clearInitMessage: () => void;
   markAsProcessed: () => void;
   reset: () => void;
-  setInitCoteaConfig: (coteaConfig?: CoteaConfigType) => void;
 }
 
 export const useInitMessageStore = create<InitMessageState>((set) => ({
   initMessage: null,
   hasProcessed: false,
   attachesUrl: [],
-  initCoteaConfig: void 0,
 
   setInitMessage: (message: string, attachesUrl: string[] = []) => {
     set({
@@ -40,12 +36,6 @@ export const useInitMessageStore = create<InitMessageState>((set) => ({
   markAsProcessed: () => {
     set({
       hasProcessed: true,
-    });
-  },
-
-  setInitCoteaConfig: (coteaConfig?: CoteaConfigType) => {
-    set({
-      initCoteaConfig: coteaConfig,
     });
   },
 

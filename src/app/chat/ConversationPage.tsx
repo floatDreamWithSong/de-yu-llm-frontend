@@ -60,6 +60,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import type { ImperativePanelHandle } from "react-resizable-panels";
 import PreviewImage from "./components/PreviewImage";
 import { PhotoProvider } from "react-photo-view";
+import { useCoteaStore } from "@/app/chat/stores/cotea";
 
 export default function ConversationPage() {
   const { conversationId } = useParams({
@@ -102,6 +103,7 @@ export default function ConversationPage() {
     completionsOption: {
       useDeepThink: search.think,
       webSearch: search.webSearch,
+      ext: useCoteaStore.getState().cotea,
     },
   });
   const getargetMes = (id: string) => {

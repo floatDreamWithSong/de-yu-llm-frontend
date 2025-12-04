@@ -63,10 +63,12 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useCoteaStore } from "@/app/chat/stores/cotea";
 
 export default function UserPromptTextarea({
   className,
@@ -188,6 +190,11 @@ export default function UserPromptTextarea({
   }, [value]);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const coteaConfig = structuredClone(initCoteaConfig);
+    if(coteaConfig?.coteaId==='cotea-ContextualizedQuestion'){
+      coteaConfig.interest = selectedInterest.join(',');
+    }
+    useCoteaStore.getState().setCotea(coteaConfig);
     if (status === "ready" && !disabled) {
       const prompt = value
         .replace(/<br\s*\/?>/gi, "\n")
@@ -406,10 +413,18 @@ export default function UserPromptTextarea({
   /**
    * 选择学生和家长的时候 在首页显示   知识讲解、引导教学
 选择教师的时候  首页显示  跨学科教案、情景化出题、知识讲解、引导教学
-   */
+*/
   const [initCoteaConfig, setInitCoteaConfig] = useState<
     CoteaConfigType | undefined
   >(void 0);
+  const DefaultGroup = selectedCotea === "default" && (
+    <>
+      {ThinkButton}
+      {WebSearchButton}
+      {CodeGenButton}
+      {AttachButton}
+    </>
+  );
   const showCrossAndContext =
     userInfo?.profile?.roleType === COTEA_ENUM.UserProfileRoleEnum.keys[1];
   const coteaMenu = (
@@ -440,7 +455,7 @@ export default function UserPromptTextarea({
             case TaskType.keys[3]:
               return {
                 coteaId: CoteaBotIds[3],
-                interest: [],
+                interest: '',
               };
             default:
               break;
@@ -608,6 +623,7 @@ export default function UserPromptTextarea({
         <DialogHeader>
           <DialogTitle>选择兴趣</DialogTitle>
         </DialogHeader>
+        <DialogDescription>选择兴趣</DialogDescription>
         <DialogContent>
           <div className="flex flex-wrap gap-2">
             {extraInterest.map((interest) => {
@@ -756,10 +772,7 @@ export default function UserPromptTextarea({
                 {PersonalizedKnowledgeExplanationGroup}
                 {GuidedTeachingGroup}
                 {ContextualizedQuestionGroup}
-                {ThinkButton}
-                {WebSearchButton}
-                {CodeGenButton}
-                {AttachButton}
+                {DefaultGroup}
               </div>
             ) : (
               <div />
@@ -778,10 +791,7 @@ export default function UserPromptTextarea({
           {PersonalizedKnowledgeExplanationGroup}
           {GuidedTeachingGroup}
           {ContextualizedQuestionGroup}
-          {ThinkButton}
-          {WebSearchButton}
-          {CodeGenButton}
-          {AttachButton}
+          {DefaultGroup}
         </div>
       )}
     </div>
