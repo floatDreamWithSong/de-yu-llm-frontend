@@ -67,7 +67,7 @@ export default function LoginPage() {
       pin: "",
     },
   });
-
+  const [isChecked, setIsChecked] = useState(true);
   useEffect(() => {
     if (countDown <= 0) return;
     const timeout = setTimeout(() => {
@@ -103,7 +103,10 @@ export default function LoginPage() {
   }, [sendCodeMutation, form]);
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(isMobile)
+    if(!isChecked) {
+      toast.info("请勾选使用协议与隐私协议");
+      return;
+    }
     if (isMobile) {
       // 移动端：直接进行登录验证
       if (!data.pin) {
@@ -219,7 +222,7 @@ export default function LoginPage() {
                     )}
                   />
                 )}
-                <ServicePolicy />
+                <ServicePolicy isChecked={isChecked} setIsChecked={setIsChecked} />
                 <AuthButton
                   disabled={
                     sendCodeMutation.isPending || loginMutation.isPending

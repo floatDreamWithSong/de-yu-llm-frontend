@@ -1,11 +1,14 @@
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { EXTERNAL_LINKS } from "@/utils/constants/link";
 import React from "react";
 
 const ServicePolicy = ({
   className,
+  isChecked,
+  setIsChecked,
   ...props
-}: React.ComponentProps<"div">) => {
+}: React.ComponentProps<"div"> & { isChecked: boolean, setIsChecked: (checked: boolean) => void }) => {
   return (
     <div
       style={{
@@ -14,6 +17,11 @@ const ServicePolicy = ({
       className={cn("block pb-4 text-center", className)}
       {...props}
     >
+      <Checkbox
+        className="translate-y-0.5 mr-1"
+        checked={isChecked}
+        onCheckedChange={(checked) => setIsChecked(checked === "indeterminate" ? false : checked)}
+      />
       注册登录即代表已阅读并同意我们的
       <a
         href={EXTERNAL_LINKS.SERVICE_PROTOCOL}

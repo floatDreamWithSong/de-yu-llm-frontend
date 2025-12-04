@@ -22,13 +22,14 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { tokenStore } from "@/lib/request";
 import { passwordSchema } from "@/apis/requests/user/schema";
 import ServicePolicy from "./components/ServicePolicy";
-
+import { useState } from "react";
 const formSchema = z.object({
   phone: mobileSchema,
   password: passwordSchema,
 });
 
 export default function PhonePasswordLoginPage() {
+  const [isChecked, setIsChecked] = useState(true);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,6 +46,10 @@ export default function PhonePasswordLoginPage() {
   });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    if(!isChecked) {
+      toast.info("请勾选使用协议与隐私协议");
+      return;
+    }
     phonePasswordLoginMutation.mutate(
       {
         authId: data.phone,
@@ -104,7 +109,7 @@ export default function PhonePasswordLoginPage() {
                 </FormItem>
               )}
             />
-            <ServicePolicy className="pb-6" />
+            <ServicePolicy isChecked={isChecked} setIsChecked={setIsChecked} className="pb-6" />
             <div className="space-y-4">
               <AuthButton
                 disabled={phonePasswordLoginMutation.isPending}
