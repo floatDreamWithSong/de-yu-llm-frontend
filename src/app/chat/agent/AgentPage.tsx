@@ -35,6 +35,7 @@ import gsap from "gsap";
 import { useTitleAni } from "@/app/chat/hooks/use-title-ani";
 import { cn } from "@/lib/utils";
 import { ResponseSchema as AgentListResponseSchema } from "@/apis/requests/agent/list";
+import z from "zod";
 /**
  * 语文
 数学
@@ -63,20 +64,24 @@ const agentTypeList = [
   "学习辅导",
   "教师支持",
 ];
+const CacheSchema = z.object({
+  data: AgentListResponseSchema,
+  expireAt: z.number(),
+})
 const AgentPage = () => {
   const agentListQuery = useInfiniteQuery({
     initialPageParam: void 0 as string | undefined,
     queryKey: [ClientQueryKeys.agent],
     queryFn: async({ pageParam: cursor }) => {
-      const cachedData =  AgentListResponseSchema.safeParse(JSON.parse(localStorage.getItem(ClientQueryKeys.agent.agentList) || "{}"));
-      if(cachedData.success){
+      const cachedData =  CacheSchema.safeParse(JSON.parse(localStorage.getItem(ClientQueryKeys.agent.agentList) || "{}"));
+      if(cachedData.success && cachedData.data.expireAt && cachedData.data.expireAt > Date.now()){
         const newData = await getAgentList({
           page: {
             size: 1,
           },
         }).then(res => res.intelligences[0]);
-        if(newData.publishTime===cachedData.data.intelligences[0].publishTime){
-          return cachedData.data;
+        if(newData.publishTime===cachedData.data.data.intelligences[0].publishTime){
+          return cachedData.data.data;
         }
       }
       const data = await getAgentList({
@@ -96,7 +101,11 @@ const AgentPage = () => {
         data.hasMore = nextData.hasMore;
         data.nextCursor = nextData.nextCursor;
       }
-      localStorage.setItem(ClientQueryKeys.agent.agentList, JSON.stringify(data));
+      const cacheData = {
+        data,
+        expireAt: Date.now() + 1000 * 60 * 60 * 24,
+      };
+      localStorage.setItem(ClientQueryKeys.agent.agentList, JSON.stringify(cacheData));
       return data;
     },
     staleTime: Number.POSITIVE_INFINITY,
