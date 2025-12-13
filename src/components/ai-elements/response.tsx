@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { type ComponentProps, memo } from "react";
+import { type ComponentProps, memo, useMemo } from "react";
 import { Streamdown } from "streamdown";
 import { visit } from "unist-util-visit";
 import type { SseSearchCite } from "@/apis/requests/conversation/schema";
@@ -106,19 +106,58 @@ function remarkCodeRefPlugin() {
     });
   };
 }
+export const preprocessLaTeX = (content: string) => {
+  // 先保存所有反引号内的内容，避免替换代码引用中的 LaTeX 分隔符
+  const codeBlocks: string[] = [];
+  let tempContent = content.replace(/`([^`]*)`/g, (match) => {
+    codeBlocks.push(match);
+    return `__CODE_BLOCK_${codeBlocks.length - 1}__`;
+  });
+
+  // Replace block-level LaTeX delimiters \[ \] with $$ $$
+  tempContent = tempContent.replace(
+    /\\\[(.*?)\\\]/gs,
+    (_, equation) => `
+$$
+${equation}
+$$`,
+  );
+  
+  // Replace inline LaTeX delimiters \( \) with $$ $$
+  tempContent = tempContent.replace(
+    /\\\((.*?)\\\)/gs,
+    (_, equation) => `$$${equation}$$`,
+  );
+  
+  // 还原反引号内的内容
+  tempContent = tempContent.replace(/__CODE_BLOCK_(\d+)__/g, (_, idx) => {
+    return codeBlocks[Number(idx)];
+  });
+  
+  return tempContent;
+};
+function normalizeLatexDelimiters(s?: string | null) {
+  if (!s) return "";
+  return preprocessLaTeX(s);
+}
+
 /* 3. Streamdown 包装 */
 export const Response = memo(
   ({
     className,
     cites,
+    children,
     onToggleCodeEditor,
     ...props
-  }: ResponseProps & { cites?: SseSearchCite[], onToggleCodeEditor?: ()=>unknown }) => (
+  }: ResponseProps & { cites?: SseSearchCite[], onToggleCodeEditor?: ()=>unknown }) => {
+    const normalizedContent = useMemo(() => normalizeLatexDelimiters(children), [children]);
+    return (
     <Streamdown
       className={cn(
         "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
         className,
       )}
+      children={normalizedContent}
       defaultOrigin="http://localhost:3000"
       allowedLinkPrefixes={["#"]}
       remarkPlugins={[remarkCitePlugin, remarkCodeRefPlugin]}
@@ -184,7 +223,9 @@ export const Response = memo(
       }}
       {...props}
     />
-  ),
+    )
+  }
+  ,
   (prev, next) => prev.children === next.children,
 );
 Response.displayName = "Response";
